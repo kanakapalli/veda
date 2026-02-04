@@ -1,0 +1,27 @@
+### Veda user profile data linked to authenticated user.
+### Uses relation to AuthUser as per Serverpod recommended pattern.
+class: VedaUserProfile
+
+# Database table for storing user profiles
+table: veda_user_profile
+
+fields:
+  ### Link to the authenticated user (creates authUserId automatically)
+  authUser: module:serverpod_auth_core:AuthUser?, relation(onDelete=Cascade)
+  ### Full name of the user.
+  fullName: String?
+  ### User biography or context description (max 200 characters).
+  bio: String?
+  ### List of interest tags selected during onboarding.
+  interests: List<String>?
+  ### Learning goal: 'career_pivot' or 'academic_depth'.
+  learningGoal: String?
+  ### Timestamp when the profile was created.
+  createdAt: DateTime
+  ### Timestamp when the profile was last updated.
+  updatedAt: DateTime
+
+indexes:
+  veda_user_profile_auth_user_id_idx:
+    fields: authUserId
+    unique: true

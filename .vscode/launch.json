@@ -1,0 +1,48 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "veda_flutter",
+      "cwd": "${workspaceFolder}/veda_flutter",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart"
+    },
+    {
+      "name": "veda_flutter (custom server)",
+      "cwd": "${workspaceFolder}/veda_flutter",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": [
+        "--dart-define=SERVER_URL=http://localhost:8080/"
+      ]
+    },
+    {
+      "name": "veda_server",
+      "cwd": "${workspaceFolder}/veda_server",
+      "request": "launch",
+      "type": "dart",
+      "program": "bin/main.dart"
+    },
+    {
+      "name": "veda_server (apply migrations)",
+      "cwd": "${workspaceFolder}/veda_server",
+      "request": "launch",
+      "type": "dart",
+      "program": "bin/main.dart",
+      "args": [
+        "--apply-migrations"
+      ]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Server + Flutter",
+      "configurations": [
+        "veda_server (apply migrations)",
+        "veda_flutter"
+      ]
+    }
+  ]
+}

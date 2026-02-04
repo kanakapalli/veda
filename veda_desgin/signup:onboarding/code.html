@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&amp;family=JetBrains+Mono:wght@400;700&amp;family=Inter:wght@400;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "stark-black": "#000000",
+              "stark-white": "#FFFFFF",
+              "stark-gray": "#1A1A1A",
+            },
+            fontFamily: {
+              "serif": ["'Playfair Display'", "serif"],
+              "mono": ["'JetBrains Mono'", "monospace"],
+              "sans": ["Inter", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .stark-border {
+                border: 2px solid #FFFFFF;
+            }
+            .stark-border-thick {
+                border: 4px solid #FFFFFF;
+            }
+            .no-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+            .no-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        }
+    </style>
+<style>
+        body {
+          min-height: max(884px, 100dvh);
+          background-color: #000000;
+        }input[type="checkbox"]:checked + label,
+        input[type="radio"]:checked + label {
+            background-color: #FFFFFF;
+            color: #000000;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-stark-black text-stark-white font-sans selection:bg-stark-white selection:text-stark-black min-h-screen flex flex-col p-6 sm:p-8 relative">
+<div class="absolute top-8 left-8">
+<div class="w-3 h-3 bg-stark-white mb-2"></div>
+<p class="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Veda System // Init</p>
+</div>
+<main class="w-full max-w-sm mx-auto flex flex-col gap-10 z-10 pt-16 pb-24">
+<div class="flex flex-col items-start">
+<h1 class="text-5xl font-black tracking-tighter uppercase leading-[0.9] mb-4">
+                Veda_<br/>Onboard
+            </h1>
+<div class="h-[2px] w-12 bg-stark-white"></div>
+</div>
+<form class="space-y-8" onsubmit="event.preventDefault();">
+<div class="space-y-5">
+<div class="space-y-1">
+<label class="font-mono text-[10px] uppercase font-bold text-zinc-500 pl-0.5 tracking-wider block">Identity // Full Name</label>
+<input class="w-full bg-stark-black border-2 border-stark-white p-3 font-mono text-sm font-bold uppercase text-stark-white placeholder:text-zinc-800 focus:border-stark-white focus:ring-0 focus:outline-none rounded-none transition-all" placeholder="ENTER NAME" type="text"/>
+</div>
+<div class="space-y-1">
+<label class="font-mono text-[10px] uppercase font-bold text-zinc-500 pl-0.5 tracking-wider block">Identity // Email</label>
+<input class="w-full bg-stark-black border-2 border-stark-white p-3 font-mono text-sm font-bold uppercase text-stark-white placeholder:text-zinc-800 focus:border-stark-white focus:ring-0 focus:outline-none rounded-none transition-all" placeholder="ENTER EMAIL" type="email"/>
+</div>
+<div class="space-y-1">
+<label class="font-mono text-[10px] uppercase font-bold text-zinc-500 pl-0.5 tracking-wider block">Security // Password</label>
+<input class="w-full bg-stark-black border-2 border-stark-white p-3 font-mono text-sm font-bold uppercase text-stark-white placeholder:text-zinc-800 focus:border-stark-white focus:ring-0 focus:outline-none rounded-none transition-all" placeholder="CREATE PASSWORD" type="password"/>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex items-center justify-between border-b border-zinc-800 pb-1">
+<label class="font-mono text-[10px] uppercase font-bold text-stark-white tracking-widest">Intel_Profile</label>
+<span class="font-mono text-[8px] text-zinc-500">MULTI-SELECT</span>
+</div>
+<div class="flex flex-wrap gap-2">
+<div class="relative">
+<input class="peer sr-only" id="tag_arch" type="checkbox"/>
+<label class="cursor-pointer inline-block border border-stark-white px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-widest transition-colors hover:bg-zinc-900 peer-checked:bg-stark-white peer-checked:text-stark-black" for="tag_arch">Architecture</label>
+</div>
+<div class="relative">
+<input checked="" class="peer sr-only" id="tag_ai" type="checkbox"/>
+<label class="cursor-pointer inline-block border border-stark-white px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-widest transition-colors hover:bg-zinc-900 peer-checked:bg-stark-white peer-checked:text-stark-black" for="tag_ai">AI_Logic</label>
+</div>
+<div class="relative">
+<input class="peer sr-only" id="tag_ethics" type="checkbox"/>
+<label class="cursor-pointer inline-block border border-stark-white px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-widest transition-colors hover:bg-zinc-900 peer-checked:bg-stark-white peer-checked:text-stark-black" for="tag_ethics">Ethics</label>
+</div>
+<div class="relative">
+<input class="peer sr-only" id="tag_quant" type="checkbox"/>
+<label class="cursor-pointer inline-block border border-stark-white px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-widest transition-colors hover:bg-zinc-900 peer-checked:bg-stark-white peer-checked:text-stark-black" for="tag_quant">Quant</label>
+</div>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex items-center justify-between border-b border-zinc-800 pb-1">
+<label class="font-mono text-[10px] uppercase font-bold text-stark-white tracking-widest">Learning Goal?</label>
+<span class="font-mono text-[8px] text-zinc-500">REQUIRED</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="relative">
+<input class="peer sr-only" id="goal_career" name="goal" type="radio"/>
+<label class="cursor-pointer flex flex-col items-center justify-center border border-stark-white p-4 h-full text-center hover:bg-zinc-900 transition-colors" for="goal_career">
+<span class="font-mono text-[10px] font-bold uppercase tracking-wider mb-1">Career<br/>Pivot</span>
+</label>
+</div>
+<div class="relative">
+<input class="peer sr-only" id="goal_academic" name="goal" type="radio"/>
+<label class="cursor-pointer flex flex-col items-center justify-center border border-stark-white p-4 h-full text-center hover:bg-zinc-900 transition-colors" for="goal_academic">
+<span class="font-mono text-[10px] font-bold uppercase tracking-wider mb-1">Academic<br/>Depth</span>
+</label>
+</div>
+</div>
+</div>
+<div class="pt-4">
+<button class="w-full bg-stark-white text-stark-black font-black uppercase text-xs sm:text-sm py-6 border-2 border-stark-white hover:bg-zinc-200 transition-colors tracking-[0.2em] flex items-center justify-center gap-2 group rounded-none">
+                    Commence_Stark_Learning
+                </button>
+</div>
+</form>
+</main>
+<div class="absolute bottom-8 left-8 right-8 flex justify-between items-end">
+<div class="flex gap-2">
+<div class="w-0.5 h-0.5 bg-zinc-700"></div>
+<div class="w-0.5 h-0.5 bg-zinc-700"></div>
+<div class="w-0.5 h-0.5 bg-zinc-700"></div>
+</div>
+<p class="font-mono text-[8px] text-zinc-800 uppercase tracking-widest">Encrypted Connection</p>
+</div>
+<div class="fixed bottom-24 right-0 bg-stark-white text-stark-black px-3 py-1.5 transform rotate-90 origin-right z-40 border border-stark-black shadow-[4px_4px_0px_0px_rgba(255,255,255,0.3)]">
+<p class="font-mono text-[8px] tracking-[0.3em] uppercase whitespace-nowrap font-bold">NODE_GENESIS_01</p>
+</div>
+
+</body></html>

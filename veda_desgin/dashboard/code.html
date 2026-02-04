@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&amp;family=JetBrains+Mono:wght@400;700&amp;family=Inter:wght@400;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "stark-black": "#000000",
+              "stark-white": "#FFFFFF",
+              "stark-gray": "#1A1A1A",
+            },
+            fontFamily: {
+              "serif": ["'Playfair Display'", "serif"],
+              "mono": ["'JetBrains Mono'", "monospace"],
+              "sans": ["Inter", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .stark-img {
+                filter: grayscale(100%) contrast(120%) brightness(110%);
+            }
+            .stark-border {
+                border: 2px solid #FFFFFF;
+            }
+            .stark-border-thick {
+                border: 4px solid #FFFFFF;
+            }
+            .no-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+            .no-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        }
+    </style>
+<style>
+        body {
+          min-height: max(884px, 100dvh);
+          background-color: #000000;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-stark-black text-stark-white font-sans selection:bg-stark-white selection:text-stark-black min-h-screen pb-28">
+<header class="p-6 pb-4 border-b-4 border-stark-white sticky top-0 bg-stark-black z-40">
+<div class="flex justify-between items-end mb-5">
+<div>
+<p class="font-mono text-[10px] uppercase tracking-widest mb-1 text-zinc-400">Veda OS // V.1</p>
+<h1 class="text-4xl font-black tracking-tighter uppercase leading-none">VEDA_DASHBOARD</h1>
+</div>
+<div class="w-10 h-10 border-2 border-stark-white flex items-center justify-center hover:bg-stark-white hover:text-stark-black transition-colors cursor-pointer">
+<span class="material-symbols-outlined !text-xl">notifications</span>
+</div>
+</div>
+<div class="relative group">
+<input class="w-full bg-stark-black border-2 border-stark-white p-4 pr-12 font-mono text-sm font-bold uppercase placeholder:text-zinc-600 focus:border-stark-white focus:ring-0 focus:outline-none transition-all" placeholder="Search Database..." type="text"/>
+<div class="absolute right-0 top-0 h-full w-12 flex items-center justify-center border-l-2 border-stark-white">
+<span class="material-symbols-outlined text-stark-white">search</span>
+</div>
+</div>
+</header>
+<main class="p-6 space-y-12">
+<section>
+<div class="flex justify-between items-end mb-4">
+<h2 class="font-mono text-xs font-black uppercase tracking-[0.2em] text-zinc-400">Continue Learning</h2>
+<span class="font-mono text-[10px] animate-pulse text-green-500">/// LIVE CONNECTION</span>
+</div>
+<article class="stark-border-thick p-0 relative group">
+<div class="h-48 w-full overflow-hidden border-b-4 border-stark-white relative">
+<img alt="Advanced RAG Architectures" class="w-full h-full object-cover stark-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAktHKZJDMdNAQDB7rL8uH-xnSBynUkS9v5M1SM0OXg8aBzpGCy_qdyMlG7v_VAIApnZnxKOnOXR7Zk1lJIJ5YCSjj-KlALqgSQ8wobpN6babPPevcKlqkYAxPnlZFJYJ0a4hRlMlonveSqhROQA58EWM0Drns-mL8cV3HDhY1DcZ4uCYqZ7RLXGCS2zbtmlxVW_l5lMS46eRxTUeg_vmy-BONCX8PvYENH2oaAyA_938hlxrE847O0iCYOQt-B3pSC_dGfm9NwYWzN"/>
+<div class="absolute inset-0 bg-gradient-to-t from-stark-black/90 to-transparent"></div>
+<div class="absolute bottom-4 left-4">
+<span class="bg-stark-white text-stark-black font-mono text-[9px] font-bold px-2 py-1 uppercase mb-2 inline-block">Module 04</span>
+<h3 class="text-2xl font-black uppercase leading-none tracking-tight">Structural Integrity<br/>in RAG Systems</h3>
+</div>
+</div>
+<div class="p-5 bg-stark-black">
+<div class="flex justify-between items-end mb-3">
+<span class="font-mono text-[10px] uppercase text-zinc-400">Progress: 72%</span>
+<span class="font-mono text-[10px] uppercase text-zinc-400">12m Remaining</span>
+</div>
+<div class="w-full h-3 border-2 border-stark-white p-[2px] mb-5">
+<div class="h-full bg-stark-white w-[72%]"></div>
+</div>
+<button class="w-full bg-stark-white text-stark-black font-black uppercase text-sm py-3 hover:bg-transparent hover:text-stark-white border-2 border-transparent hover:border-stark-white transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined !text-lg">play_arrow</span>
+                    Resume Session
+                </button>
+</div>
+</article>
+</section>
+<section>
+<div class="flex justify-between items-center mb-4">
+<h2 class="font-mono text-xs font-black uppercase tracking-[0.2em] text-zinc-400">Mentor Sessions</h2>
+<div class="flex gap-2">
+<span class="material-symbols-outlined !text-base cursor-pointer hover:text-zinc-400">chevron_left</span>
+<span class="material-symbols-outlined !text-base cursor-pointer hover:text-zinc-400">chevron_right</span>
+</div>
+</div>
+<div class="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+<div class="min-w-[240px] border-2 border-stark-white p-4 flex flex-col justify-between hover:bg-zinc-900 transition-colors">
+<div class="flex justify-between items-start mb-4">
+<span class="font-mono text-xl font-bold border-b-2 border-stark-white pb-1">14:00</span>
+<span class="bg-zinc-800 text-[9px] font-mono px-1 py-0.5 uppercase">Live</span>
+</div>
+<div>
+<h4 class="font-bold uppercase text-sm mb-1 leading-tight">Neural Sync Strategies</h4>
+<p class="font-mono text-[10px] text-zinc-400 uppercase">Dr. Aris • 45m</p>
+</div>
+<button class="mt-4 border border-stark-white py-1 text-[10px] font-mono uppercase hover:bg-stark-white hover:text-stark-black transition-colors">Join Room</button>
+</div>
+<div class="min-w-[240px] border-2 border-stark-white p-4 flex flex-col justify-between hover:bg-zinc-900 transition-colors">
+<div class="flex justify-between items-start mb-4">
+<span class="font-mono text-xl font-bold border-b-2 border-zinc-700 text-zinc-500 pb-1">16:30</span>
+<span class="bg-zinc-800 text-[9px] font-mono px-1 py-0.5 uppercase text-zinc-400">Sched</span>
+</div>
+<div>
+<h4 class="font-bold uppercase text-sm mb-1 leading-tight">Prompt Engineering V2</h4>
+<p class="font-mono text-[10px] text-zinc-400 uppercase">Kai.09 • 60m</p>
+</div>
+<button class="mt-4 border border-zinc-700 text-zinc-500 py-1 text-[10px] font-mono uppercase hover:border-stark-white hover:text-stark-white transition-colors">Remind Me</button>
+</div>
+<div class="min-w-[240px] border-2 border-stark-white p-4 flex flex-col justify-between hover:bg-zinc-900 transition-colors">
+<div class="flex justify-between items-start mb-4">
+<span class="font-mono text-xl font-bold border-b-2 border-zinc-700 text-zinc-500 pb-1">19:00</span>
+<span class="bg-zinc-800 text-[9px] font-mono px-1 py-0.5 uppercase text-zinc-400">Sched</span>
+</div>
+<div>
+<h4 class="font-bold uppercase text-sm mb-1 leading-tight">Recursive Logic Lab</h4>
+<p class="font-mono text-[10px] text-zinc-400 uppercase">Lina_X • 30m</p>
+</div>
+<button class="mt-4 border border-zinc-700 text-zinc-500 py-1 text-[10px] font-mono uppercase hover:border-stark-white hover:text-stark-white transition-colors">Remind Me</button>
+</div>
+</div>
+</section>
+<section>
+<h2 class="font-mono text-xs font-black uppercase tracking-[0.2em] mb-4 text-zinc-400">Explore by Topic</h2>
+<div class="grid grid-cols-2 gap-4">
+<div class="aspect-square border-2 border-stark-white p-4 flex flex-col justify-between hover:bg-stark-white hover:text-stark-black transition-colors group cursor-pointer relative overflow-hidden">
+<div class="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined">arrow_outward</span>
+</div>
+<span class="material-symbols-outlined !text-4xl">psychology</span>
+<div>
+<h3 class="font-black uppercase text-lg leading-none tracking-tighter">Psych</h3>
+<p class="font-mono text-[9px] mt-1 opacity-60">Human Behavior</p>
+</div>
+</div>
+<div class="aspect-square border-2 border-stark-white bg-stark-white text-stark-black p-4 flex flex-col justify-between cursor-pointer relative overflow-hidden">
+<div class="absolute right-2 top-2">
+<span class="material-symbols-outlined">arrow_outward</span>
+</div>
+<span class="material-symbols-outlined !text-4xl">architecture</span>
+<div>
+<h3 class="font-black uppercase text-lg leading-none tracking-tighter">Arch</h3>
+<p class="font-mono text-[9px] mt-1 opacity-60">System Design</p>
+</div>
+</div>
+<div class="aspect-square border-2 border-stark-white p-4 flex flex-col justify-between hover:bg-stark-white hover:text-stark-black transition-colors group cursor-pointer relative overflow-hidden">
+<div class="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined">arrow_outward</span>
+</div>
+<span class="material-symbols-outlined !text-4xl">smart_toy</span>
+<div>
+<h3 class="font-black uppercase text-lg leading-none tracking-tighter">AI Strat</h3>
+<p class="font-mono text-[9px] mt-1 opacity-60">Future Logic</p>
+</div>
+</div>
+<div class="aspect-square border-2 border-stark-white p-4 flex flex-col justify-between hover:bg-stark-white hover:text-stark-black transition-colors group cursor-pointer relative overflow-hidden">
+<div class="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined">arrow_outward</span>
+</div>
+<span class="material-symbols-outlined !text-4xl">terminal</span>
+<div>
+<h3 class="font-black uppercase text-lg leading-none tracking-tighter">Code</h3>
+<p class="font-mono text-[9px] mt-1 opacity-60">Implementation</p>
+</div>
+</div>
+</div>
+</section>
+<section>
+<h2 class="font-mono text-xs font-black uppercase tracking-[0.2em] mb-4 text-zinc-400">Popular Coaches</h2>
+<div class="flex gap-6 overflow-x-auto no-scrollbar pb-2">
+<div class="flex flex-col items-center min-w-[70px] cursor-pointer group">
+<div class="w-16 h-16 rounded-full border-2 border-stark-white overflow-hidden p-[2px] mb-2 group-hover:bg-stark-white transition-colors">
+<div class="w-full h-full rounded-full bg-zinc-800 overflow-hidden">
+<img alt="Aris" class="w-full h-full object-cover stark-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3pYPrnlCVqAulQ0fK01ixOPwuM1NwDZvNC-lF7QHDLt_sDI5hjv09VFZ6UO07QcCDrAITKnO8Bgh-qZVpbQvbi_6VIzoDQI8NbkY_pUwdjndGtTYjkfFrNSsyvUhMrzVKq16paADwNTQ5xnEWS9Ie0umgAEY5bxQ9odYF1_fF9gOeEqZ_CdER1c8P1F-46TL-NMDm82pd_glF7MZ7cBiP02bvidRdPd_IQIrMGvA5AtQN9GC-wlx0fx4R1qNNkNTzA405dw9G9kfJ"/>
+</div>
+</div>
+<span class="font-mono text-[9px] font-bold uppercase group-hover:underline">Dr. Aris</span>
+</div>
+<div class="flex flex-col items-center min-w-[70px] cursor-pointer group">
+<div class="w-16 h-16 rounded-full border-2 border-stark-white overflow-hidden p-[2px] mb-2 group-hover:bg-stark-white transition-colors">
+<div class="w-full h-full rounded-full bg-zinc-800 overflow-hidden">
+<img alt="Kai" class="w-full h-full object-cover stark-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASLmRCVLEA_1moXnd44mSQJPiQGv09UOAbmdEyiESaMc2Wnf5Baqnmt6IHlYG2GykXzhzKsWL1c2G6jxq6SIXTwtz6zzv5aalSl_yWC_Y7eXvtAVD1f6r2A9TfMnCbBXRGEZF73tEPEo-Nx_8Cq7P3AWSQwfj5RgVp-IddJ-HboiDn-m_yUwM14Li1O4BjX2EElmJOpjUO3t8spORlkjo1BK3A_59kMIqIHlmNDm4D7vhoB_yvbCHPAeMJIjece9lyEqRTgouzyF0r"/>
+</div>
+</div>
+<span class="font-mono text-[9px] font-bold uppercase group-hover:underline">Kai.09</span>
+</div>
+<div class="flex flex-col items-center min-w-[70px] cursor-pointer group">
+<div class="w-16 h-16 rounded-full border-2 border-stark-white overflow-hidden p-[2px] mb-2 group-hover:bg-stark-white transition-colors">
+<div class="w-full h-full rounded-full bg-zinc-800 overflow-hidden">
+<img alt="Lina" class="w-full h-full object-cover stark-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAho7zvAQn9HTPIrQ-0ZG6yAXwy-T_CgVtrDY29P46vWz8HuMlvf6nLaanDk5RPJf_jY_QXEncOGVpPP_mPj6owQq-Fgad3G35nv14MPGu6xS12GRDX1jsq0CN5NqyilvtDGy_1qJ-UYZiRaE94zt9XosYaJs3UsuTwD1HTOpgiuAlMgJC5tsn82xomSLHVqDpr-ZRg661STWBs2wSbvTMubr83pdqSi92DPteUHqXVJ4-QouV8eer7ZROyWzR0F8mwPBfuT9hRQD-"/>
+</div>
+</div>
+<span class="font-mono text-[9px] font-bold uppercase group-hover:underline">Lina_X</span>
+</div>
+<div class="flex flex-col items-center min-w-[70px] cursor-pointer group">
+<div class="w-16 h-16 rounded-full border-2 border-stark-white overflow-hidden p-[2px] mb-2 group-hover:bg-stark-white transition-colors">
+<div class="w-full h-full rounded-full bg-zinc-800 overflow-hidden">
+<img alt="Vex" class="w-full h-full object-cover stark-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtGMcrs4MEnom0BpanOI52yHKVnF2_WfWcI3quXiC0j3LJspKDnO2GLfXsrAQK1Y4acYAfpcWNT9AQKoaV49S5iDK9lyMkSoZjLPYR81kbzz2Z7IGR6nqIEdH4BUogyxA0mZ6hfRFN08xPSR6-weX0uXNEnU6npwxgvaVQtGXGax5jk-yEWcnfHAFqLZg9Q6VEH9ngiDZB9v_lIvpTT0y6VyDKAiKnXzoKwfi-cUXo_YbTGIC_kvaaFh_2Tar9MO_hOI3jNEgeg8Vr"/>
+</div>
+</div>
+<span class="font-mono text-[9px] font-bold uppercase group-hover:underline">Vex</span>
+</div>
+<div class="flex flex-col items-center min-w-[70px] cursor-pointer group">
+<div class="w-16 h-16 rounded-full border-2 border-zinc-700 overflow-hidden flex items-center justify-center mb-2 group-hover:border-stark-white transition-colors">
+<span class="material-symbols-outlined text-zinc-500 group-hover:text-stark-white">add</span>
+</div>
+<span class="font-mono text-[9px] font-bold uppercase text-zinc-500 group-hover:text-stark-white">View All</span>
+</div>
+</div>
+</section>
+<section class="space-y-4">
+<h2 class="font-mono text-xs font-black uppercase tracking-[0.2em] mb-4 text-zinc-400">New Arrivals</h2>
+<article class="border-2 border-stark-white bg-stark-black flex flex-row h-20 overflow-hidden relative group hover:bg-zinc-900 transition-colors cursor-pointer">
+<div class="w-20 h-full border-r-2 border-stark-white shrink-0 relative">
+<img alt="Non-Linear Systems Theory" class="w-full h-full object-cover stark-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFSlJmuKJxMlrGtTl6J4jTVZHTE_CQIEcId-4H2CsS9J7CA4TZD-xxBdSQvXU2xzFTvEq766N_SsDXe13rjdm_jyhJtM3ReKcAgfrD2SI44H1c78GK94htf1CRFt8N-xLi9tTwVNPxO_OBNMP0ivMtoJYjz-59gMrekpqEiMDWFs3KZODJvDE6Vhy-p2yz96N8kCp9DqIem8YwCMbEI4CyPvU9rNCeIFFl9HzSRbnn7I-_mVeYwpSCokp8UFt7N5l_lINL8PlmwG4f"/>
+<div class="absolute inset-0 bg-black/10"></div>
+</div>
+<div class="p-3 flex flex-col justify-center w-full">
+<div class="flex justify-between items-start w-full">
+<div>
+<h3 class="text-xs font-black uppercase leading-tight tracking-tight">Non-Linear Systems</h3>
+<p class="font-mono text-[9px] text-zinc-400 mt-0.5 uppercase">Added Today • 8 Modules</p>
+</div>
+<span class="material-symbols-outlined text-stark-white !text-lg">arrow_forward</span>
+</div>
+</div>
+</article>
+<article class="border-2 border-stark-white bg-stark-black flex flex-row h-20 overflow-hidden relative group hover:bg-zinc-900 transition-colors cursor-pointer">
+<div class="w-20 h-full border-r-2 border-stark-white shrink-0 relative">
+<img alt="Ethics in Automation" class="w-full h-full object-cover stark-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFSlJmuKJxMlrGtTl6J4jTVZHTE_CQIEcId-4H2CsS9J7CA4TZD-xxBdSQvXU2xzFTvEq766N_SsDXe13rjdm_jyhJtM3ReKcAgfrD2SI44H1c78GK94htf1CRFt8N-xLi9tTwVNPxO_OBNMP0ivMtoJYjz-59gMrekpqEiMDWFs3KZODJvDE6Vhy-p2yz96N8kCp9DqIem8YwCMbEI4CyPvU9rNCeIFFl9HzSRbnn7I-_mVeYwpSCokp8UFt7N5l_lINL8PlmwG4f"/>
+<div class="absolute inset-0 bg-black/10"></div>
+</div>
+<div class="p-3 flex flex-col justify-center w-full">
+<div class="flex justify-between items-start w-full">
+<div>
+<h3 class="text-xs font-black uppercase leading-tight tracking-tight">Ethics in Automation</h3>
+<p class="font-mono text-[9px] text-zinc-400 mt-0.5 uppercase">Yesterday • 12 Modules</p>
+</div>
+<span class="material-symbols-outlined text-stark-white !text-lg">arrow_forward</span>
+</div>
+</div>
+</article>
+<article class="border-2 border-stark-white bg-stark-black flex flex-row h-20 overflow-hidden relative group hover:bg-zinc-900 transition-colors cursor-pointer">
+<div class="w-20 h-full border-r-2 border-stark-white shrink-0 relative bg-zinc-800 flex items-center justify-center">
+<span class="material-symbols-outlined text-zinc-500">lock</span>
+</div>
+<div class="p-3 flex flex-col justify-center w-full opacity-60">
+<div class="flex justify-between items-start w-full">
+<div>
+<h3 class="text-xs font-black uppercase leading-tight tracking-tight">Advanced Algorithms</h3>
+<p class="font-mono text-[9px] text-zinc-400 mt-0.5 uppercase">Coming Soon</p>
+</div>
+<span class="font-mono text-[8px] border border-zinc-600 px-1">LOCKED</span>
+</div>
+</div>
+</article>
+</section>
+</main>
+<nav class="fixed bottom-0 left-0 w-full bg-stark-black border-t border-stark-white px-8 py-4 flex justify-between items-center z-50">
+<div class="flex flex-col items-center cursor-pointer group text-stark-white hover:text-zinc-400 transition-colors">
+<span class="material-symbols-outlined !text-2xl">home</span>
+<span class="font-mono text-[8px] font-bold uppercase mt-1">HOME</span>
+</div>
+<div class="flex flex-col items-center cursor-pointer group text-stark-white hover:text-zinc-400 transition-colors">
+<span class="material-symbols-outlined !text-2xl">search</span>
+<span class="font-mono text-[8px] font-bold uppercase mt-1">SEARCH</span>
+</div>
+<div class="flex flex-col items-center cursor-pointer group text-stark-white hover:text-zinc-400 transition-colors">
+<span class="material-symbols-outlined !text-2xl">school</span>
+<span class="font-mono text-[8px] font-bold uppercase mt-1">LEARN</span>
+</div>
+<div class="flex flex-col items-center cursor-pointer group text-stark-white hover:text-zinc-400 transition-colors">
+<span class="material-symbols-outlined !text-2xl">person</span>
+<span class="font-mono text-[8px] font-bold uppercase mt-1">PROFILE</span>
+</div>
+</nav>
+<div class="fixed bottom-24 right-0 bg-stark-white text-stark-black px-2 py-1 transform rotate-90 origin-right z-40 border border-stark-black shadow-[4px_4px_0px_0px_rgba(255,255,255,0.3)]">
+<p class="font-mono text-[8px] tracking-[0.3em] uppercase whitespace-nowrap">VEDA_OS</p>
+</div>
+</body></html>

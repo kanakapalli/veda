@@ -1,0 +1,8 @@
+### Response object combining VedaUserProfile with email from auth system
+class: VedaUserProfileWithEmail
+
+fields:
+  ### The user profile data
+  profile: VedaUserProfile?
+  ### Email from Serverpod auth system
+  email: String?

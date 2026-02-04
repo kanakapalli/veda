@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&amp;family=JetBrains+Mono:wght@400;700&amp;family=Inter:wght@400;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "stark-black": "#000000",
+              "stark-white": "#FFFFFF",
+              "stark-gray": "#1A1A1A",
+            },
+            fontFamily: {
+              "serif": ["'Playfair Display'", "serif"],
+              "mono": ["'JetBrains Mono'", "monospace"],
+              "sans": ["Inter", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .stark-img {
+                filter: grayscale(100%) contrast(120%) brightness(110%);
+            }
+            .stark-border {
+                border: 2px solid #FFFFFF;
+            }
+            .stark-border-thick {
+                border: 4px solid #FFFFFF;
+            }
+            .no-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+            .no-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+            .toggle-checkbox:checked {
+                right: 0;
+                border-color: #000000;
+            }
+            .toggle-checkbox:checked + .toggle-label {
+                background-color: #FFFFFF;
+            }
+        }
+    </style>
+<style>
+        body {
+          min-height: max(884px, 100dvh);
+          background-color: #000000;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-stark-black text-stark-white font-sans selection:bg-stark-white selection:text-stark-black min-h-screen pb-28">
+<header class="p-6 pb-4 border-b-4 border-stark-white sticky top-0 bg-stark-black z-40">
+<div class="flex justify-between items-end">
+<div>
+<p class="font-mono text-[10px] uppercase tracking-widest mb-1 text-zinc-400">Veda OS // V.1</p>
+<h1 class="text-4xl font-black tracking-tighter uppercase leading-none">USER_ID</h1>
+</div>
+<div class="w-10 h-10 border-2 border-stark-white flex items-center justify-center hover:bg-stark-white hover:text-stark-black transition-colors cursor-pointer">
+<span class="material-symbols-outlined !text-xl">settings</span>
+</div>
+</div>
+</header>
+<main class="p-6 space-y-10">
+<section class="flex flex-col items-center justify-center py-4">
+<div class="w-32 h-32 rounded-full border-4 border-stark-white overflow-hidden p-1 mb-6 relative group">
+<div class="w-full h-full rounded-full bg-zinc-800 overflow-hidden relative">
+<img alt="User Avatar" class="w-full h-full object-cover stark-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASLmRCVLEA_1moXnd44mSQJPiQGv09UOAbmdEyiESaMc2Wnf5Baqnmt6IHlYG2GykXzhzKsWL1c2G6jxq6SIXTwtz6zzv5aalSl_yWC_Y7eXvtAVD1f6r2A9TfMnCbBXRGEZF73tEPEo-Nx_8Cq7P3AWSQwfj5RgVp-IddJ-HboiDn-m_yUwM14Li1O4BjX2EElmJOpjUO3t8spORlkjo1BK3A_59kMIqIHlmNDm4D7vhoB_yvbCHPAeMJIjece9lyEqRTgouzyF0r"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+</div>
+<div class="absolute bottom-0 right-0 bg-stark-white text-stark-black p-1 rounded-full border-2 border-stark-black">
+<span class="material-symbols-outlined !text-sm block">verified</span>
+</div>
+</div>
+<h2 class="text-3xl font-black uppercase tracking-tight mb-2">Alex Veda</h2>
+<div class="bg-zinc-900 border border-zinc-700 px-3 py-1">
+<p class="font-mono text-xs text-zinc-300 tracking-widest uppercase">LEARNER_RANK: <span class="text-stark-white font-bold">04</span></p>
+</div>
+</section>
+<section>
+<h3 class="font-mono text-xs font-black uppercase tracking-[0.2em] mb-4 text-zinc-400">Subscription_Status</h3>
+<div class="stark-border p-5 bg-stark-black relative overflow-hidden">
+<div class="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-zinc-800 to-transparent -mr-8 -mt-8 rounded-full blur-xl"></div>
+<div class="flex justify-between items-start mb-6">
+<div>
+<span class="inline-block bg-stark-white text-stark-black font-mono text-[9px] font-bold px-2 py-0.5 uppercase mb-2">Active Plan</span>
+<h4 class="text-xl font-bold uppercase leading-none">Pro Learner</h4>
+</div>
+<span class="material-symbols-outlined text-zinc-500">card_membership</span>
+</div>
+<div class="border-t border-zinc-800 pt-4 flex justify-between items-center">
+<span class="font-mono text-[10px] uppercase text-zinc-500">Renews On</span>
+<span class="font-mono text-sm font-bold uppercase">Oct 24, 2024</span>
+</div>
+</div>
+</section>
+<section>
+<h3 class="font-mono text-xs font-black uppercase tracking-[0.2em] mb-4 text-zinc-400">System_Settings</h3>
+<div class="border-t-2 border-stark-white">
+<div class="flex justify-between items-center py-5 border-b-2 border-zinc-800">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-zinc-400">notifications</span>
+<div>
+<p class="font-bold uppercase text-sm leading-none">Notifications</p>
+<p class="font-mono text-[9px] text-zinc-500 mt-1 uppercase">Updates &amp; Mentions</p>
+</div>
+</div>
+<div class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
+<div class="block overflow-hidden h-6 bg-stark-white border-2 border-stark-white cursor-pointer"></div>
+<div class="absolute top-1 right-1 w-4 h-4 bg-stark-black border border-stark-black"></div>
+</div>
+</div>
+<div class="flex justify-between items-center py-5 border-b-2 border-stark-white">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-zinc-400">fingerprint</span>
+<div>
+<p class="font-bold uppercase text-sm leading-none">Biometric Access</p>
+<p class="font-mono text-[9px] text-zinc-500 mt-1 uppercase">FaceID / TouchID</p>
+</div>
+</div>
+<div class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in opacity-50">
+<div class="block overflow-hidden h-6 bg-transparent border-2 border-zinc-500 cursor-pointer"></div>
+<div class="absolute top-1 left-1 w-4 h-4 bg-zinc-500"></div>
+</div>
+</div>
+</div>
+</section>
+<section>
+<h3 class="font-mono text-xs font-black uppercase tracking-[0.2em] mb-4 text-zinc-400">Knowledge_Archive</h3>
+<a class="block stark-border p-4 hover:bg-zinc-900 transition-colors group" href="#">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 border border-stark-white flex items-center justify-center bg-zinc-900 group-hover:bg-stark-white group-hover:text-stark-black transition-colors">
+<span class="material-symbols-outlined">database</span>
+</div>
+<div>
+<h4 class="font-bold uppercase text-sm">Personal Vault</h4>
+<p class="font-mono text-[9px] text-zinc-500 mt-1 uppercase">12 Saved Courses • 45 Notes</p>
+</div>
+</div>
+<span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</div>
+</a>
+</section>
+<section class="pt-4">
+<div class="bg-stark-white text-stark-black p-6 border-2 border-stark-white relative overflow-hidden group cursor-pointer">
+<div class="absolute top-0 right-0 p-4 opacity-50">
+<span class="material-symbols-outlined !text-6xl group-hover:scale-110 transition-transform duration-500">architecture</span>
+</div>
+<div class="relative z-10 pr-12">
+<h2 class="text-3xl font-black uppercase leading-[0.9] tracking-tighter mb-4">Become<br/>A Creator</h2>
+<p class="font-mono text-[10px] font-bold uppercase mb-6 border-l-2 border-stark-black pl-3 max-w-[200px] leading-relaxed">
+                    Build RAG-based courses. Train Custom Agents. Monetize Knowledge.
+                </p>
+<button class="bg-stark-black text-stark-white px-5 py-3 font-bold uppercase text-xs flex items-center gap-2 hover:bg-zinc-800 transition-colors">
+                    Access Studio
+                    <span class="material-symbols-outlined !text-sm">arrow_outward</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<nav class="fixed bottom-0 left-0 w-full bg-stark-black border-t-4 border-stark-white px-6 py-4 flex justify-between items-center z-50">
+<div class="flex flex-col items-center cursor-pointer opacity-40 hover:opacity-100 transition-opacity group">
+<span class="material-symbols-outlined !text-2xl">grid_view</span>
+<span class="font-mono text-[8px] font-bold uppercase mt-1">Hub</span>
+</div>
+<div class="flex flex-col items-center opacity-40 hover:opacity-100 transition-opacity cursor-pointer">
+<span class="material-symbols-outlined !text-2xl">home</span>
+<span class="font-mono text-[8px] font-bold uppercase mt-1">Home</span>
+</div>
+<div class="flex flex-col items-center opacity-40 hover:opacity-100 transition-opacity cursor-pointer">
+<span class="material-symbols-outlined !text-2xl">database</span>
+<span class="font-mono text-[8px] font-bold uppercase mt-1">Vault</span>
+</div>
+<div class="flex flex-col items-center cursor-pointer relative">
+<div class="absolute -top-10 bg-stark-white text-stark-black px-2 py-0.5 font-mono text-[8px] font-bold uppercase">Active</div>
+<span class="material-symbols-outlined !text-2xl">person</span>
+<span class="font-mono text-[8px] font-bold uppercase mt-1">ID</span>
+</div>
+</nav>
+<div class="fixed bottom-24 right-0 bg-stark-white text-stark-black px-2 py-1 transform rotate-90 origin-right z-40 border border-stark-black shadow-[4px_4px_0px_0px_rgba(255,255,255,0.3)]">
+<p class="font-mono text-[8px] tracking-[0.3em] uppercase whitespace-nowrap">VEDA_OS_V.1.0</p>
+</div>
+
+</body></html>

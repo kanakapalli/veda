@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&amp;family=JetBrains+Mono:wght@400;700&amp;family=Inter:wght@400;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "stark-black": "#000000",
+              "stark-white": "#FFFFFF",
+              "stark-gray": "#1A1A1A",
+            },
+            fontFamily: {
+              "serif": ["'Playfair Display'", "serif"],
+              "mono": ["'JetBrains Mono'", "monospace"],
+              "sans": ["Inter", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .stark-img {
+                filter: grayscale(100%) contrast(150%) brightness(100%);
+            }
+            .stark-border {
+                border: 2px solid #FFFFFF;
+            }
+            .stark-border-thick {
+                border: 4px solid #FFFFFF;
+            }
+            .no-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+            .no-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        }
+    </style>
+<style>
+        body {
+          min-height: max(884px, 100dvh);
+          background-color: #000000;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-stark-black text-stark-white font-sans selection:bg-stark-white selection:text-stark-black min-h-screen pb-32">
+<header class="p-6 pb-4 border-b-2 border-stark-white sticky top-0 bg-stark-black z-40">
+<div class="flex justify-between items-end">
+<div>
+<p class="font-mono text-[10px] uppercase tracking-widest mb-1 text-zinc-400">VEDA_OS // MY_LEARNING</p>
+<h1 class="text-3xl font-black tracking-tighter uppercase leading-none">ENROLLED_COURSES</h1>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-mono text-[10px] text-zinc-500 uppercase">Status: Syncing</span>
+<div class="w-2 h-2 bg-green-500 rounded-full mt-1"></div>
+</div>
+</div>
+</header>
+<main class="p-6 space-y-10">
+<section>
+<div class="flex justify-between items-end mb-4">
+<h2 class="font-mono text-xs font-black uppercase tracking-[0.2em] text-zinc-400">Current_Session</h2>
+<span class="font-mono text-[10px] text-zinc-500 italic">Last Sync: 2m ago</span>
+</div>
+<article class="stark-border relative overflow-hidden">
+<div class="relative h-64 w-full">
+<img alt="Architectural Asset" class="w-full h-full object-cover stark-img opacity-60" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAktHKZJDMdNAQDB7rL8uH-xnSBynUkS9v5M1SM0OXg8aBzpGCy_qdyMlG7v_VAIApnZnxKOnOXR7Zk1lJIJ5YCSjj-KlALqgSQ8wobpN6babPPevcKlqkYAxPnlZFJYJ0a4hRlMlonveSqhROQA58EWM0Drns-mL8cV3HDhY1DcZ4uCYqZ7RLXGCS2zbtmlxVW_l5lMS46eRxTUeg_vmy-BONCX8PvYENH2oaAyA_938hlxrE847O0iCYOQt-B3pSC_dGfm9NwYWzN"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+<div class="absolute bottom-6 left-6 right-6">
+<p class="font-mono text-[10px] uppercase text-white/70 mb-2">Continue Module 04</p>
+<h3 class="text-4xl font-black uppercase leading-none tracking-tighter mb-6">Structural<br/>Integrity</h3>
+<button class="w-full bg-stark-white text-stark-black font-black uppercase text-sm py-4 flex items-center justify-center gap-2 hover:bg-zinc-200 transition-colors">
+<span class="material-symbols-outlined !text-xl">play_arrow</span>
+                            Resume_Session
+                        </button>
+</div>
+</div>
+</article>
+</section>
+<section class="space-y-6">
+<h2 class="font-mono text-xs font-black uppercase tracking-[0.2em] text-zinc-400">All_Enrolled</h2>
+<article class="stark-border p-5 bg-stark-black flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<div class="flex gap-4 items-center">
+<div class="w-12 h-12 border border-stark-white overflow-hidden shrink-0">
+<img alt="Coach Avatar" class="w-full h-full object-cover stark-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3pYPrnlCVqAulQ0fK01ixOPwuM1NwDZvNC-lF7QHDLt_sDI5hjv09VFZ6UO07QcCDrAITKnO8Bgh-qZVpbQvbi_6VIzoDQI8NbkY_pUwdjndGtTYjkfFrNSsyvUhMrzVKq16paADwNTQ5xnEWS9Ie0umgAEY5bxQ9odYF1_fF9gOeEqZ_CdER1c8P1F-46TL-NMDm82pd_glF7MZ7cBiP02bvidRdPd_IQIrMGvA5AtQN9GC-wlx0fx4R1qNNkNTzA405dw9G9kfJ"/>
+</div>
+<div>
+<h4 class="font-black uppercase text-base leading-tight">Neural Sync Strategies</h4>
+<p class="font-mono text-[10px] text-zinc-500 uppercase">Coach: Dr. Aris</p>
+</div>
+</div>
+<button class="w-10 h-10 border border-stark-white flex items-center justify-center hover:bg-stark-white hover:text-stark-black transition-colors">
+<span class="material-symbols-outlined !text-xl">arrow_forward</span>
+</button>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between font-mono text-[9px] uppercase tracking-tighter">
+<span class="text-zinc-400">Module 02 / 12</span>
+<span class="text-white">68% Complete</span>
+</div>
+<div class="w-full h-1 bg-zinc-800 relative">
+<div class="absolute left-0 top-0 h-full bg-stark-white" style="width: 68%;"></div>
+</div>
+</div>
+</article>
+<article class="stark-border p-5 bg-stark-black flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<div class="flex gap-4 items-center">
+<div class="w-12 h-12 border border-stark-white overflow-hidden shrink-0">
+<img alt="Coach Avatar" class="w-full h-full object-cover stark-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASLmRCVLEA_1moXnd44mSQJPiQGv09UOAbmdEyiESaMc2Wnf5Baqnmt6IHlYG2GykXzhzKsWL1c2G6jxq6SIXTwtz6zzv5aalSl_yWC_Y7eXvtAVD1f6r2A9TfMnCbBXRGEZF73tEPEo-Nx_8Cq7P3AWSQwfj5RgVp-IddJ-HboiDn-m_yUwM14Li1O4BjX2EElmJOpjUO3t8spORlkjo1BK3A_59kMIqIHlmNDm4D7vhoB_yvbCHPAeMJIjece9lyEqRTgouzyF0r"/>
+</div>
+<div>
+<h4 class="font-black uppercase text-base leading-tight">Prompt Engineering V2</h4>
+<p class="font-mono text-[10px] text-zinc-500 uppercase">Coach: Kai.09</p>
+</div>
+</div>
+<button class="w-10 h-10 border border-stark-white flex items-center justify-center hover:bg-stark-white hover:text-stark-black transition-colors">
+<span class="material-symbols-outlined !text-xl">arrow_forward</span>
+</button>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between font-mono text-[9px] uppercase tracking-tighter">
+<span class="text-zinc-400">Module 08 / 10</span>
+<span class="text-white">85% Complete</span>
+</div>
+<div class="w-full h-1 bg-zinc-800 relative">
+<div class="absolute left-0 top-0 h-full bg-stark-white" style="width: 85%;"></div>
+</div>
+</div>
+</article>
+<article class="stark-border p-5 bg-stark-black flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<div class="flex gap-4 items-center">
+<div class="w-12 h-12 border border-stark-white overflow-hidden shrink-0">
+<img alt="Coach Avatar" class="w-full h-full object-cover stark-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAho7zvAQn9HTPIrQ-0ZG6yAXwy-T_CgVtrDY29P46vWz8HuMlvf6nLaanDk5RPJf_jY_QXEncOGVpPP_mPj6owQq-Fgad3G35nv14MPGu6xS12GRDX1jsq0CN5NqyilvtDGy_1qJ-UYZiRaE94zt9XosYaJs3UsuTwD1HTOpgiuAlMgJC5tsn82xomSLHVqDpr-ZRg661STWBs2wSbvTMubr83pdqSi92DPteUHqXVJ4-QouV8eer7ZROyWzR0F8mwPBfuT9hRQD-"/>
+</div>
+<div>
+<h4 class="font-black uppercase text-base leading-tight">Recursive Logic Lab</h4>
+<p class="font-mono text-[10px] text-zinc-500 uppercase">Coach: Lina_X</p>
+</div>
+</div>
+<button class="w-10 h-10 border border-stark-white flex items-center justify-center hover:bg-stark-white hover:text-stark-black transition-colors">
+<span class="material-symbols-outlined !text-xl">arrow_forward</span>
+</button>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between font-mono text-[9px] uppercase tracking-tighter">
+<span class="text-zinc-400">Module 01 / 06</span>
+<span class="text-white">12% Complete</span>
+</div>
+<div class="w-full h-1 bg-zinc-800 relative">
+<div class="absolute left-0 top-0 h-full bg-stark-white" style="width: 12%;"></div>
+</div>
+</div>
+</article>
+</section>
+</main>
+<nav class="fixed bottom-0 left-0 w-full bg-stark-black border-t-2 border-stark-white px-8 py-5 flex justify-between items-center z-50">
+<div class="flex flex-col items-center cursor-pointer group opacity-50 hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined !text-2xl">grid_view</span>
+<span class="font-mono text-[8px] font-bold uppercase mt-1">Hub</span>
+</div>
+<div class="flex flex-col items-center cursor-pointer group">
+<span class="material-symbols-outlined !text-2xl">home</span>
+<span class="font-mono text-[8px] font-bold uppercase mt-1">Home</span>
+</div>
+<div class="flex flex-col items-center cursor-pointer relative">
+<div class="absolute -top-12 bg-stark-white text-stark-black px-2 py-0.5 font-mono text-[8px] font-bold uppercase border-2 border-stark-white">Active</div>
+<span class="material-symbols-outlined !text-2xl">database</span>
+<span class="font-mono text-[8px] font-bold uppercase mt-1">Vault</span>
+</div>
+<div class="flex flex-col items-center opacity-50 hover:opacity-100 transition-opacity cursor-pointer">
+<span class="material-symbols-outlined !text-2xl">person</span>
+<span class="font-mono text-[8px] font-bold uppercase mt-1">ID</span>
+</div>
+</nav>
+<div class="fixed bottom-28 right-0 bg-stark-white text-stark-black px-2 py-1 transform rotate-90 origin-right z-40 border-2 border-stark-black">
+<p class="font-mono text-[8px] tracking-[0.3em] uppercase whitespace-nowrap">VEDA_OS_V.1.0</p>
+</div>
+
+</body></html>

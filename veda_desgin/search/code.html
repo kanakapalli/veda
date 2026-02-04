@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&amp;family=JetBrains+Mono:wght@400;700&amp;family=Inter:wght@400;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "stark-black": "#000000",
+              "stark-white": "#FFFFFF",
+              "stark-gray": "#1A1A1A",
+            },
+            fontFamily: {
+              "serif": ["'Playfair Display'", "serif"],
+              "mono": ["'JetBrains Mono'", "monospace"],
+              "sans": ["Inter", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .stark-img {
+                filter: grayscale(100%) contrast(120%) brightness(110%);
+            }
+            .stark-border {
+                border: 2px solid #FFFFFF;
+            }
+            .stark-border-thick {
+                border: 4px solid #FFFFFF;
+            }
+            .no-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+            .no-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        }
+    </style>
+<style>
+        body {
+          min-height: max(884px, 100dvh);
+          background-color: #000000;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-stark-black text-stark-white font-sans selection:bg-stark-white selection:text-stark-black min-h-screen pb-28">
+<header class="p-6 pb-2 sticky top-0 bg-stark-black z-40">
+<div class="flex justify-between items-center mb-6">
+<button class="flex items-center gap-2 group">
+<span class="material-symbols-outlined text-stark-white group-hover:opacity-70 transition-opacity">arrow_back</span>
+<span class="font-mono text-[10px] uppercase tracking-widest text-zinc-400 group-hover:text-stark-white transition-colors">Return</span>
+</button>
+<p class="font-mono text-[10px] uppercase tracking-widest text-zinc-400">Search_Mode: Active</p>
+</div>
+<div class="relative group">
+<input class="w-full bg-stark-black border-2 border-stark-white p-6 pr-12 font-black text-2xl uppercase placeholder:text-zinc-700 focus:border-stark-white focus:ring-0 focus:bg-zinc-900 transition-all outline-none" placeholder="SEARCH DATABASE..." type="text"/>
+<span class="material-symbols-outlined absolute right-6 top-1/2 -translate-y-1/2 text-stark-white !text-3xl">search</span>
+</div>
+</header>
+<main class="px-6 space-y-10 mt-4">
+<section>
+<div class="flex justify-between items-center mb-4 border-b border-zinc-800 pb-2">
+<h2 class="font-mono text-xs font-black uppercase tracking-[0.2em] text-zinc-500">Search History</h2>
+<button class="font-mono text-[9px] uppercase text-zinc-600 hover:text-stark-white transition-colors">Clear All</button>
+</div>
+<ul class="space-y-0">
+<li class="flex justify-between items-center py-3 border-b border-zinc-900 group cursor-pointer hover:bg-zinc-900 px-2 -mx-2 transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-zinc-600 !text-sm">history</span>
+<span class="font-bold text-sm uppercase tracking-wide">Neural Network Optimization</span>
+</div>
+<button class="text-zinc-500 hover:text-stark-white">
+<span class="material-symbols-outlined !text-lg">close</span>
+</button>
+</li>
+<li class="flex justify-between items-center py-3 border-b border-zinc-900 group cursor-pointer hover:bg-zinc-900 px-2 -mx-2 transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-zinc-600 !text-sm">history</span>
+<span class="font-bold text-sm uppercase tracking-wide">RAG Architecture Basics</span>
+</div>
+<button class="text-zinc-500 hover:text-stark-white">
+<span class="material-symbols-outlined !text-lg">close</span>
+</button>
+</li>
+<li class="flex justify-between items-center py-3 border-b border-zinc-900 group cursor-pointer hover:bg-zinc-900 px-2 -mx-2 transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-zinc-600 !text-sm">history</span>
+<span class="font-bold text-sm uppercase tracking-wide">Dr. Aris Recursive Logic</span>
+</div>
+<button class="text-zinc-500 hover:text-stark-white">
+<span class="material-symbols-outlined !text-lg">close</span>
+</button>
+</li>
+</ul>
+</section>
+<section>
+<h2 class="font-mono text-xs font-black uppercase tracking-[0.2em] mb-4 text-zinc-500">Advanced Filters</h2>
+<div class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+<button class="shrink-0 border-2 border-stark-white h-12 px-5 flex items-center justify-between gap-3 hover:bg-stark-white hover:text-stark-black transition-colors group">
+<span class="font-mono text-xs font-bold uppercase">Duration</span>
+<span class="material-symbols-outlined !text-base group-hover:rotate-180 transition-transform">expand_more</span>
+</button>
+<button class="shrink-0 border-2 border-stark-white h-12 px-5 flex items-center justify-between gap-3 hover:bg-stark-white hover:text-stark-black transition-colors group">
+<span class="font-mono text-xs font-bold uppercase">Expertise Level</span>
+<span class="material-symbols-outlined !text-base group-hover:rotate-180 transition-transform">expand_more</span>
+</button>
+<button class="shrink-0 border-2 border-stark-white h-12 px-5 flex items-center justify-between gap-3 hover:bg-stark-white hover:text-stark-black transition-colors group">
+<span class="font-mono text-xs font-bold uppercase">Rating</span>
+<span class="material-symbols-outlined !text-base group-hover:rotate-180 transition-transform">expand_more</span>
+</button>
+<button class="shrink-0 border-2 border-stark-white h-12 px-5 flex items-center justify-between gap-3 hover:bg-stark-white hover:text-stark-black transition-colors group">
+<span class="font-mono text-xs font-bold uppercase">Source</span>
+<span class="material-symbols-outlined !text-base group-hover:rotate-180 transition-transform">expand_more</span>
+</button>
+</div>
+</section>
+<section>
+<h2 class="font-mono text-xs font-black uppercase tracking-[0.2em] mb-4 text-zinc-500">Trending Topics</h2>
+<div class="flex flex-wrap gap-3">
+<button class="border border-stark-white px-4 py-2 hover:bg-stark-white hover:text-stark-black transition-colors">
+<span class="font-mono text-[10px] font-bold uppercase tracking-wider">#RAG_Systems</span>
+</button>
+<button class="border border-stark-white px-4 py-2 hover:bg-stark-white hover:text-stark-black transition-colors">
+<span class="font-mono text-[10px] font-bold uppercase tracking-wider">#Vector_Embeddings</span>
+</button>
+<button class="border border-stark-white px-4 py-2 hover:bg-stark-white hover:text-stark-black transition-colors">
+<span class="font-mono text-[10px] font-bold uppercase tracking-wider">#AI_Ethics</span>
+</button>
+<button class="border border-stark-white px-4 py-2 hover:bg-stark-white hover:text-stark-black transition-colors">
+<span class="font-mono text-[10px] font-bold uppercase tracking-wider">#Python_API</span>
+</button>
+<button class="border border-stark-white px-4 py-2 hover:bg-stark-white hover:text-stark-black transition-colors">
+<span class="font-mono text-[10px] font-bold uppercase tracking-wider">#Deep_Learning</span>
+</button>
+</div>
+</section>
+<section>
+<div class="flex justify-between items-center mb-6">
+<h2 class="font-mono text-xs font-black uppercase tracking-[0.2em] text-zinc-500">Suggested For You</h2>
+<span class="font-mono text-[9px] text-zinc-500 uppercase">Based on recent activity</span>
+</div>
+<div class="space-y-4">
+<article class="border border-stark-white p-4 flex items-center gap-4 hover:bg-zinc-900 transition-colors cursor-pointer group">
+<div class="w-12 h-12 shrink-0 border border-stark-white p-[1px]">
+<img alt="Aris" class="w-full h-full object-cover stark-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3pYPrnlCVqAulQ0fK01ixOPwuM1NwDZvNC-lF7QHDLt_sDI5hjv09VFZ6UO07QcCDrAITKnO8Bgh-qZVpbQvbi_6VIzoDQI8NbkY_pUwdjndGtTYjkfFrNSsyvUhMrzVKq16paADwNTQ5xnEWS9Ie0umgAEY5bxQ9odYF1_fF9gOeEqZ_CdER1c8P1F-46TL-NMDm82pd_glF7MZ7cBiP02bvidRdPd_IQIrMGvA5AtQN9GC-wlx0fx4R1qNNkNTzA405dw9G9kfJ"/>
+</div>
+<div class="flex-grow">
+<h3 class="font-black text-sm uppercase leading-none mb-1">Dr. Aris</h3>
+<p class="font-mono text-[10px] text-zinc-400 uppercase">Recursive Logic • 98% Match</p>
+</div>
+<div class="w-8 h-8 flex items-center justify-center border border-zinc-700 group-hover:border-stark-white transition-colors">
+<span class="material-symbols-outlined !text-sm">arrow_forward</span>
+</div>
+</article>
+<article class="border border-stark-white p-4 flex items-center gap-4 hover:bg-zinc-900 transition-colors cursor-pointer group">
+<div class="w-12 h-12 shrink-0 border border-stark-white p-[1px]">
+<img alt="Lina" class="w-full h-full object-cover stark-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAho7zvAQn9HTPIrQ-0ZG6yAXwy-T_CgVtrDY29P46vWz8HuMlvf6nLaanDk5RPJf_jY_QXEncOGVpPP_mPj6owQq-Fgad3G35nv14MPGu6xS12GRDX1jsq0CN5NqyilvtDGy_1qJ-UYZiRaE94zt9XosYaJs3UsuTwD1HTOpgiuAlMgJC5tsn82xomSLHVqDpr-ZRg661STWBs2wSbvTMubr83pdqSi92DPteUHqXVJ4-QouV8eer7ZROyWzR0F8mwPBfuT9hRQD-"/>
+</div>
+<div class="flex-grow">
+<h3 class="font-black text-sm uppercase leading-none mb-1">Lina_X</h3>
+<p class="font-mono text-[10px] text-zinc-400 uppercase">System Integrity • 94% Match</p>
+</div>
+<div class="w-8 h-8 flex items-center justify-center border border-zinc-700 group-hover:border-stark-white transition-colors">
+<span class="material-symbols-outlined !text-sm">arrow_forward</span>
+</div>
+</article>
+<article class="border border-stark-white p-4 flex items-center gap-4 hover:bg-zinc-900 transition-colors cursor-pointer group">
+<div class="w-12 h-12 shrink-0 border border-stark-white p-[1px]">
+<img alt="Kai" class="w-full h-full object-cover stark-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASLmRCVLEA_1moXnd44mSQJPiQGv09UOAbmdEyiESaMc2Wnf5Baqnmt6IHlYG2GykXzhzKsWL1c2G6jxq6SIXTwtz6zzv5aalSl_yWC_Y7eXvtAVD1f6r2A9TfMnCbBXRGEZF73tEPEo-Nx_8Cq7P3AWSQwfj5RgVp-IddJ-HboiDn-m_yUwM14Li1O4BjX2EElmJOpjUO3t8spORlkjo1BK3A_59kMIqIHlmNDm4D7vhoB_yvbCHPAeMJIjece9lyEqRTgouzyF0r"/>
+</div>
+<div class="flex-grow">
+<h3 class="font-black text-sm uppercase leading-none mb-1">Kai.09</h3>
+<p class="font-mono text-[10px] text-zinc-400 uppercase">Data Security • 89% Match</p>
+</div>
+<div class="w-8 h-8 flex items-center justify-center border border-zinc-700 group-hover:border-stark-white transition-colors">
+<span class="material-symbols-outlined !text-sm">arrow_forward</span>
+</div>
+</article>
+</div>
+</section>
+</main>
+<nav class="fixed bottom-0 left-0 w-full bg-stark-black border-t-4 border-stark-white px-6 py-4 flex justify-between items-center z-50">
+<div class="flex flex-col items-center opacity-40 hover:opacity-100 transition-opacity cursor-pointer">
+<span class="material-symbols-outlined !text-2xl">grid_view</span>
+<span class="font-mono text-[8px] font-bold uppercase mt-1">Hub</span>
+</div>
+<div class="flex flex-col items-center opacity-40 hover:opacity-100 transition-opacity cursor-pointer">
+<span class="material-symbols-outlined !text-2xl">home</span>
+<span class="font-mono text-[8px] font-bold uppercase mt-1">Home</span>
+</div>
+<div class="flex flex-col items-center cursor-pointer text-stark-white">
+<span class="material-symbols-outlined !text-2xl">search</span>
+<span class="font-mono text-[8px] font-bold uppercase mt-1">Search</span>
+</div>
+<div class="flex flex-col items-center opacity-40 hover:opacity-100 transition-opacity cursor-pointer">
+<span class="material-symbols-outlined !text-2xl">person</span>
+<span class="font-mono text-[8px] font-bold uppercase mt-1">ID</span>
+</div>
+</nav>
+<div class="fixed bottom-24 right-0 bg-stark-white text-stark-black px-2 py-1 transform rotate-90 origin-right z-40 border border-stark-black">
+<p class="font-mono text-[8px] tracking-[0.3em] uppercase whitespace-nowrap">STARK_OS_SEARCH_V2</p>
+</div>
+
+</body></html>
