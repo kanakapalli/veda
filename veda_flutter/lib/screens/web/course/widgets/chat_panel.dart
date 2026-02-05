@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../design_system/veda_colors.dart';
 import '../models/course_models.dart';
 import 'chat_bubble.dart';
+import 'live_audio_panel.dart';
 import 'mode_button.dart';
 
 class ChatPanel extends StatelessWidget {
@@ -15,6 +16,11 @@ class ChatPanel extends StatelessWidget {
   final VoidCallback onSendMessage;
   final void Function(ChatMode) onModeChanged;
   final VoidCallback? onExport;
+  final String? courseTitle;
+  final String? courseStatus;
+  final String? courseImageUrl;
+  final VoidCallback? onEditCourseImage;
+  final int? courseId;
 
   const ChatPanel({
     super.key,
@@ -26,6 +32,11 @@ class ChatPanel extends StatelessWidget {
     required this.onSendMessage,
     required this.onModeChanged,
     this.onExport,
+    this.courseTitle,
+    this.courseStatus,
+    this.courseImageUrl,
+    this.onEditCourseImage,
+    this.courseId,
   });
 
   @override
@@ -35,10 +46,41 @@ class ChatPanel extends StatelessWidget {
       child: Column(
         children: [
           _buildHeader(),
-          Expanded(child: _buildMessagesList()),
-          _buildInputArea(),
+          Expanded(
+            child: chatMode == ChatMode.create
+                ? _buildCreateModeContent()
+                : _buildTestModeContent(),
+          ),
         ],
       ),
+    );
+  }
+
+  Widget _buildCreateModeContent() {
+    return Column(
+      children: [
+        Expanded(child: _buildMessagesList()),
+        _buildInputArea(),
+      ],
+    );
+  }
+
+  Widget _buildTestModeContent() {
+    if (courseId == null) {
+      return Center(
+        child: Text(
+          'Save the course first to start a test session.',
+          style: GoogleFonts.jetBrainsMono(
+            fontSize: 11,
+            color: VedaColors.zinc500,
+          ),
+        ),
+      );
+    }
+
+    return LiveAudioPanel(
+      courseId: courseId!,
+      moduleTitle: courseTitle,
     );
   }
 
@@ -53,23 +95,83 @@ class ChatPanel extends StatelessWidget {
       ),
       child: Row(
         children: [
+          // Course image or add icon
+          GestureDetector(
+            onTap: onEditCourseImage,
+            child: Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                border: Border.all(color: VedaColors.zinc800, width: 1),
+              ),
+              child: courseImageUrl != null && courseImageUrl!.isNotEmpty
+                  ? Image.network(
+                      courseImageUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => const Icon(
+                        Icons.broken_image_outlined,
+                        size: 18,
+                        color: VedaColors.zinc700,
+                      ),
+                    )
+                  : const Icon(
+                      Icons.add,
+                      size: 20,
+                      color: VedaColors.zinc700,
+                    ),
+            ),
+          ),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'COURSE ARCHITECT',
+                  courseTitle?.toUpperCase() ?? 'COURSE ARCHITECT',
                   style: GoogleFonts.inter(
                     fontSize: 16,
-                    fontWeight: FontWeight.w300,
+                    fontWeight: FontWeight.w400,
                     color: VedaColors.white,
-                    letterSpacing: -0.2,
+                    letterSpacing: 0.2,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Row(
                   children: [
+                    if (courseStatus != null) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: courseStatus == 'DRAFT'
+                                ? VedaColors.zinc700
+                                : courseStatus == 'PUBLIC'
+                                    ? VedaColors.accent
+                                    : VedaColors.zinc700,
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(
+                          courseStatus!,
+                          style: GoogleFonts.jetBrainsMono(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w400,
+                            color: courseStatus == 'DRAFT'
+                                ? VedaColors.zinc500
+                                : courseStatus == 'PUBLIC'
+                                    ? VedaColors.accent
+                                    : VedaColors.zinc500,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                    ],
                     Container(
                       width: 6,
                       height: 6,

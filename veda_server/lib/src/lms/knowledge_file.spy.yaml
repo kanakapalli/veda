@@ -1,0 +1,23 @@
+### KnowledgeFile - source material for AI course generation
+class: KnowledgeFile
+table: knowledge_files
+
+fields:
+  ### Original file name
+  fileName: String
+  ### URL to the stored file
+  fileUrl: String
+  ### File size in bytes
+  fileSize: int
+  ### File MIME type or extension
+  fileType: String?
+  ### Timestamp when the file was uploaded
+  uploadedAt: DateTime, default=now
+  ### Foreign key to parent course
+  courseId: int, relation(parent=courses, onDelete=Cascade)
+  ### Parent course reference
+  course: Course?
+
+indexes:
+  knowledge_files_course_id_idx:
+    fields: courseId

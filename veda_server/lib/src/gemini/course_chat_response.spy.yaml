@@ -1,0 +1,6 @@
+class: CourseChatResponse
+fields:
+  text: String
+  error: String?
+  toolsExecuted: List<String>?
+  updatedCourse: Course?

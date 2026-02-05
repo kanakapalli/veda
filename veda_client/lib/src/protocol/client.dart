@@ -18,11 +18,22 @@ import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i4;
 import 'package:veda_client/src/protocol/gemini/chat_response.dart' as _i5;
 import 'package:veda_client/src/protocol/gemini/chat_request.dart' as _i6;
-import 'package:veda_client/src/protocol/greetings/greeting.dart' as _i7;
-import 'package:veda_client/src/protocol/profiles/user_profile.dart' as _i8;
+import 'package:veda_client/src/protocol/gemini/course_chat_response.dart'
+    as _i7;
+import 'package:veda_client/src/protocol/gemini/course_chat_request.dart'
+    as _i8;
+import 'package:veda_client/src/protocol/greetings/greeting.dart' as _i9;
+import 'package:veda_client/src/protocol/live/live_message.dart' as _i10;
+import 'package:veda_client/src/protocol/lms/course.dart' as _i11;
+import 'package:veda_client/src/protocol/lms/course_visibility.dart' as _i12;
+import 'package:veda_client/src/protocol/lms/knowledge_file.dart' as _i13;
+import 'package:veda_client/src/protocol/lms/module.dart' as _i14;
+import 'package:veda_client/src/protocol/lms/topic.dart' as _i15;
+import 'package:veda_client/src/protocol/lms/module_item.dart' as _i16;
+import 'package:veda_client/src/protocol/profiles/user_profile.dart' as _i17;
 import 'package:veda_client/src/protocol/profiles/user_profile_with_email.dart'
-    as _i9;
-import 'protocol.dart' as _i10;
+    as _i18;
+import 'protocol.dart' as _i19;
 
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
 /// are made available on the server and enable the corresponding sign-in widget
@@ -245,13 +256,23 @@ class EndpointGemini extends _i2.EndpointRef {
   @override
   String get name => 'gemini';
 
-  /// Send a chat message to Gemini and get a response
+  /// Send a chat message to Gemini and get a response (basic, no tools)
   _i3.Future<_i5.ChatResponse> chat(_i6.ChatRequest request) =>
       caller.callServerEndpoint<_i5.ChatResponse>(
         'gemini',
         'chat',
         {'request': request},
       );
+
+  /// Send a course chat message with tool calling support
+  /// Tools can update course fields, generate images, and create modules
+  _i3.Future<_i7.CourseChatResponse> courseChat(
+    _i8.CourseChatRequest request,
+  ) => caller.callServerEndpoint<_i7.CourseChatResponse>(
+    'gemini',
+    'courseChat',
+    {'request': request},
+  );
 }
 
 /// This is an example endpoint that returns a greeting message through
@@ -264,11 +285,236 @@ class EndpointGreeting extends _i2.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i3.Future<_i7.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i7.Greeting>(
+  _i3.Future<_i9.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i9.Greeting>(
         'greeting',
         'hello',
         {'name': name},
+      );
+}
+
+/// Streaming endpoint for Gemini Live Audio conversations
+/// Completely independent from the existing GeminiEndpoint
+/// {@category Endpoint}
+class EndpointLive extends _i2.EndpointRef {
+  EndpointLive(_i2.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'live';
+
+  /// Bidirectional streaming for live audio/text conversation
+  ///
+  /// Client sends LiveMessage via input stream:
+  ///   type='config' (first message) — text=courseId, audioBase64=voiceName
+  ///   type='text' — text=user message
+  ///   type='audio' — audioBase64=base64 PCM data
+  ///   type='end_turn' — signals end of user audio turn
+  ///   type='interrupt' — interrupts AI while speaking
+  ///   type='disconnect' — close session
+  ///
+  /// Server returns LiveMessage via output stream:
+  ///   type='state' — text=connecting|connected|turn_complete|interrupted|disconnected
+  ///   type='text' — AI text response
+  ///   type='audio' — AI audio response (audioBase64)
+  ///   type='error' — error message
+  _i3.Stream<_i10.LiveMessage> audioSession(
+    _i3.Stream<_i10.LiveMessage> inputStream,
+  ) =>
+      caller.callStreamingServerEndpoint<
+        _i3.Stream<_i10.LiveMessage>,
+        _i10.LiveMessage
+      >(
+        'live',
+        'audioSession',
+        {},
+        {'inputStream': inputStream},
+      );
+}
+
+/// LMS Endpoint - handles course management operations
+/// {@category Endpoint}
+class EndpointLms extends _i2.EndpointRef {
+  EndpointLms(_i2.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'lms';
+
+  /// Creates a new course with default draft visibility
+  _i3.Future<_i11.Course> createCourse(_i11.Course course) =>
+      caller.callServerEndpoint<_i11.Course>(
+        'lms',
+        'createCourse',
+        {'course': course},
+      );
+
+  /// Updates an existing course
+  _i3.Future<_i11.Course> updateCourse(_i11.Course course) =>
+      caller.callServerEndpoint<_i11.Course>(
+        'lms',
+        'updateCourse',
+        {'course': course},
+      );
+
+  /// Deletes a course by ID
+  _i3.Future<bool> deleteCourse(int id) => caller.callServerEndpoint<bool>(
+    'lms',
+    'deleteCourse',
+    {'id': id},
+  );
+
+  /// Gets a course by ID with all related data
+  _i3.Future<_i11.Course?> getCourseById(int id) =>
+      caller.callServerEndpoint<_i11.Course?>(
+        'lms',
+        'getCourseById',
+        {'id': id},
+      );
+
+  /// Lists courses with optional keyword and visibility filters
+  _i3.Future<List<_i11.Course>> listCourses({
+    String? keyword,
+    _i12.CourseVisibility? visibility,
+  }) => caller.callServerEndpoint<List<_i11.Course>>(
+    'lms',
+    'listCourses',
+    {
+      'keyword': keyword,
+      'visibility': visibility,
+    },
+  );
+
+  /// Adds a knowledge file to a course
+  _i3.Future<_i13.KnowledgeFile> addFileToCourse(_i13.KnowledgeFile file) =>
+      caller.callServerEndpoint<_i13.KnowledgeFile>(
+        'lms',
+        'addFileToCourse',
+        {'file': file},
+      );
+
+  /// Gets all knowledge files for a course
+  _i3.Future<List<_i13.KnowledgeFile>> getFilesForCourse(int courseId) =>
+      caller.callServerEndpoint<List<_i13.KnowledgeFile>>(
+        'lms',
+        'getFilesForCourse',
+        {'courseId': courseId},
+      );
+
+  /// Deletes a knowledge file
+  _i3.Future<bool> deleteFile(int fileId) => caller.callServerEndpoint<bool>(
+    'lms',
+    'deleteFile',
+    {'fileId': fileId},
+  );
+
+  /// Gets all modules for a course with items and topics
+  _i3.Future<List<_i14.Module>> getModules(int courseId) =>
+      caller.callServerEndpoint<List<_i14.Module>>(
+        'lms',
+        'getModules',
+        {'courseId': courseId},
+      );
+
+  /// Creates a new module
+  _i3.Future<_i14.Module> createModule(_i14.Module module) =>
+      caller.callServerEndpoint<_i14.Module>(
+        'lms',
+        'createModule',
+        {'module': module},
+      );
+
+  /// Updates an existing module
+  _i3.Future<_i14.Module> updateModule(_i14.Module module) =>
+      caller.callServerEndpoint<_i14.Module>(
+        'lms',
+        'updateModule',
+        {'module': module},
+      );
+
+  /// Deletes a module by ID
+  _i3.Future<bool> deleteModule(int moduleId) =>
+      caller.callServerEndpoint<bool>(
+        'lms',
+        'deleteModule',
+        {'moduleId': moduleId},
+      );
+
+  /// Deletes all modules for a course
+  _i3.Future<void> deleteAllModules(int courseId) =>
+      caller.callServerEndpoint<void>(
+        'lms',
+        'deleteAllModules',
+        {'courseId': courseId},
+      );
+
+  /// Creates a new topic
+  _i3.Future<_i15.Topic> createTopic(_i15.Topic topic) =>
+      caller.callServerEndpoint<_i15.Topic>(
+        'lms',
+        'createTopic',
+        {'topic': topic},
+      );
+
+  /// Updates an existing topic
+  _i3.Future<_i15.Topic> updateTopic(_i15.Topic topic) =>
+      caller.callServerEndpoint<_i15.Topic>(
+        'lms',
+        'updateTopic',
+        {'topic': topic},
+      );
+
+  /// Gets a topic by ID
+  _i3.Future<_i15.Topic?> getTopicById(int id) =>
+      caller.callServerEndpoint<_i15.Topic?>(
+        'lms',
+        'getTopicById',
+        {'id': id},
+      );
+
+  /// Creates a module item (links topic to module)
+  _i3.Future<_i16.ModuleItem> createModuleItem(_i16.ModuleItem moduleItem) =>
+      caller.callServerEndpoint<_i16.ModuleItem>(
+        'lms',
+        'createModuleItem',
+        {'moduleItem': moduleItem},
+      );
+
+  /// Updates a module item
+  _i3.Future<_i16.ModuleItem> updateModuleItem(_i16.ModuleItem moduleItem) =>
+      caller.callServerEndpoint<_i16.ModuleItem>(
+        'lms',
+        'updateModuleItem',
+        {'moduleItem': moduleItem},
+      );
+
+  /// Deletes a module item
+  _i3.Future<bool> deleteModuleItem(int moduleItemId) =>
+      caller.callServerEndpoint<bool>(
+        'lms',
+        'deleteModuleItem',
+        {'moduleItemId': moduleItemId},
+      );
+
+  /// Returns a signed upload description for direct client-to-S3 upload
+  _i3.Future<String?> getUploadDescription(String path) =>
+      caller.callServerEndpoint<String?>(
+        'lms',
+        'getUploadDescription',
+        {'path': path},
+      );
+
+  /// Verifies that a direct file upload completed successfully
+  _i3.Future<bool> verifyUpload(String path) => caller.callServerEndpoint<bool>(
+    'lms',
+    'verifyUpload',
+    {'path': path},
+  );
+
+  /// Returns the public URL for an uploaded file
+  _i3.Future<String?> getPublicUrl(String path) =>
+      caller.callServerEndpoint<String?>(
+        'lms',
+        'getPublicUrl',
+        {'path': path},
       );
 }
 
@@ -281,12 +527,12 @@ class EndpointVedaUserProfile extends _i2.EndpointRef {
   String get name => 'vedaUserProfile';
 
   /// Creates or updates a user profile for the authenticated user.
-  _i3.Future<_i8.VedaUserProfile> upsertProfile({
+  _i3.Future<_i17.VedaUserProfile> upsertProfile({
     required String fullName,
     String? bio,
     required List<String> interests,
     String? learningGoal,
-  }) => caller.callServerEndpoint<_i8.VedaUserProfile>(
+  }) => caller.callServerEndpoint<_i17.VedaUserProfile>(
     'vedaUserProfile',
     'upsertProfile',
     {
@@ -298,8 +544,8 @@ class EndpointVedaUserProfile extends _i2.EndpointRef {
   );
 
   /// Gets the profile for the authenticated user.
-  _i3.Future<_i8.VedaUserProfile?> getMyProfile() =>
-      caller.callServerEndpoint<_i8.VedaUserProfile?>(
+  _i3.Future<_i17.VedaUserProfile?> getMyProfile() =>
+      caller.callServerEndpoint<_i17.VedaUserProfile?>(
         'vedaUserProfile',
         'getMyProfile',
         {},
@@ -313,8 +559,8 @@ class EndpointVedaUserProfile extends _i2.EndpointRef {
   );
 
   /// Gets the user profile with email from Serverpod's auth system.
-  _i3.Future<_i9.VedaUserProfileWithEmail?> getMyProfileWithEmail() =>
-      caller.callServerEndpoint<_i9.VedaUserProfileWithEmail?>(
+  _i3.Future<_i18.VedaUserProfileWithEmail?> getMyProfileWithEmail() =>
+      caller.callServerEndpoint<_i18.VedaUserProfileWithEmail?>(
         'vedaUserProfile',
         'getMyProfileWithEmail',
         {},
@@ -352,7 +598,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i10.Protocol(),
+         _i19.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,
@@ -365,6 +611,8 @@ class Client extends _i2.ServerpodClientShared {
     jwtRefresh = EndpointJwtRefresh(this);
     gemini = EndpointGemini(this);
     greeting = EndpointGreeting(this);
+    live = EndpointLive(this);
+    lms = EndpointLms(this);
     vedaUserProfile = EndpointVedaUserProfile(this);
     modules = Modules(this);
   }
@@ -377,6 +625,10 @@ class Client extends _i2.ServerpodClientShared {
 
   late final EndpointGreeting greeting;
 
+  late final EndpointLive live;
+
+  late final EndpointLms lms;
+
   late final EndpointVedaUserProfile vedaUserProfile;
 
   late final Modules modules;
@@ -387,6 +639,8 @@ class Client extends _i2.ServerpodClientShared {
     'jwtRefresh': jwtRefresh,
     'gemini': gemini,
     'greeting': greeting,
+    'live': live,
+    'lms': lms,
     'vedaUserProfile': vedaUserProfile,
   };
 

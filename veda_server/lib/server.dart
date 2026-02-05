@@ -4,6 +4,8 @@ import 'dart:math';
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_idp_server/core.dart';
 import 'package:serverpod_auth_idp_server/providers/email.dart';
+import 'package:serverpod_cloud_storage_s3/serverpod_cloud_storage_s3.dart'
+    as s3;
 
 import 'src/generated/endpoints.dart';
 import 'src/generated/protocol.dart';
@@ -33,6 +35,18 @@ void run(List<String> args) async {
         passwordResetVerificationCodeGenerator: _generate6DigitCode,
       ),
     ],
+  );
+
+  // Register S3 cloud storage for file uploads.
+  pod.addCloudStorage(
+    s3.S3CloudStorage(
+      serverpod: pod,
+      storageId: 'public',
+      public: true,
+      region: 'eu-north-1',
+      bucket: 'veda-storage',
+      publicHost: 'veda-storage.s3.eu-north-1.amazonaws.com',
+    ),
   );
 
   // Setup a default page at the web root.

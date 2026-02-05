@@ -1,0 +1,6 @@
+class: LiveMessage
+fields:
+  type: String
+  text: String?
+  audioBase64: String?
+  isUser: bool

@@ -1,0 +1,6 @@
+### Course visibility status enum
+enum: CourseVisibility
+values:
+  - draft
+  - public
+  - private

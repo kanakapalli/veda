@@ -1,0 +1,35 @@
+### Course container - defines high-level course settings and AI parameters
+class: Course
+table: courses
+
+fields:
+  ### Course title
+  title: String
+  ### Course description
+  description: String?
+  ### URL for course thumbnail image
+  courseImageUrl: String?
+  ### URL for course banner image
+  bannerImageUrl: String?
+  ### URL for course intro video
+  videoUrl: String?
+  ### Course visibility status (draft, public, private)
+  visibility: CourseVisibility
+  ### System prompt for AI course generation
+  systemPrompt: String?
+  ### Timestamp when the course was created
+  createdAt: DateTime, default=now
+  ### Timestamp when the course was last updated
+  updatedAt: DateTime, default=now
+  ### List of modules in this course
+  modules: List<Module>?, relation
+  ### List of course indices (searchable tags/keywords)
+  courseIndices: List<CourseIndex>?, relation
+  ### List of knowledge files for AI generation
+  knowledgeFiles: List<KnowledgeFile>?, relation
+
+indexes:
+  courses_visibility_idx:
+    fields: visibility
+  courses_created_at_idx:
+    fields: createdAt

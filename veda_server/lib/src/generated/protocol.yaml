@@ -10,8 +10,34 @@ jwtRefresh:
   - refreshAccessToken:
 gemini:
   - chat:
+  - courseChat:
 greeting:
   - hello:
+live:
+  - audioSession:
+lms:
+  - createCourse:
+  - updateCourse:
+  - deleteCourse:
+  - getCourseById:
+  - listCourses:
+  - addFileToCourse:
+  - getFilesForCourse:
+  - deleteFile:
+  - getModules:
+  - createModule:
+  - updateModule:
+  - deleteModule:
+  - deleteAllModules:
+  - createTopic:
+  - updateTopic:
+  - getTopicById:
+  - createModuleItem:
+  - updateModuleItem:
+  - deleteModuleItem:
+  - getUploadDescription:
+  - verifyUpload:
+  - getPublicUrl:
 vedaUserProfile:
   - upsertProfile:
   - getMyProfile:

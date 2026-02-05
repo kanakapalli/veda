@@ -1,0 +1,25 @@
+### CourseIndex - searchable metadata/tags for course discovery
+class: CourseIndex
+table: course_indices
+
+fields:
+  ### Index title/keyword
+  title: String
+  ### Index description
+  description: String?
+  ### URL for index image
+  imageUrl: String?
+  ### List of tags for this index
+  tags: List<String>?
+  ### Sort order
+  sortOrder: int
+  ### Foreign key to parent course
+  courseId: int, relation(parent=courses, onDelete=Cascade)
+  ### Parent course reference
+  course: Course?
+
+indexes:
+  course_indices_course_id_idx:
+    fields: courseId
+  course_indices_title_idx:
+    fields: title

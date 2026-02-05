@@ -2,6 +2,17 @@ import 'dart:convert';
 import 'dart:math' as math;
 import 'package:http/http.dart' as http;
 
+/// Result of a Gemini chat that may contain a function call
+class GeminiChatResult {
+  final String? text;
+  final String? functionName;
+  final Map<String, dynamic>? functionArgs;
+
+  GeminiChatResult({this.text, this.functionName, this.functionArgs});
+
+  bool get hasFunctionCall => functionName != null;
+}
+
 /// Service for interacting with Gemini API using Google AI Studio API key
 class GeminiService {
   static const String _baseUrl =
@@ -11,6 +22,142 @@ class GeminiService {
   final String apiKey;
 
   GeminiService({required this.apiKey});
+
+  /// Course tool definitions for Gemini function calling
+  static final List<Map<String, dynamic>> _courseTools = [
+    {
+      'function_declarations': [
+        {
+          'name': 'updateCourseTitle',
+          'description': 'Update the title of the current course',
+          'parameters': {
+            'type': 'object',
+            'properties': {
+              'title': {
+                'type': 'string',
+                'description': 'The new title for the course'
+              },
+            },
+            'required': ['title'],
+          },
+        },
+        {
+          'name': 'updateCourseDescription',
+          'description': 'Update the description of the current course',
+          'parameters': {
+            'type': 'object',
+            'properties': {
+              'description': {
+                'type': 'string',
+                'description': 'The new description for the course'
+              },
+            },
+            'required': ['description'],
+          },
+        },
+        {
+          'name': 'updateCourseVisibility',
+          'description':
+              'Update the visibility status of the current course (draft, public, or private)',
+          'parameters': {
+            'type': 'object',
+            'properties': {
+              'visibility': {
+                'type': 'string',
+                'enum': ['draft', 'public', 'private'],
+                'description': 'The visibility status: draft, public, or private'
+              },
+            },
+            'required': ['visibility'],
+          },
+        },
+        {
+          'name': 'updateCourseVideoUrl',
+          'description':
+              'Update the intro video URL for the current course',
+          'parameters': {
+            'type': 'object',
+            'properties': {
+              'videoUrl': {
+                'type': 'string',
+                'description': 'The URL of the intro video (YouTube, Vimeo, etc.)'
+              },
+            },
+            'required': ['videoUrl'],
+          },
+        },
+        {
+          'name': 'updateCourseSystemPrompt',
+          'description':
+              'Update the AI system prompt used for course interactions',
+          'parameters': {
+            'type': 'object',
+            'properties': {
+              'systemPrompt': {
+                'type': 'string',
+                'description': 'The system prompt to guide AI behavior for this course'
+              },
+            },
+            'required': ['systemPrompt'],
+          },
+        },
+        {
+          'name': 'generateCourseImage',
+          'description':
+              'Generate and set a course thumbnail image using AI based on course content',
+          'parameters': {
+            'type': 'object',
+            'properties': {
+              'imagePrompt': {
+                'type': 'string',
+                'description':
+                    'Description of the image to generate (e.g., "minimalist illustration of programming concepts")'
+              },
+            },
+            'required': ['imagePrompt'],
+          },
+        },
+        {
+          'name': 'generateBannerImage',
+          'description':
+              'Generate and set a course banner image using AI based on course content',
+          'parameters': {
+            'type': 'object',
+            'properties': {
+              'imagePrompt': {
+                'type': 'string',
+                'description':
+                    'Description of the banner image to generate (wide format, e.g., "abstract representation of machine learning")'
+              },
+            },
+            'required': ['imagePrompt'],
+          },
+        },
+        {
+          'name': 'createModule',
+          'description': 'Create a new module in the course',
+          'parameters': {
+            'type': 'object',
+            'properties': {
+              'title': {
+                'type': 'string',
+                'description': 'The title of the module'
+              },
+              'description': {
+                'type': 'string',
+                'description': 'A brief description of the module content'
+              },
+              'sortOrder': {
+                'type': 'integer',
+                'description': 'The order position of this module (1, 2, 3, etc.)'
+              },
+            },
+            'required': ['title', 'sortOrder'],
+          },
+        },
+      ],
+    },
+  ];
 
   /// Calculator tool definitions for Gemini function calling
   static final List<Map<String, dynamic>> _calculatorTools = [
@@ -244,6 +391,191 @@ class GeminiService {
 
     // Regular text response
     return parts[0]['text'] as String? ?? 'No response generated.';
+  }
+
+  /// Send a course chat message with course-specific tools
+  /// Returns either text or a function call for the endpoint to handle
+  Future<GeminiChatResult> courseChat({
+    required String message,
+    List<Map<String, String>>? history,
+    String? systemInstruction,
+  }) async {
+    final url = Uri.parse('$_baseUrl/$_model:generateContent?key=$apiKey');
+
+    final contents = <Map<String, dynamic>>[];
+
+    // Add history if provided
+    if (history != null) {
+      for (final msg in history) {
+        contents.add({
+          'role': msg['role'],
+          'parts': [
+            {'text': msg['content']}
+          ],
+        });
+      }
+    }
+
+    // Add current user message
+    contents.add({
+      'role': 'user',
+      'parts': [
+        {'text': message}
+      ],
+    });
+
+    final body = <String, dynamic>{
+      'contents': contents,
+      'tools': _courseTools,
+      'generationConfig': {
+        'temperature': 0.7,
+        'topK': 40,
+        'topP': 0.95,
+        'maxOutputTokens': 2048,
+      },
+    };
+
+    // Add system instruction if provided
+    if (systemInstruction != null && systemInstruction.isNotEmpty) {
+      body['systemInstruction'] = {
+        'parts': [
+          {'text': systemInstruction}
+        ],
+      };
+    }
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      return _parseCourseResponse(data);
+    } else {
+      final error = jsonDecode(response.body);
+      throw Exception(
+        'Gemini API error: ${error['error']?['message'] ?? response.body}',
+      );
+    }
+  }
+
+  /// Parse the response and return text or function call info
+  GeminiChatResult _parseCourseResponse(Map<String, dynamic> data) {
+    final candidates = data['candidates'] as List<dynamic>?;
+
+    if (candidates == null || candidates.isEmpty) {
+      return GeminiChatResult(text: 'No response generated.');
+    }
+
+    final content = candidates[0]['content'] as Map<String, dynamic>?;
+    final parts = content?['parts'] as List<dynamic>?;
+
+    if (parts == null || parts.isEmpty) {
+      return GeminiChatResult(text: 'No response generated.');
+    }
+
+    // Check if there's a function call
+    final functionCall = parts[0]['functionCall'] as Map<String, dynamic>?;
+
+    if (functionCall != null) {
+      final functionName = functionCall['name'] as String;
+      final functionArgs = functionCall['args'] as Map<String, dynamic>;
+      return GeminiChatResult(
+        functionName: functionName,
+        functionArgs: functionArgs,
+      );
+    }
+
+    // Regular text response
+    return GeminiChatResult(
+      text: parts[0]['text'] as String? ?? 'No response generated.',
+    );
+  }
+
+  /// Continue conversation after function execution with the result
+  Future<String> sendFunctionResultForCourse({
+    required List<Map<String, dynamic>> contents,
+    required String functionName,
+    required Map<String, dynamic> functionArgs,
+    required dynamic result,
+    String? systemInstruction,
+  }) async {
+    final url = Uri.parse('$_baseUrl/$_model:generateContent?key=$apiKey');
+
+    // Add the model's function call to contents
+    contents.add({
+      'role': 'model',
+      'parts': [
+        {
+          'functionCall': {
+            'name': functionName,
+            'args': functionArgs,
+          }
+        }
+      ],
+    });
+
+    // Add the function response
+    contents.add({
+      'role': 'function',
+      'parts': [
+        {
+          'functionResponse': {
+            'name': functionName,
+            'response': {
+              'result': result,
+            },
+          }
+        }
+      ],
+    });
+
+    final body = <String, dynamic>{
+      'contents': contents,
+      'tools': _courseTools,
+      'generationConfig': {
+        'temperature': 0.7,
+        'topK': 40,
+        'topP': 0.95,
+        'maxOutputTokens': 2048,
+      },
+    };
+
+    if (systemInstruction != null && systemInstruction.isNotEmpty) {
+      body['systemInstruction'] = {
+        'parts': [
+          {'text': systemInstruction}
+        ],
+      };
+    }
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final candidates = data['candidates'] as List<dynamic>?;
+
+      if (candidates != null && candidates.isNotEmpty) {
+        final content = candidates[0]['content'] as Map<String, dynamic>?;
+        final parts = content?['parts'] as List<dynamic>?;
+
+        if (parts != null && parts.isNotEmpty) {
+          return parts[0]['text'] as String? ?? 'Action completed successfully.';
+        }
+      }
+      return 'Action completed successfully.';
+    } else {
+      final error = jsonDecode(response.body);
+      throw Exception(
+        'Gemini API error: ${error['error']?['message'] ?? response.body}',
+      );
+    }
   }
 
   /// Send function result back to Gemini for final response

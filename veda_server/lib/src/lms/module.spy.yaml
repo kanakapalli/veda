@@ -1,0 +1,29 @@
+### Module - hierarchical organization unit within a course
+class: Module
+table: modules
+
+fields:
+  ### Module title
+  title: String
+  ### Module description
+  description: String?
+  ### Sort order within the course
+  sortOrder: int
+  ### URL for module image
+  imageUrl: String?
+  ### URL for module banner image
+  bannerImageUrl: String?
+  ### URL for module intro video
+  videoUrl: String?
+  ### Foreign key to parent course
+  courseId: int, relation(parent=courses, onDelete=Cascade)
+  ### Parent course reference
+  course: Course?
+  ### List of module items (topics) in this module
+  items: List<ModuleItem>?, relation
+
+indexes:
+  modules_course_id_idx:
+    fields: courseId
+  modules_sort_order_idx:
+    fields: sortOrder

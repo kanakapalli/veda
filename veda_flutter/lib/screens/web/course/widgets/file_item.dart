@@ -23,11 +23,21 @@ class FileItem extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.insert_drive_file_outlined,
-            size: 16,
-            color: VedaColors.zinc700,
-          ),
+          if (file.isUploading)
+            const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 1,
+                valueColor: AlwaysStoppedAnimation(VedaColors.accent),
+              ),
+            )
+          else
+            const Icon(
+              Icons.insert_drive_file_outlined,
+              size: 16,
+              color: VedaColors.zinc700,
+            ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -38,7 +48,9 @@ class FileItem extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 11,
                     fontWeight: FontWeight.w400,
-                    color: VedaColors.white,
+                    color: file.isUploading
+                        ? VedaColors.zinc500
+                        : VedaColors.white,
                     letterSpacing: 0.2,
                   ),
                   maxLines: 1,
@@ -46,7 +58,7 @@ class FileItem extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  file.size,
+                  file.isUploading ? 'UPLOADING...' : file.size,
                   style: GoogleFonts.jetBrainsMono(
                     fontSize: 9,
                     color: VedaColors.zinc700,
@@ -56,13 +68,18 @@ class FileItem extends StatelessWidget {
               ],
             ),
           ),
-          InkWell(
-            onTap: onRemove,
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              child: const Icon(Icons.close, size: 14, color: VedaColors.zinc700),
+          if (!file.isUploading)
+            InkWell(
+              onTap: onRemove,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                child: const Icon(
+                  Icons.close,
+                  size: 14,
+                  color: VedaColors.zinc700,
+                ),
+              ),
             ),
-          ),
         ],
       ),
     );

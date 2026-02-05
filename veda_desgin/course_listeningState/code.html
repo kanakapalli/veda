@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "mono-black": "#050505",
+              "mono-white": "#FFFFFF",
+              "tech-gray": "#1A1A1A",
+            },
+            fontFamily: {
+              "display": ["Space Grotesk", "sans-serif"],
+              "mono": ["JetBrains Mono", "monospace"]
+            },
+            backgroundImage: {
+                'grid-pattern': "linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px)"
+            }
+          },
+        },
+      }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .tech-border { @apply border border-white/20; }
+            .grid-bg { background-size: 40px 40px; }
+            .razor-corners { border-radius: 0 !important; }
+            .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+            }
+        }
+        body {
+            background-color: #000000;
+            color: #FFFFFF;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display bg-black h-screen w-full relative overflow-hidden flex flex-col">
+<div class="absolute inset-0 grid-bg bg-grid-pattern pointer-events-none z-0 opacity-50"></div>
+<div class="absolute top-0 bottom-0 left-[24px] w-[1px] bg-white/10 pointer-events-none z-0"></div>
+<div class="absolute top-0 bottom-0 right-[24px] w-[1px] bg-white/10 pointer-events-none z-0"></div>
+<div class="absolute top-8 left-8 z-10">
+<span class="material-symbols-outlined !text-[14px] text-white/50">add</span>
+</div>
+<div class="absolute top-8 right-8 z-10 flex flex-col items-end gap-1">
+<span class="text-[8px] font-bold tracking-[0.2em] text-white/40">SYS.AUDIO.IN</span>
+<span class="text-[8px] font-bold tracking-[0.2em] text-white">LISTENING</span>
+</div>
+<div class="absolute bottom-32 left-8 z-10">
+<div class="w-3 h-[1px] bg-white/50"></div>
+<div class="h-3 w-[1px] bg-white/50 absolute top-[-6px] left-[6px]"></div>
+</div>
+<div class="absolute bottom-32 right-8 z-10">
+<div class="w-3 h-[1px] bg-white/50 absolute right-0"></div>
+<div class="h-3 w-[1px] bg-white/50 absolute top-[-6px] right-[6px]"></div>
+</div>
+<header class="relative z-10 pt-16 px-6 flex flex-col items-center gap-4 w-full shrink-0">
+<div class="flex flex-col items-center gap-1 text-center w-full max-w-md mx-auto">
+<span class="text-[10px] font-medium tracking-[0.2em] text-white/40 uppercase mt-4">Module_04</span>
+<h1 class="text-2xl font-bold uppercase tracking-tight leading-none text-center text-white mt-1">
+                Load_Bearing_Logic
+            </h1>
+<div class="w-8 h-[1px] bg-white/20 mt-4"></div>
+</div>
+</header>
+<main class="flex-1 relative flex flex-col items-center justify-start z-10 w-full overflow-hidden">
+<div class="relative flex items-center justify-center shrink-0 h-56 w-full mt-2">
+<div class="size-24 rounded-full bg-black border border-white text-white z-20 flex items-center justify-center gap-1 shadow-[0_0_30px_rgba(255,255,255,0.15)]">
+<div class="w-1 h-6 bg-white rounded-full animate-[pulse_1s_ease-in-out_infinite]"></div>
+<div class="w-1 h-10 bg-white rounded-full animate-[pulse_1.2s_ease-in-out_infinite]"></div>
+<div class="w-1 h-14 bg-white rounded-full animate-[pulse_0.8s_ease-in-out_infinite]"></div>
+<div class="w-1 h-8 bg-white rounded-full animate-[pulse_1.5s_ease-in-out_infinite]"></div>
+<div class="w-1 h-5 bg-white rounded-full animate-[pulse_1.1s_ease-in-out_infinite]"></div>
+</div>
+<div class="absolute size-36 rounded-full border-[1px] border-white/60 z-10 scale-105 opacity-80"></div>
+<div class="absolute size-52 rounded-full border-[1px] border-white/30 z-0"></div>
+<div class="absolute size-72 rounded-full border-[1px] border-white/10 -z-10"></div>
+<div class="absolute size-[380px] rounded-full border-[1px] border-white/5 -z-20 border-dashed animate-[spin_10s_linear_infinite]"></div>
+</div>
+<div class="w-full max-w-sm px-6 flex flex-col flex-1 min-h-0 relative z-20 mb-2">
+<div class="flex items-center justify-between border-b border-white/20 pb-2 mb-3 shrink-0">
+<span class="text-[9px] font-bold tracking-[0.2em] text-white/60 uppercase">Live_Transcript</span>
+<div class="flex items-center gap-2">
+<span class="text-[8px] font-mono text-white/30 tracking-widest">USER.IN.01</span>
+<span class="size-1.5 rounded-full bg-white animate-pulse"></span>
+</div>
+</div>
+<div class="overflow-y-auto scrollbar-hide font-mono text-xs md:text-sm leading-6 text-white/80 flex flex-col gap-3 pb-8 relative">
+<div class="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-transparent to-black z-10 sticky bottom-0 h-full hidden"></div>
+<p class="opacity-30">
+                    By isolating side effects, we ensure that the RAG pipeline remains pure. This allows the AI agent to retrieve context without polluting the global state.
+                </p>
+<p class="text-white text-base font-medium">
+<span class="text-white mr-2 font-bold">&gt;</span>
+                    Wait, if we decouple the state, how do we handle the <span class="bg-white/20 px-1 text-white">latency spikes</span> during high traffic events?
+                    <span class="inline-block w-2 h-4 bg-white align-middle ml-1 animate-pulse"></span>
+</p>
+<div class="h-12 shrink-0"></div>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none z-20"></div>
+</div>
+</main>
+<footer class="relative z-20 w-full px-6 pb-8 pt-2">
+<div class="w-full max-w-sm mx-auto flex items-end justify-between relative">
+<div class="flex flex-col gap-2 mb-4 w-[70px]">
+<span class="text-[7px] font-bold tracking-[0.2em] text-white/30 uppercase pl-1">Source</span>
+<div class="border border-white/20 bg-black/80 backdrop-blur size-[34px] flex items-center justify-center group/icon hover:border-white/40 transition-colors cursor-pointer">
+<span class="material-symbols-outlined !text-[16px] text-white/80 group-hover/icon:text-white transition-colors">attach_file</span>
+</div>
+</div>
+<div class="flex items-center justify-center shrink-0 mx-2">
+<button class="relative w-[110px] h-[110px] rounded-full border-2 border-white flex flex-col items-center justify-center gap-1 bg-white shadow-[0_0_40px_rgba(255,255,255,0.3)] transition-all duration-300">
+<div class="absolute inset-0 rounded-full border border-white/50 scale-110 animate-pulse"></div>
+<span class="material-symbols-outlined !text-[32px] text-black mb-1">mic</span>
+<span class="text-[9px] font-bold tracking-[0.1em] uppercase max-w-[80px] text-center leading-tight text-black">
+                        LISTENING...
+                    </span>
+</button>
+</div>
+<div class="flex flex-col gap-2 items-end mb-4 w-[70px]">
+</div>
+</div>
+</footer>
+<div class="fixed top-32 right-[-24px] rotate-90 pointer-events-none z-0">
+<p class="text-[8px] font-bold tracking-[0.8em] uppercase text-white/20">AI_SESSION / LISTENING / VAR_003</p>
+</div>
+
+</body></html>

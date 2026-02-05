@@ -1,0 +1,23 @@
+### Topic - reusable lesson content that can be shared across modules
+class: Topic
+table: topics
+
+fields:
+  ### Topic title
+  title: String
+  ### Topic description / lesson content body
+  description: String?
+  ### URL for topic video
+  videoUrl: String?
+  ### URL for topic image
+  imageUrl: String?
+  ### URL for topic banner image
+  bannerImageUrl: String?
+  ### Timestamp when the topic was created
+  createdAt: DateTime, default=now
+  ### Timestamp when the topic was last updated
+  updatedAt: DateTime, default=now
+
+indexes:
+  topics_title_idx:
+    fields: title

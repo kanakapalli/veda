@@ -10,13 +10,39 @@ class KnowledgeFile {
   final String name;
   final String size;
   final String type;
+  final String? fileUrl;
+  final int? serverId;
+  final bool isUploading;
 
   KnowledgeFile({
     required this.id,
     required this.name,
     required this.size,
     required this.type,
+    this.fileUrl,
+    this.serverId,
+    this.isUploading = false,
   });
+
+  KnowledgeFile copyWith({
+    String? id,
+    String? name,
+    String? size,
+    String? type,
+    String? fileUrl,
+    int? serverId,
+    bool? isUploading,
+  }) {
+    return KnowledgeFile(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      size: size ?? this.size,
+      type: type ?? this.type,
+      fileUrl: fileUrl ?? this.fileUrl,
+      serverId: serverId ?? this.serverId,
+      isUploading: isUploading ?? this.isUploading,
+    );
+  }
 }
 
 class ChatMessage {

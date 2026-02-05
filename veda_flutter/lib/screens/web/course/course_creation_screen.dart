@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:veda_client/veda_client.dart' as veda;
 
 import '../../../design_system/veda_colors.dart';
+import '../../../main.dart';
 import '../../../services/gemini_service.dart';
+import '../../../services/upload_service.dart';
 import 'models/course_models.dart';
 import 'widgets/chat_panel.dart';
 import 'widgets/course_index_panel.dart';
@@ -11,7 +14,9 @@ import 'widgets/knowledge_base_panel.dart';
 /// Course Creation Screen - AI-powered course architect
 /// Follows Neo-Minimalist Line Art aesthetic with Swiss grid system
 class CourseCreationScreen extends StatefulWidget {
-  const CourseCreationScreen({super.key});
+  final veda.Course course;
+
+  const CourseCreationScreen({super.key, required this.course});
 
   @override
   State<CourseCreationScreen> createState() => _CourseCreationScreenState();
@@ -23,71 +28,92 @@ class _CourseCreationScreenState extends State<CourseCreationScreen> {
 
   ChatMode _chatMode = ChatMode.create;
   String _activeTab = 'index';
-  bool _isPublic = false;
   bool _isLoading = false;
 
-  final List<KnowledgeFile> _files = [
-    KnowledgeFile(
-      id: '1',
-      name: 'Introduction_to_React.pdf',
-      size: '2.4 MB',
-      type: 'pdf',
-    ),
-    KnowledgeFile(
-      id: '2',
-      name: 'Advanced_Hooks_Guide.docx',
-      size: '1.1 MB',
-      type: 'doc',
-    ),
-    KnowledgeFile(
-      id: '3',
-      name: 'Project_Assets.zip',
-      size: '15 MB',
-      type: 'zip',
-    ),
-  ];
+  // Knowledge files loaded from server
+  final List<KnowledgeFile> _files = [];
 
   final List<ChatMessage> _messages = [];
 
-  final List<CourseModule> _modules = [
-    CourseModule(
-      id: 'mod-1',
-      title: 'Module 1: Fundamentals',
-      expanded: true,
-      lessons: [
-        Lesson(id: 'les-1-1', title: 'What is React?', duration: '5:00'),
-        Lesson(id: 'les-1-2', title: 'JSX & Rendering', duration: '10:00'),
-      ],
-    ),
-    CourseModule(
-      id: 'mod-2',
-      title: 'Module 2: State Management',
-      expanded: false,
-      lessons: [
-        Lesson(id: 'les-2-1', title: 'useState Hook', duration: '8:30'),
-        Lesson(id: 'les-2-2', title: 'useReducer Hook', duration: '12:00'),
-      ],
-    ),
-  ];
+  // Modules loaded from server
+  final List<CourseModule> _modules = [];
+
+  // Track the current course state (may be updated by AI tools)
+  late veda.Course _course;
+
+  // Get visibility status from course
+  bool get _isPublic => _course.visibility == veda.CourseVisibility.public;
+
+  String get _courseStatus {
+    switch (_course.visibility) {
+      case veda.CourseVisibility.draft:
+        return 'DRAFT';
+      case veda.CourseVisibility.public:
+        return 'PUBLIC';
+      case veda.CourseVisibility.private:
+        return 'PRIVATE';
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    _course = widget.course;
+
+    print('🎨 [CourseCreation] initState called');
+    print('🎨 [CourseCreation] Course ID: ${_course.id}');
+    print('🎨 [CourseCreation] Course Title: ${_course.title}');
+    print('🎨 [CourseCreation] Course Image URL: ${_course.courseImageUrl}');
+    print('🎨 [CourseCreation] Banner Image URL: ${_course.bannerImageUrl}');
+
     _initializeChat();
+    _loadKnowledgeFiles();
+  }
+
+  Future<void> _loadKnowledgeFiles() async {
+    if (_course.id == null) return;
+    try {
+      final serverFiles = await client.lms.getFilesForCourse(_course.id!);
+      if (!mounted) return;
+      setState(() {
+        _files.clear();
+        for (final f in serverFiles) {
+          _files.add(
+            KnowledgeFile(
+              id: f.id.toString(),
+              name: f.fileName,
+              size: _formatBytes(f.fileSize),
+              type: f.fileType ?? '',
+              fileUrl: f.fileUrl,
+              serverId: f.id,
+            ),
+          );
+        }
+      });
+    } catch (_) {}
+  }
+
+  String _formatBytes(int bytes) {
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
   }
 
   void _initializeChat() {
-    // Add initial AI greeting
-    _messages.add(ChatMessage(
-      id: '1',
-      sender: MessageSender.ai,
-      text:
-          'Hello! I am your course assistant powered by Gemini. Upload your knowledge files on the left, and I can help you structure your course or generate content. What shall we work on today?',
-    ));
+    // Add initial AI greeting with course context
+    _messages.add(
+      ChatMessage(
+        id: '1',
+        sender: MessageSender.ai,
+        text:
+            'Hello! I am your course assistant powered by Gemini. I see you\'re working on "${_course.title}". Upload your knowledge files on the left, and I can help you structure your course or generate content.\n\nI can also help you:\n• Update course title, description, and visibility\n• Set video URLs\n• Create modules\n• Generate course and banner images\n\nJust ask me to make changes and I\'ll update the course directly!',
+      ),
+    );
 
-    // Initialize Gemini chat session with system instruction
+    // Initialize Gemini chat session with course ID for tool calling
     GeminiService.instance.startChatSession(
       systemInstruction: _buildSystemInstruction(),
+      courseId: _course.id,
     );
   }
 
@@ -129,37 +155,71 @@ Reference specific files when making suggestions based on their content.
     _messageController.clear();
 
     setState(() {
-      _messages.add(ChatMessage(
-        id: DateTime.now().toString(),
-        sender: MessageSender.user,
-        text: userText,
-      ));
+      _messages.add(
+        ChatMessage(
+          id: DateTime.now().toString(),
+          sender: MessageSender.user,
+          text: userText,
+        ),
+      );
       _isLoading = true;
       // Add loading message
-      _messages.add(ChatMessage(
-        id: 'loading',
-        sender: MessageSender.ai,
-        text: '',
-        isLoading: true,
-      ));
+      _messages.add(
+        ChatMessage(
+          id: 'loading',
+          sender: MessageSender.ai,
+          text: '',
+          isLoading: true,
+        ),
+      );
     });
 
     _scrollToBottom();
 
     try {
-      final response = await GeminiService.instance.sendMessage(userText);
+      // Use course chat with tool calling support
+      final result = await GeminiService.instance.sendCourseMessage(
+        userText,
+        courseId: _course.id,
+      );
 
       if (!mounted) return;
 
       setState(() {
         // Remove loading message
         _messages.removeWhere((m) => m.id == 'loading');
-        // Add AI response
-        _messages.add(ChatMessage(
-          id: DateTime.now().toString(),
-          sender: MessageSender.ai,
-          text: response,
-        ));
+
+        if (result.hasError) {
+          _messages.add(
+            ChatMessage(
+              id: DateTime.now().toString(),
+              sender: MessageSender.ai,
+              text: 'Error: ${result.error}',
+            ),
+          );
+        } else {
+          // Add AI response
+          _messages.add(
+            ChatMessage(
+              id: DateTime.now().toString(),
+              sender: MessageSender.ai,
+              text: result.text,
+            ),
+          );
+
+          // If course was updated by tools, refresh our local state
+          if (result.updatedCourse != null) {
+            _course = result.updatedCourse!;
+          }
+
+          // Show snackbar if tools were executed
+          if (result.hasUpdates) {
+            _showSuccessSnackBar(
+              'COURSE UPDATED: ${result.toolsExecuted.join(", ")}',
+            );
+          }
+        }
+
         _isLoading = false;
       });
     } catch (e) {
@@ -167,11 +227,13 @@ Reference specific files when making suggestions based on their content.
 
       setState(() {
         _messages.removeWhere((m) => m.id == 'loading');
-        _messages.add(ChatMessage(
-          id: DateTime.now().toString(),
-          sender: MessageSender.ai,
-          text: 'Sorry, I encountered an error. Please try again.',
-        ));
+        _messages.add(
+          ChatMessage(
+            id: DateTime.now().toString(),
+            sender: MessageSender.ai,
+            text: 'Sorry, I encountered an error. Please try again.',
+          ),
+        );
         _isLoading = false;
       });
     }
@@ -191,22 +253,71 @@ Reference specific files when making suggestions based on their content.
     });
   }
 
-  void _addFile() {
-    setState(() {
-      _files.add(KnowledgeFile(
-        id: DateTime.now().toString(),
-        name: 'New_Knowledge_Base_${_files.length + 1}.pdf',
-        size: '1.2 MB',
-        type: 'pdf',
-      ));
-    });
-    // Update Gemini context with new files
-    GeminiService.instance.startChatSession(
-      systemInstruction: _buildSystemInstruction(),
+  Future<void> _addFile() async {
+    if (_course.id == null) return;
+
+    // Pick and upload the file
+    final result = await UploadService.instance.pickAndUploadKnowledgeFile(
+      _course.id!,
     );
+    if (result == null) return; // user cancelled picker
+
+    if (!result.success) {
+      if (!mounted) return;
+      _showErrorSnackBar(result.error ?? 'UPLOAD FAILED');
+      return;
+    }
+
+    // Save file record to server
+    try {
+      final serverFile = await client.lms.addFileToCourse(
+        veda.KnowledgeFile(
+          courseId: _course.id!,
+          fileName: result.fileName ?? 'unknown',
+          fileSize: result.fileSize ?? 0,
+          fileType: result.fileType,
+          fileUrl: result.publicUrl ?? '',
+        ),
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _files.add(
+          KnowledgeFile(
+            id: serverFile.id.toString(),
+            name: serverFile.fileName,
+            size: _formatBytes(serverFile.fileSize),
+            type: serverFile.fileType ?? '',
+            fileUrl: serverFile.fileUrl,
+            serverId: serverFile.id,
+          ),
+        );
+      });
+
+      // Update Gemini context with new files
+      GeminiService.instance.startChatSession(
+        systemInstruction: _buildSystemInstruction(),
+        courseId: _course.id,
+      );
+
+      _showSuccessSnackBar('FILE UPLOADED');
+    } catch (e) {
+      if (!mounted) return;
+      _showErrorSnackBar('FAILED TO SAVE FILE RECORD');
+    }
   }
 
-  void _removeFile(String id) {
+  Future<void> _removeFile(String id) async {
+    final file = _files.firstWhere((f) => f.id == id);
+    if (file.serverId != null) {
+      try {
+        await client.lms.deleteFile(file.serverId!);
+      } catch (_) {
+        if (!mounted) return;
+        _showErrorSnackBar('FAILED TO DELETE FILE');
+        return;
+      }
+    }
     setState(() {
       _files.removeWhere((f) => f.id == id);
     });
@@ -223,6 +334,243 @@ Reference specific files when making suggestions based on their content.
     });
   }
 
+  Future<void> _updateVisibility(bool isPublic) async {
+    try {
+      final newVisibility = isPublic
+          ? veda.CourseVisibility.public
+          : veda.CourseVisibility.private;
+
+      final updatedCourse = _course.copyWith(
+        visibility: newVisibility,
+      );
+
+      await client.lms.updateCourse(updatedCourse);
+      setState(() {
+        _course = updatedCourse;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      _showErrorSnackBar('FAILED TO UPDATE VISIBILITY');
+    }
+  }
+
+  void _generateIndex() {
+    // Send a message to AI to generate course index
+    _messageController.text =
+        'Please generate a course index/outline for "${_course.title}" based on the uploaded knowledge files.';
+    _sendMessage();
+  }
+
+  Future<void> _editCourseImage() async {
+    if (_course.id == null) return;
+
+    final result = await UploadService.instance.pickAndUploadCourseImage(
+      _course.id!,
+    );
+    if (result == null) return;
+
+    if (!result.success) {
+      if (!mounted) return;
+      _showErrorSnackBar(result.error ?? 'UPLOAD FAILED');
+      return;
+    }
+
+    try {
+      final updated = _course.copyWith(courseImageUrl: result.publicUrl);
+      await client.lms.updateCourse(updated);
+      if (!mounted) return;
+      setState(() => _course = updated);
+      _showSuccessSnackBar('COURSE IMAGE UPDATED');
+    } catch (_) {
+      if (!mounted) return;
+      _showErrorSnackBar('FAILED TO UPDATE COURSE IMAGE');
+    }
+  }
+
+  Future<void> _editBannerImage() async {
+    if (_course.id == null) return;
+
+    final result = await UploadService.instance.pickAndUploadBannerImage(
+      _course.id!,
+    );
+    if (result == null) return;
+
+    if (!result.success) {
+      if (!mounted) return;
+      _showErrorSnackBar(result.error ?? 'UPLOAD FAILED');
+      return;
+    }
+
+    try {
+      final updated = _course.copyWith(bannerImageUrl: result.publicUrl);
+      await client.lms.updateCourse(updated);
+      if (!mounted) return;
+      setState(() => _course = updated);
+      _showSuccessSnackBar('BANNER IMAGE UPDATED');
+    } catch (_) {
+      if (!mounted) return;
+      _showErrorSnackBar('FAILED TO UPDATE BANNER IMAGE');
+    }
+  }
+
+  Future<void> _updateTitle(String title) async {
+    if (title.trim().isEmpty) return;
+    try {
+      final updatedCourse = _course.copyWith(title: title.trim());
+      await client.lms.updateCourse(updatedCourse);
+      setState(() {
+        _course = updatedCourse;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      _showErrorSnackBar('FAILED TO UPDATE TITLE');
+    }
+  }
+
+  Future<void> _updateDescription(String description) async {
+    try {
+      final updatedCourse = _course.copyWith(description: description);
+      await client.lms.updateCourse(updatedCourse);
+      setState(() {
+        _course = updatedCourse;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      _showErrorSnackBar('FAILED TO UPDATE DESCRIPTION');
+    }
+  }
+
+  Future<void> _updateVideoUrl(String videoUrl) async {
+    try {
+      final updatedCourse = _course.copyWith(videoUrl: videoUrl);
+      await client.lms.updateCourse(updatedCourse);
+      setState(() {
+        _course = updatedCourse;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      _showErrorSnackBar('FAILED TO UPDATE VIDEO URL');
+    }
+  }
+
+  Future<void> _updateSystemPrompt(String systemPrompt) async {
+    try {
+      final updatedCourse = _course.copyWith(systemPrompt: systemPrompt);
+      await client.lms.updateCourse(updatedCourse);
+      setState(() {
+        _course = updatedCourse;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      _showErrorSnackBar('FAILED TO UPDATE SYSTEM PROMPT');
+    }
+  }
+
+  Future<void> _deleteCourse() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: VedaColors.zinc900,
+        title: Text(
+          'DELETE COURSE',
+          style: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.w400,
+            color: VedaColors.white,
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to delete "${_course.title}"? This action cannot be undone.',
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+            color: VedaColors.zinc500,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(
+              'CANCEL',
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: VedaColors.zinc500,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(
+              'DELETE',
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: VedaColors.error,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await client.lms.deleteCourse(_course.id!);
+        if (!mounted) return;
+        Navigator.of(context).pop();
+      } catch (e) {
+        if (!mounted) return;
+        _showErrorSnackBar('FAILED TO DELETE COURSE');
+      }
+    }
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: GoogleFonts.jetBrainsMono(
+            fontSize: 11,
+            fontWeight: FontWeight.w400,
+            color: VedaColors.white,
+            letterSpacing: 1.0,
+          ),
+        ),
+        backgroundColor: VedaColors.error,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: GoogleFonts.jetBrainsMono(
+            fontSize: 11,
+            fontWeight: FontWeight.w400,
+            color: VedaColors.black,
+            letterSpacing: 1.0,
+          ),
+        ),
+        backgroundColor: VedaColors.white,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  Future<void> _saveAllSettings() async {
+    try {
+      await client.lms.updateCourse(_course);
+      if (!mounted) return;
+      _showSuccessSnackBar('COURSE UPDATED SUCCESSFULLY');
+    } catch (e) {
+      if (!mounted) return;
+      _showErrorSnackBar('FAILED TO UPDATE COURSE');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 900;
@@ -233,14 +581,30 @@ Reference specific files when making suggestions based on their content.
         appBar: AppBar(
           backgroundColor: VedaColors.black,
           elevation: 0,
-          title: Text(
-            'COURSE ARCHITECT',
-            style: GoogleFonts.inter(
-              fontSize: 18,
-              fontWeight: FontWeight.w300,
-              color: VedaColors.white,
-              letterSpacing: -0.5,
-            ),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _course.title.toUpperCase(),
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                  color: VedaColors.white,
+                  letterSpacing: 0.2,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                _courseStatus,
+                style: GoogleFonts.jetBrainsMono(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w400,
+                  color: VedaColors.zinc500,
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ],
           ),
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(1),
@@ -258,6 +622,11 @@ Reference specific files when making suggestions based on their content.
           activeFilesCount: _files.length,
           onSendMessage: _sendMessage,
           onModeChanged: (mode) => setState(() => _chatMode = mode),
+          courseTitle: _course.title,
+          courseStatus: _courseStatus,
+          courseImageUrl: _course.courseImageUrl,
+          onEditCourseImage: _editCourseImage,
+          courseId: _course.id,
         ),
       );
     }
@@ -288,6 +657,11 @@ Reference specific files when making suggestions based on their content.
               activeFilesCount: _files.length,
               onSendMessage: _sendMessage,
               onModeChanged: (mode) => setState(() => _chatMode = mode),
+              courseTitle: _course.title,
+              courseStatus: _courseStatus,
+              courseImageUrl: _course.courseImageUrl,
+              onEditCourseImage: _editCourseImage,
+              courseId: _course.id,
             ),
           ),
           // Vertical divider
@@ -298,12 +672,29 @@ Reference specific files when making suggestions based on their content.
             child: CourseIndexPanel(
               activeTab: _activeTab,
               modules: _modules,
-              courseTitle: 'React Mastery',
+              courseTitle: _course.title,
+              courseDescription: _course.description,
+              courseStatus: _courseStatus,
+              courseImageUrl: _course.courseImageUrl,
+              bannerImageUrl: _course.bannerImageUrl,
+              videoUrl: _course.videoUrl,
+              systemPrompt: _course.systemPrompt,
+              createdAt: _course.createdAt,
+              updatedAt: _course.updatedAt,
+              knowledgeFiles: _files,
               isPublic: _isPublic,
               onTabChanged: (tab) => setState(() => _activeTab = tab),
               onModuleToggle: _toggleModule,
-              onVisibilityChanged: (value) =>
-                  setState(() => _isPublic = value),
+              onVisibilityChanged: _updateVisibility,
+              onGenerateIndex: _generateIndex,
+              onEditCourseImage: _editCourseImage,
+              onEditBannerImage: _editBannerImage,
+              onTitleChanged: _updateTitle,
+              onDescriptionChanged: _updateDescription,
+              onVideoUrlChanged: _updateVideoUrl,
+              onSystemPromptChanged: _updateSystemPrompt,
+              onDeleteCourse: _deleteCourse,
+              onSaveSettings: _saveAllSettings,
             ),
           ),
         ],

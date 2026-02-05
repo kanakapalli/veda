@@ -1,0 +1,6 @@
+class: CourseChatRequest
+fields:
+  message: String
+  courseId: int
+  history: List<ChatMessage>?
+  systemInstruction: String?

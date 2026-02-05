@@ -1,0 +1,25 @@
+### ModuleItem - junction table linking modules to topics with context
+class: ModuleItem
+table: module_items
+
+fields:
+  ### Sort order within the module
+  sortOrder: int
+  ### Contextual description specific to this topic in this course
+  contextualDescription: String?
+  ### Foreign key to parent module
+  moduleId: int, relation(parent=modules, onDelete=Cascade)
+  ### Parent module reference
+  module: Module?
+  ### Foreign key to topic
+  topicId: int, relation(parent=topics, onDelete=Cascade)
+  ### Topic reference
+  topic: Topic?
+
+indexes:
+  module_items_module_id_idx:
+    fields: moduleId
+  module_items_topic_id_idx:
+    fields: topicId
+  module_items_sort_order_idx:
+    fields: sortOrder
