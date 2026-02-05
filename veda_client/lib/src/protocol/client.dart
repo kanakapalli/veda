@@ -16,11 +16,13 @@ import 'package:serverpod_client/serverpod_client.dart' as _i2;
 import 'dart:async' as _i3;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i4;
-import 'package:veda_client/src/protocol/greetings/greeting.dart' as _i5;
-import 'package:veda_client/src/protocol/profiles/user_profile.dart' as _i6;
+import 'package:veda_client/src/protocol/gemini/chat_response.dart' as _i5;
+import 'package:veda_client/src/protocol/gemini/chat_request.dart' as _i6;
+import 'package:veda_client/src/protocol/greetings/greeting.dart' as _i7;
+import 'package:veda_client/src/protocol/profiles/user_profile.dart' as _i8;
 import 'package:veda_client/src/protocol/profiles/user_profile_with_email.dart'
-    as _i7;
-import 'protocol.dart' as _i8;
+    as _i9;
+import 'protocol.dart' as _i10;
 
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
 /// are made available on the server and enable the corresponding sign-in widget
@@ -236,6 +238,22 @@ class EndpointJwtRefresh extends _i4.EndpointRefreshJwtTokens {
   );
 }
 
+/// {@category Endpoint}
+class EndpointGemini extends _i2.EndpointRef {
+  EndpointGemini(_i2.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'gemini';
+
+  /// Send a chat message to Gemini and get a response
+  _i3.Future<_i5.ChatResponse> chat(_i6.ChatRequest request) =>
+      caller.callServerEndpoint<_i5.ChatResponse>(
+        'gemini',
+        'chat',
+        {'request': request},
+      );
+}
+
 /// This is an example endpoint that returns a greeting message through
 /// its [hello] method.
 /// {@category Endpoint}
@@ -246,8 +264,8 @@ class EndpointGreeting extends _i2.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i3.Future<_i5.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i5.Greeting>(
+  _i3.Future<_i7.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i7.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -263,12 +281,12 @@ class EndpointVedaUserProfile extends _i2.EndpointRef {
   String get name => 'vedaUserProfile';
 
   /// Creates or updates a user profile for the authenticated user.
-  _i3.Future<_i6.VedaUserProfile> upsertProfile({
+  _i3.Future<_i8.VedaUserProfile> upsertProfile({
     required String fullName,
     String? bio,
     required List<String> interests,
     String? learningGoal,
-  }) => caller.callServerEndpoint<_i6.VedaUserProfile>(
+  }) => caller.callServerEndpoint<_i8.VedaUserProfile>(
     'vedaUserProfile',
     'upsertProfile',
     {
@@ -280,8 +298,8 @@ class EndpointVedaUserProfile extends _i2.EndpointRef {
   );
 
   /// Gets the profile for the authenticated user.
-  _i3.Future<_i6.VedaUserProfile?> getMyProfile() =>
-      caller.callServerEndpoint<_i6.VedaUserProfile?>(
+  _i3.Future<_i8.VedaUserProfile?> getMyProfile() =>
+      caller.callServerEndpoint<_i8.VedaUserProfile?>(
         'vedaUserProfile',
         'getMyProfile',
         {},
@@ -295,8 +313,8 @@ class EndpointVedaUserProfile extends _i2.EndpointRef {
   );
 
   /// Gets the user profile with email from Serverpod's auth system.
-  _i3.Future<_i7.VedaUserProfileWithEmail?> getMyProfileWithEmail() =>
-      caller.callServerEndpoint<_i7.VedaUserProfileWithEmail?>(
+  _i3.Future<_i9.VedaUserProfileWithEmail?> getMyProfileWithEmail() =>
+      caller.callServerEndpoint<_i9.VedaUserProfileWithEmail?>(
         'vedaUserProfile',
         'getMyProfileWithEmail',
         {},
@@ -334,7 +352,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i8.Protocol(),
+         _i10.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,
@@ -345,6 +363,7 @@ class Client extends _i2.ServerpodClientShared {
        ) {
     emailIdp = EndpointEmailIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
+    gemini = EndpointGemini(this);
     greeting = EndpointGreeting(this);
     vedaUserProfile = EndpointVedaUserProfile(this);
     modules = Modules(this);
@@ -353,6 +372,8 @@ class Client extends _i2.ServerpodClientShared {
   late final EndpointEmailIdp emailIdp;
 
   late final EndpointJwtRefresh jwtRefresh;
+
+  late final EndpointGemini gemini;
 
   late final EndpointGreeting greeting;
 
@@ -364,6 +385,7 @@ class Client extends _i2.ServerpodClientShared {
   Map<String, _i2.EndpointRef> get endpointRefLookup => {
     'emailIdp': emailIdp,
     'jwtRefresh': jwtRefresh,
+    'gemini': gemini,
     'greeting': greeting,
     'vedaUserProfile': vedaUserProfile,
   };

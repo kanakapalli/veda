@@ -8,6 +8,8 @@ emailIdp:
   - finishPasswordReset:
 jwtRefresh:
   - refreshAccessToken:
+gemini:
+  - chat:
 greeting:
   - hello:
 vedaUserProfile:

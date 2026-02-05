@@ -13,12 +13,14 @@
 import 'package:serverpod/serverpod.dart' as _i1;
 import '../auth/email_idp_endpoint.dart' as _i2;
 import '../auth/jwt_refresh_endpoint.dart' as _i3;
-import '../greetings/greeting_endpoint.dart' as _i4;
-import '../profiles/user_profile_endpoint.dart' as _i5;
+import '../gemini/gemini_endpoint.dart' as _i4;
+import '../greetings/greeting_endpoint.dart' as _i5;
+import '../profiles/user_profile_endpoint.dart' as _i6;
+import 'package:veda_server/src/generated/gemini/chat_request.dart' as _i7;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
-    as _i6;
+    as _i8;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
-    as _i7;
+    as _i9;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -36,13 +38,19 @@ class Endpoints extends _i1.EndpointDispatch {
           'jwtRefresh',
           null,
         ),
-      'greeting': _i4.GreetingEndpoint()
+      'gemini': _i4.GeminiEndpoint()
+        ..initialize(
+          server,
+          'gemini',
+          null,
+        ),
+      'greeting': _i5.GreetingEndpoint()
         ..initialize(
           server,
           'greeting',
           null,
         ),
-      'vedaUserProfile': _i5.VedaUserProfileEndpoint()
+      'vedaUserProfile': _i6.VedaUserProfileEndpoint()
         ..initialize(
           server,
           'vedaUserProfile',
@@ -243,6 +251,30 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
+    connectors['gemini'] = _i1.EndpointConnector(
+      name: 'gemini',
+      endpoint: endpoints['gemini']!,
+      methodConnectors: {
+        'chat': _i1.MethodConnector(
+          name: 'chat',
+          params: {
+            'request': _i1.ParameterDescription(
+              name: 'request',
+              type: _i1.getType<_i7.ChatRequest>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['gemini'] as _i4.GeminiEndpoint).chat(
+                session,
+                params['request'],
+              ),
+        ),
+      },
+    );
     connectors['greeting'] = _i1.EndpointConnector(
       name: 'greeting',
       endpoint: endpoints['greeting']!,
@@ -260,7 +292,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['greeting'] as _i4.GreetingEndpoint).hello(
+              ) async => (endpoints['greeting'] as _i5.GreetingEndpoint).hello(
                 session,
                 params['name'],
               ),
@@ -300,7 +332,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['vedaUserProfile'] as _i5.VedaUserProfileEndpoint)
+                  (endpoints['vedaUserProfile'] as _i6.VedaUserProfileEndpoint)
                       .upsertProfile(
                         session,
                         fullName: params['fullName'],
@@ -317,7 +349,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['vedaUserProfile'] as _i5.VedaUserProfileEndpoint)
+                  (endpoints['vedaUserProfile'] as _i6.VedaUserProfileEndpoint)
                       .getMyProfile(session),
         ),
         'hasCompletedOnboarding': _i1.MethodConnector(
@@ -328,7 +360,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['vedaUserProfile'] as _i5.VedaUserProfileEndpoint)
+                  (endpoints['vedaUserProfile'] as _i6.VedaUserProfileEndpoint)
                       .hasCompletedOnboarding(session),
         ),
         'getMyProfileWithEmail': _i1.MethodConnector(
@@ -339,14 +371,14 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['vedaUserProfile'] as _i5.VedaUserProfileEndpoint)
+                  (endpoints['vedaUserProfile'] as _i6.VedaUserProfileEndpoint)
                       .getMyProfileWithEmail(session),
         ),
       },
     );
-    modules['serverpod_auth_idp'] = _i6.Endpoints()
+    modules['serverpod_auth_idp'] = _i8.Endpoints()
       ..initializeEndpoints(server);
-    modules['serverpod_auth_core'] = _i7.Endpoints()
+    modules['serverpod_auth_core'] = _i9.Endpoints()
       ..initializeEndpoints(server);
   }
 }

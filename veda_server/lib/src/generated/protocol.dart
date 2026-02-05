@@ -16,9 +16,15 @@ import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _i3;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _i4;
-import 'greetings/greeting.dart' as _i5;
-import 'profiles/user_profile.dart' as _i6;
-import 'profiles/user_profile_with_email.dart' as _i7;
+import 'gemini/chat_message.dart' as _i5;
+import 'gemini/chat_request.dart' as _i6;
+import 'gemini/chat_response.dart' as _i7;
+import 'greetings/greeting.dart' as _i8;
+import 'profiles/user_profile.dart' as _i9;
+import 'profiles/user_profile_with_email.dart' as _i10;
+export 'gemini/chat_message.dart';
+export 'gemini/chat_request.dart';
+export 'gemini/chat_response.dart';
 export 'greetings/greeting.dart';
 export 'profiles/user_profile.dart';
 export 'profiles/user_profile_with_email.dart';
@@ -161,23 +167,55 @@ class Protocol extends _i1.SerializationManagerServer {
       }
     }
 
-    if (t == _i5.Greeting) {
-      return _i5.Greeting.fromJson(data) as T;
+    if (t == _i5.ChatMessage) {
+      return _i5.ChatMessage.fromJson(data) as T;
     }
-    if (t == _i6.VedaUserProfile) {
-      return _i6.VedaUserProfile.fromJson(data) as T;
+    if (t == _i6.ChatRequest) {
+      return _i6.ChatRequest.fromJson(data) as T;
     }
-    if (t == _i7.VedaUserProfileWithEmail) {
-      return _i7.VedaUserProfileWithEmail.fromJson(data) as T;
+    if (t == _i7.ChatResponse) {
+      return _i7.ChatResponse.fromJson(data) as T;
     }
-    if (t == _i1.getType<_i5.Greeting?>()) {
-      return (data != null ? _i5.Greeting.fromJson(data) : null) as T;
+    if (t == _i8.Greeting) {
+      return _i8.Greeting.fromJson(data) as T;
     }
-    if (t == _i1.getType<_i6.VedaUserProfile?>()) {
-      return (data != null ? _i6.VedaUserProfile.fromJson(data) : null) as T;
+    if (t == _i9.VedaUserProfile) {
+      return _i9.VedaUserProfile.fromJson(data) as T;
     }
-    if (t == _i1.getType<_i7.VedaUserProfileWithEmail?>()) {
-      return (data != null ? _i7.VedaUserProfileWithEmail.fromJson(data) : null)
+    if (t == _i10.VedaUserProfileWithEmail) {
+      return _i10.VedaUserProfileWithEmail.fromJson(data) as T;
+    }
+    if (t == _i1.getType<_i5.ChatMessage?>()) {
+      return (data != null ? _i5.ChatMessage.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i6.ChatRequest?>()) {
+      return (data != null ? _i6.ChatRequest.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i7.ChatResponse?>()) {
+      return (data != null ? _i7.ChatResponse.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i8.Greeting?>()) {
+      return (data != null ? _i8.Greeting.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i9.VedaUserProfile?>()) {
+      return (data != null ? _i9.VedaUserProfile.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i10.VedaUserProfileWithEmail?>()) {
+      return (data != null
+              ? _i10.VedaUserProfileWithEmail.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == List<_i5.ChatMessage>) {
+      return (data as List).map((e) => deserialize<_i5.ChatMessage>(e)).toList()
+          as T;
+    }
+    if (t == _i1.getType<List<_i5.ChatMessage>?>()) {
+      return (data != null
+              ? (data as List)
+                    .map((e) => deserialize<_i5.ChatMessage>(e))
+                    .toList()
+              : null)
           as T;
     }
     if (t == List<String>) {
@@ -206,9 +244,12 @@ class Protocol extends _i1.SerializationManagerServer {
 
   static String? getClassNameForType(Type type) {
     return switch (type) {
-      _i5.Greeting => 'Greeting',
-      _i6.VedaUserProfile => 'VedaUserProfile',
-      _i7.VedaUserProfileWithEmail => 'VedaUserProfileWithEmail',
+      _i5.ChatMessage => 'ChatMessage',
+      _i6.ChatRequest => 'ChatRequest',
+      _i7.ChatResponse => 'ChatResponse',
+      _i8.Greeting => 'Greeting',
+      _i9.VedaUserProfile => 'VedaUserProfile',
+      _i10.VedaUserProfileWithEmail => 'VedaUserProfileWithEmail',
       _ => null,
     };
   }
@@ -223,11 +264,17 @@ class Protocol extends _i1.SerializationManagerServer {
     }
 
     switch (data) {
-      case _i5.Greeting():
+      case _i5.ChatMessage():
+        return 'ChatMessage';
+      case _i6.ChatRequest():
+        return 'ChatRequest';
+      case _i7.ChatResponse():
+        return 'ChatResponse';
+      case _i8.Greeting():
         return 'Greeting';
-      case _i6.VedaUserProfile():
+      case _i9.VedaUserProfile():
         return 'VedaUserProfile';
-      case _i7.VedaUserProfileWithEmail():
+      case _i10.VedaUserProfileWithEmail():
         return 'VedaUserProfileWithEmail';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -251,14 +298,23 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName is! String) {
       return super.deserializeByClassName(data);
     }
+    if (dataClassName == 'ChatMessage') {
+      return deserialize<_i5.ChatMessage>(data['data']);
+    }
+    if (dataClassName == 'ChatRequest') {
+      return deserialize<_i6.ChatRequest>(data['data']);
+    }
+    if (dataClassName == 'ChatResponse') {
+      return deserialize<_i7.ChatResponse>(data['data']);
+    }
     if (dataClassName == 'Greeting') {
-      return deserialize<_i5.Greeting>(data['data']);
+      return deserialize<_i8.Greeting>(data['data']);
     }
     if (dataClassName == 'VedaUserProfile') {
-      return deserialize<_i6.VedaUserProfile>(data['data']);
+      return deserialize<_i9.VedaUserProfile>(data['data']);
     }
     if (dataClassName == 'VedaUserProfileWithEmail') {
-      return deserialize<_i7.VedaUserProfileWithEmail>(data['data']);
+      return deserialize<_i10.VedaUserProfileWithEmail>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -296,8 +352,8 @@ class Protocol extends _i1.SerializationManagerServer {
       }
     }
     switch (t) {
-      case _i6.VedaUserProfile:
-        return _i6.VedaUserProfile.t;
+      case _i9.VedaUserProfile:
+        return _i9.VedaUserProfile.t;
     }
     return null;
   }

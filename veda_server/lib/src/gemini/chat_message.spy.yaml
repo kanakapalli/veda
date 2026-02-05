@@ -1,0 +1,4 @@
+class: ChatMessage
+fields:
+  role: String
+  content: String

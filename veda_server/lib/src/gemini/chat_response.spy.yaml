@@ -1,0 +1,4 @@
+class: ChatResponse
+fields:
+  text: String
+  error: String?

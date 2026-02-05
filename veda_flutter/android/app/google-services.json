@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "698295394667",
+    "project_id": "veda-coach",
+    "storage_bucket": "veda-coach.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:698295394667:android:63bb3dc1159f452fe9ac2e",
+        "android_client_info": {
+          "package_name": "com.example.veda_flutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCl9rhC8BKZlV5FwpTTbS4Nkp9J3kQNVQE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

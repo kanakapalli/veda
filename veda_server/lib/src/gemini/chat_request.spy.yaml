@@ -1,0 +1,5 @@
+class: ChatRequest
+fields:
+  message: String
+  history: List<ChatMessage>?
+  systemInstruction: String?

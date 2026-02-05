@@ -11,13 +11,19 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
-import 'greetings/greeting.dart' as _i2;
-import 'profiles/user_profile.dart' as _i3;
-import 'profiles/user_profile_with_email.dart' as _i4;
+import 'gemini/chat_message.dart' as _i2;
+import 'gemini/chat_request.dart' as _i3;
+import 'gemini/chat_response.dart' as _i4;
+import 'greetings/greeting.dart' as _i5;
+import 'profiles/user_profile.dart' as _i6;
+import 'profiles/user_profile_with_email.dart' as _i7;
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
-    as _i5;
+    as _i8;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
-    as _i6;
+    as _i9;
+export 'gemini/chat_message.dart';
+export 'gemini/chat_request.dart';
+export 'gemini/chat_response.dart';
 export 'greetings/greeting.dart';
 export 'profiles/user_profile.dart';
 export 'profiles/user_profile_with_email.dart';
@@ -57,23 +63,53 @@ class Protocol extends _i1.SerializationManager {
       }
     }
 
-    if (t == _i2.Greeting) {
-      return _i2.Greeting.fromJson(data) as T;
+    if (t == _i2.ChatMessage) {
+      return _i2.ChatMessage.fromJson(data) as T;
     }
-    if (t == _i3.VedaUserProfile) {
-      return _i3.VedaUserProfile.fromJson(data) as T;
+    if (t == _i3.ChatRequest) {
+      return _i3.ChatRequest.fromJson(data) as T;
     }
-    if (t == _i4.VedaUserProfileWithEmail) {
-      return _i4.VedaUserProfileWithEmail.fromJson(data) as T;
+    if (t == _i4.ChatResponse) {
+      return _i4.ChatResponse.fromJson(data) as T;
     }
-    if (t == _i1.getType<_i2.Greeting?>()) {
-      return (data != null ? _i2.Greeting.fromJson(data) : null) as T;
+    if (t == _i5.Greeting) {
+      return _i5.Greeting.fromJson(data) as T;
     }
-    if (t == _i1.getType<_i3.VedaUserProfile?>()) {
-      return (data != null ? _i3.VedaUserProfile.fromJson(data) : null) as T;
+    if (t == _i6.VedaUserProfile) {
+      return _i6.VedaUserProfile.fromJson(data) as T;
     }
-    if (t == _i1.getType<_i4.VedaUserProfileWithEmail?>()) {
-      return (data != null ? _i4.VedaUserProfileWithEmail.fromJson(data) : null)
+    if (t == _i7.VedaUserProfileWithEmail) {
+      return _i7.VedaUserProfileWithEmail.fromJson(data) as T;
+    }
+    if (t == _i1.getType<_i2.ChatMessage?>()) {
+      return (data != null ? _i2.ChatMessage.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i3.ChatRequest?>()) {
+      return (data != null ? _i3.ChatRequest.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i4.ChatResponse?>()) {
+      return (data != null ? _i4.ChatResponse.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i5.Greeting?>()) {
+      return (data != null ? _i5.Greeting.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i6.VedaUserProfile?>()) {
+      return (data != null ? _i6.VedaUserProfile.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i7.VedaUserProfileWithEmail?>()) {
+      return (data != null ? _i7.VedaUserProfileWithEmail.fromJson(data) : null)
+          as T;
+    }
+    if (t == List<_i2.ChatMessage>) {
+      return (data as List).map((e) => deserialize<_i2.ChatMessage>(e)).toList()
+          as T;
+    }
+    if (t == _i1.getType<List<_i2.ChatMessage>?>()) {
+      return (data != null
+              ? (data as List)
+                    .map((e) => deserialize<_i2.ChatMessage>(e))
+                    .toList()
+              : null)
           as T;
     }
     if (t == List<String>) {
@@ -89,19 +125,22 @@ class Protocol extends _i1.SerializationManager {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
     try {
-      return _i5.Protocol().deserialize<T>(data, t);
+      return _i8.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     try {
-      return _i6.Protocol().deserialize<T>(data, t);
+      return _i9.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     return super.deserialize<T>(data, t);
   }
 
   static String? getClassNameForType(Type type) {
     return switch (type) {
-      _i2.Greeting => 'Greeting',
-      _i3.VedaUserProfile => 'VedaUserProfile',
-      _i4.VedaUserProfileWithEmail => 'VedaUserProfileWithEmail',
+      _i2.ChatMessage => 'ChatMessage',
+      _i3.ChatRequest => 'ChatRequest',
+      _i4.ChatResponse => 'ChatResponse',
+      _i5.Greeting => 'Greeting',
+      _i6.VedaUserProfile => 'VedaUserProfile',
+      _i7.VedaUserProfileWithEmail => 'VedaUserProfileWithEmail',
       _ => null,
     };
   }
@@ -116,18 +155,24 @@ class Protocol extends _i1.SerializationManager {
     }
 
     switch (data) {
-      case _i2.Greeting():
+      case _i2.ChatMessage():
+        return 'ChatMessage';
+      case _i3.ChatRequest():
+        return 'ChatRequest';
+      case _i4.ChatResponse():
+        return 'ChatResponse';
+      case _i5.Greeting():
         return 'Greeting';
-      case _i3.VedaUserProfile():
+      case _i6.VedaUserProfile():
         return 'VedaUserProfile';
-      case _i4.VedaUserProfileWithEmail():
+      case _i7.VedaUserProfileWithEmail():
         return 'VedaUserProfileWithEmail';
     }
-    className = _i5.Protocol().getClassNameForObject(data);
+    className = _i8.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_idp.$className';
     }
-    className = _i6.Protocol().getClassNameForObject(data);
+    className = _i9.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_core.$className';
     }
@@ -140,22 +185,31 @@ class Protocol extends _i1.SerializationManager {
     if (dataClassName is! String) {
       return super.deserializeByClassName(data);
     }
+    if (dataClassName == 'ChatMessage') {
+      return deserialize<_i2.ChatMessage>(data['data']);
+    }
+    if (dataClassName == 'ChatRequest') {
+      return deserialize<_i3.ChatRequest>(data['data']);
+    }
+    if (dataClassName == 'ChatResponse') {
+      return deserialize<_i4.ChatResponse>(data['data']);
+    }
     if (dataClassName == 'Greeting') {
-      return deserialize<_i2.Greeting>(data['data']);
+      return deserialize<_i5.Greeting>(data['data']);
     }
     if (dataClassName == 'VedaUserProfile') {
-      return deserialize<_i3.VedaUserProfile>(data['data']);
+      return deserialize<_i6.VedaUserProfile>(data['data']);
     }
     if (dataClassName == 'VedaUserProfileWithEmail') {
-      return deserialize<_i4.VedaUserProfileWithEmail>(data['data']);
+      return deserialize<_i7.VedaUserProfileWithEmail>(data['data']);
     }
     if (dataClassName.startsWith('serverpod_auth_idp.')) {
       data['className'] = dataClassName.substring(19);
-      return _i5.Protocol().deserializeByClassName(data);
+      return _i8.Protocol().deserializeByClassName(data);
     }
     if (dataClassName.startsWith('serverpod_auth_core.')) {
       data['className'] = dataClassName.substring(20);
-      return _i6.Protocol().deserializeByClassName(data);
+      return _i9.Protocol().deserializeByClassName(data);
     }
     return super.deserializeByClassName(data);
   }
@@ -170,10 +224,10 @@ class Protocol extends _i1.SerializationManager {
       return null;
     }
     try {
-      return _i5.Protocol().mapRecordToJson(record);
+      return _i8.Protocol().mapRecordToJson(record);
     } catch (_) {}
     try {
-      return _i6.Protocol().mapRecordToJson(record);
+      return _i9.Protocol().mapRecordToJson(record);
     } catch (_) {}
     throw Exception('Unsupported record type ${record.runtimeType}');
   }
