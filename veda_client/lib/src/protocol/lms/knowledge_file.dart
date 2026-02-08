@@ -14,7 +14,7 @@ import 'package:serverpod_client/serverpod_client.dart' as _i1;
 import '../lms/course.dart' as _i2;
 import 'package:veda_client/src/protocol/protocol.dart' as _i3;
 
-/// KnowledgeFile - source material for AI course generation
+/// KnowledgeFile - source material for AI course generation with RAG support
 abstract class KnowledgeFile implements _i1.SerializableModel {
   KnowledgeFile._({
     this.id,
@@ -22,6 +22,8 @@ abstract class KnowledgeFile implements _i1.SerializableModel {
     required this.fileUrl,
     required this.fileSize,
     this.fileType,
+    this.textContent,
+    this.embedding,
     DateTime? uploadedAt,
     required this.courseId,
     this.course,
@@ -33,6 +35,8 @@ abstract class KnowledgeFile implements _i1.SerializableModel {
     required String fileUrl,
     required int fileSize,
     String? fileType,
+    String? textContent,
+    _i1.Vector? embedding,
     DateTime? uploadedAt,
     required int courseId,
     _i2.Course? course,
@@ -45,6 +49,10 @@ abstract class KnowledgeFile implements _i1.SerializableModel {
       fileUrl: jsonSerialization['fileUrl'] as String,
       fileSize: jsonSerialization['fileSize'] as int,
       fileType: jsonSerialization['fileType'] as String?,
+      textContent: jsonSerialization['textContent'] as String?,
+      embedding: jsonSerialization['embedding'] == null
+          ? null
+          : _i1.VectorJsonExtension.fromJson(jsonSerialization['embedding']),
       uploadedAt: jsonSerialization['uploadedAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['uploadedAt']),
@@ -72,6 +80,12 @@ abstract class KnowledgeFile implements _i1.SerializableModel {
   /// File MIME type or extension
   String? fileType;
 
+  /// Extracted text content for RAG
+  String? textContent;
+
+  /// Embedding vector for semantic search (3072 dimensions for gemini-embedding-001)
+  _i1.Vector? embedding;
+
   /// Timestamp when the file was uploaded
   DateTime uploadedAt;
 
@@ -90,6 +104,8 @@ abstract class KnowledgeFile implements _i1.SerializableModel {
     String? fileUrl,
     int? fileSize,
     String? fileType,
+    String? textContent,
+    _i1.Vector? embedding,
     DateTime? uploadedAt,
     int? courseId,
     _i2.Course? course,
@@ -103,6 +119,8 @@ abstract class KnowledgeFile implements _i1.SerializableModel {
       'fileUrl': fileUrl,
       'fileSize': fileSize,
       if (fileType != null) 'fileType': fileType,
+      if (textContent != null) 'textContent': textContent,
+      if (embedding != null) 'embedding': embedding?.toJson(),
       'uploadedAt': uploadedAt.toJson(),
       'courseId': courseId,
       if (course != null) 'course': course?.toJson(),
@@ -124,6 +142,8 @@ class _KnowledgeFileImpl extends KnowledgeFile {
     required String fileUrl,
     required int fileSize,
     String? fileType,
+    String? textContent,
+    _i1.Vector? embedding,
     DateTime? uploadedAt,
     required int courseId,
     _i2.Course? course,
@@ -133,6 +153,8 @@ class _KnowledgeFileImpl extends KnowledgeFile {
          fileUrl: fileUrl,
          fileSize: fileSize,
          fileType: fileType,
+         textContent: textContent,
+         embedding: embedding,
          uploadedAt: uploadedAt,
          courseId: courseId,
          course: course,
@@ -148,6 +170,8 @@ class _KnowledgeFileImpl extends KnowledgeFile {
     String? fileUrl,
     int? fileSize,
     Object? fileType = _Undefined,
+    Object? textContent = _Undefined,
+    Object? embedding = _Undefined,
     DateTime? uploadedAt,
     int? courseId,
     Object? course = _Undefined,
@@ -158,6 +182,8 @@ class _KnowledgeFileImpl extends KnowledgeFile {
       fileUrl: fileUrl ?? this.fileUrl,
       fileSize: fileSize ?? this.fileSize,
       fileType: fileType is String? ? fileType : this.fileType,
+      textContent: textContent is String? ? textContent : this.textContent,
+      embedding: embedding is _i1.Vector? ? embedding : this.embedding?.clone(),
       uploadedAt: uploadedAt ?? this.uploadedAt,
       courseId: courseId ?? this.courseId,
       course: course is _i2.Course? ? course : this.course?.copyWith(),

@@ -8,7 +8,6 @@
 // ignore_for_file: type_literal_in_constant_pattern
 // ignore_for_file: use_super_parameters
 // ignore_for_file: invalid_use_of_internal_member
-// ignore_for_file: unnecessary_null_comparison
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
@@ -158,8 +157,8 @@ abstract class Module implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
     };
   }
 
-  static ModuleInclude include({_i3.ModuleItemIncludeList? items}) {
-    return ModuleInclude._(items: items);
+  static ModuleInclude include() {
+    return ModuleInclude._();
   }
 
   static ModuleIncludeList includeList({
@@ -346,6 +345,13 @@ class ModuleUpdateTable extends _i1.UpdateTable<ModuleTable> {
         value,
       );
 
+  _i1.ColumnValue<List<_i3.ModuleItem>, List<_i3.ModuleItem>> items(
+    List<_i3.ModuleItem>? value,
+  ) => _i1.ColumnValue(
+    table.items,
+    value,
+  );
+
   _i1.ColumnValue<int, int> $_coursesModulesCoursesId(int? value) =>
       _i1.ColumnValue(
         table.$_coursesModulesCoursesId,
@@ -388,6 +394,10 @@ class ModuleTable extends _i1.Table<int?> {
       'course',
       this,
     );
+    items = _i1.ColumnSerializable<List<_i3.ModuleItem>>(
+      'items',
+      this,
+    );
     $_coursesModulesCoursesId = _i1.ColumnInt(
       '_coursesModulesCoursesId',
       this,
@@ -421,44 +431,9 @@ class ModuleTable extends _i1.Table<int?> {
   late final _i1.ColumnSerializable<_i2.Course> course;
 
   /// List of module items (topics) in this module
-  _i3.ModuleItemTable? ___items;
-
-  /// List of module items (topics) in this module
-  _i1.ManyRelation<_i3.ModuleItemTable>? _items;
+  late final _i1.ColumnSerializable<List<_i3.ModuleItem>> items;
 
   late final _i1.ColumnInt $_coursesModulesCoursesId;
-
-  _i3.ModuleItemTable get __items {
-    if (___items != null) return ___items!;
-    ___items = _i1.createRelationTable(
-      relationFieldName: '__items',
-      field: Module.t.id,
-      foreignField: _i3.ModuleItem.t.$_modulesItemsModulesId,
-      tableRelation: tableRelation,
-      createTable: (foreignTableRelation) =>
-          _i3.ModuleItemTable(tableRelation: foreignTableRelation),
-    );
-    return ___items!;
-  }
-
-  _i1.ManyRelation<_i3.ModuleItemTable> get items {
-    if (_items != null) return _items!;
-    var relationTable = _i1.createRelationTable(
-      relationFieldName: 'items',
-      field: Module.t.id,
-      foreignField: _i3.ModuleItem.t.$_modulesItemsModulesId,
-      tableRelation: tableRelation,
-      createTable: (foreignTableRelation) =>
-          _i3.ModuleItemTable(tableRelation: foreignTableRelation),
-    );
-    _items = _i1.ManyRelation<_i3.ModuleItemTable>(
-      tableWithRelations: relationTable,
-      table: _i3.ModuleItemTable(
-        tableRelation: relationTable.tableRelation!.lastRelation,
-      ),
-    );
-    return _items!;
-  }
 
   @override
   List<_i1.Column> get columns => [
@@ -471,6 +446,7 @@ class ModuleTable extends _i1.Table<int?> {
     videoUrl,
     courseId,
     course,
+    items,
     $_coursesModulesCoursesId,
   ];
 
@@ -485,26 +461,15 @@ class ModuleTable extends _i1.Table<int?> {
     videoUrl,
     courseId,
     course,
+    items,
   ];
-
-  @override
-  _i1.Table? getRelationTable(String relationField) {
-    if (relationField == 'items') {
-      return __items;
-    }
-    return null;
-  }
 }
 
 class ModuleInclude extends _i1.IncludeObject {
-  ModuleInclude._({_i3.ModuleItemIncludeList? items}) {
-    _items = items;
-  }
-
-  _i3.ModuleItemIncludeList? _items;
+  ModuleInclude._();
 
   @override
-  Map<String, _i1.Include?> get includes => {'items': _items};
+  Map<String, _i1.Include?> get includes => {};
 
   @override
   _i1.Table<int?> get table => Module.t;
@@ -532,14 +497,6 @@ class ModuleIncludeList extends _i1.IncludeList {
 
 class ModuleRepository {
   const ModuleRepository._();
-
-  final attach = const ModuleAttachRepository._();
-
-  final attachRow = const ModuleAttachRowRepository._();
-
-  final detach = const ModuleDetachRepository._();
-
-  final detachRow = const ModuleDetachRowRepository._();
 
   /// Returns a list of [Module]s matching the given query parameters.
   ///
@@ -572,7 +529,6 @@ class ModuleRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<ModuleTable>? orderByList,
     _i1.Transaction? transaction,
-    ModuleInclude? include,
   }) async {
     return session.db.find<Module>(
       where: where?.call(Module.t),
@@ -582,7 +538,6 @@ class ModuleRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
-      include: include,
     );
   }
 
@@ -611,7 +566,6 @@ class ModuleRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<ModuleTable>? orderByList,
     _i1.Transaction? transaction,
-    ModuleInclude? include,
   }) async {
     return session.db.findFirstRow<Module>(
       where: where?.call(Module.t),
@@ -620,7 +574,6 @@ class ModuleRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
-      include: include,
     );
   }
 
@@ -629,12 +582,10 @@ class ModuleRepository {
     _i1.Session session,
     int id, {
     _i1.Transaction? transaction,
-    ModuleInclude? include,
   }) async {
     return session.db.findById<Module>(
       id,
       transaction: transaction,
-      include: include,
     );
   }
 
@@ -792,132 +743,6 @@ class ModuleRepository {
     return session.db.count<Module>(
       where: where?.call(Module.t),
       limit: limit,
-      transaction: transaction,
-    );
-  }
-}
-
-class ModuleAttachRepository {
-  const ModuleAttachRepository._();
-
-  /// Creates a relation between this [Module] and the given [ModuleItem]s
-  /// by setting each [ModuleItem]'s foreign key `_modulesItemsModulesId` to refer to this [Module].
-  Future<void> items(
-    _i1.Session session,
-    Module module,
-    List<_i3.ModuleItem> moduleItem, {
-    _i1.Transaction? transaction,
-  }) async {
-    if (moduleItem.any((e) => e.id == null)) {
-      throw ArgumentError.notNull('moduleItem.id');
-    }
-    if (module.id == null) {
-      throw ArgumentError.notNull('module.id');
-    }
-
-    var $moduleItem = moduleItem
-        .map(
-          (e) => _i3.ModuleItemImplicit(
-            e,
-            $_modulesItemsModulesId: module.id,
-          ),
-        )
-        .toList();
-    await session.db.update<_i3.ModuleItem>(
-      $moduleItem,
-      columns: [_i3.ModuleItem.t.$_modulesItemsModulesId],
-      transaction: transaction,
-    );
-  }
-}
-
-class ModuleAttachRowRepository {
-  const ModuleAttachRowRepository._();
-
-  /// Creates a relation between this [Module] and the given [ModuleItem]
-  /// by setting the [ModuleItem]'s foreign key `_modulesItemsModulesId` to refer to this [Module].
-  Future<void> items(
-    _i1.Session session,
-    Module module,
-    _i3.ModuleItem moduleItem, {
-    _i1.Transaction? transaction,
-  }) async {
-    if (moduleItem.id == null) {
-      throw ArgumentError.notNull('moduleItem.id');
-    }
-    if (module.id == null) {
-      throw ArgumentError.notNull('module.id');
-    }
-
-    var $moduleItem = _i3.ModuleItemImplicit(
-      moduleItem,
-      $_modulesItemsModulesId: module.id,
-    );
-    await session.db.updateRow<_i3.ModuleItem>(
-      $moduleItem,
-      columns: [_i3.ModuleItem.t.$_modulesItemsModulesId],
-      transaction: transaction,
-    );
-  }
-}
-
-class ModuleDetachRepository {
-  const ModuleDetachRepository._();
-
-  /// Detaches the relation between this [Module] and the given [ModuleItem]
-  /// by setting the [ModuleItem]'s foreign key `_modulesItemsModulesId` to `null`.
-  ///
-  /// This removes the association between the two models without deleting
-  /// the related record.
-  Future<void> items(
-    _i1.Session session,
-    List<_i3.ModuleItem> moduleItem, {
-    _i1.Transaction? transaction,
-  }) async {
-    if (moduleItem.any((e) => e.id == null)) {
-      throw ArgumentError.notNull('moduleItem.id');
-    }
-
-    var $moduleItem = moduleItem
-        .map(
-          (e) => _i3.ModuleItemImplicit(
-            e,
-            $_modulesItemsModulesId: null,
-          ),
-        )
-        .toList();
-    await session.db.update<_i3.ModuleItem>(
-      $moduleItem,
-      columns: [_i3.ModuleItem.t.$_modulesItemsModulesId],
-      transaction: transaction,
-    );
-  }
-}
-
-class ModuleDetachRowRepository {
-  const ModuleDetachRowRepository._();
-
-  /// Detaches the relation between this [Module] and the given [ModuleItem]
-  /// by setting the [ModuleItem]'s foreign key `_modulesItemsModulesId` to `null`.
-  ///
-  /// This removes the association between the two models without deleting
-  /// the related record.
-  Future<void> items(
-    _i1.Session session,
-    _i3.ModuleItem moduleItem, {
-    _i1.Transaction? transaction,
-  }) async {
-    if (moduleItem.id == null) {
-      throw ArgumentError.notNull('moduleItem.id');
-    }
-
-    var $moduleItem = _i3.ModuleItemImplicit(
-      moduleItem,
-      $_modulesItemsModulesId: null,
-    );
-    await session.db.updateRow<_i3.ModuleItem>(
-      $moduleItem,
-      columns: [_i3.ModuleItem.t.$_modulesItemsModulesId],
       transaction: transaction,
     );
   }

@@ -1,7 +1,7 @@
 /// Models for the Course Creation feature
 library;
 
-enum ChatMode { create, test }
+enum ChatMode { create, teach }
 
 enum MessageSender { user, ai }
 

@@ -11,10 +11,11 @@ jwtRefresh:
 gemini:
   - chat:
   - courseChat:
+  - startTeachingChat:
+  - answerTeachingQuestion:
+  - generateSpeech:
 greeting:
   - hello:
-live:
-  - audioSession:
 lms:
   - createCourse:
   - updateCourse:
@@ -22,6 +23,8 @@ lms:
   - getCourseById:
   - listCourses:
   - addFileToCourse:
+  - processFileEmbedding:
+  - processAllFileEmbeddings:
   - getFilesForCourse:
   - deleteFile:
   - getModules:
@@ -35,9 +38,11 @@ lms:
   - createModuleItem:
   - updateModuleItem:
   - deleteModuleItem:
+  - generateCourseTableOfContents:
   - getUploadDescription:
   - verifyUpload:
   - getPublicUrl:
+  - findRelevantKnowledge:
 vedaUserProfile:
   - upsertProfile:
   - getMyProfile:

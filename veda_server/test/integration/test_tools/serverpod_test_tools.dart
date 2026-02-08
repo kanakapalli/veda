@@ -23,16 +23,15 @@ import 'package:veda_server/src/generated/gemini/course_chat_response.dart'
 import 'package:veda_server/src/generated/gemini/course_chat_request.dart'
     as _i8;
 import 'package:veda_server/src/generated/greetings/greeting.dart' as _i9;
-import 'package:veda_server/src/generated/live/live_message.dart' as _i10;
-import 'package:veda_server/src/generated/lms/course.dart' as _i11;
-import 'package:veda_server/src/generated/lms/course_visibility.dart' as _i12;
-import 'package:veda_server/src/generated/lms/knowledge_file.dart' as _i13;
-import 'package:veda_server/src/generated/lms/module.dart' as _i14;
-import 'package:veda_server/src/generated/lms/topic.dart' as _i15;
-import 'package:veda_server/src/generated/lms/module_item.dart' as _i16;
-import 'package:veda_server/src/generated/profiles/user_profile.dart' as _i17;
+import 'package:veda_server/src/generated/lms/course.dart' as _i10;
+import 'package:veda_server/src/generated/lms/course_visibility.dart' as _i11;
+import 'package:veda_server/src/generated/lms/knowledge_file.dart' as _i12;
+import 'package:veda_server/src/generated/lms/module.dart' as _i13;
+import 'package:veda_server/src/generated/lms/topic.dart' as _i14;
+import 'package:veda_server/src/generated/lms/module_item.dart' as _i15;
+import 'package:veda_server/src/generated/profiles/user_profile.dart' as _i16;
 import 'package:veda_server/src/generated/profiles/user_profile_with_email.dart'
-    as _i18;
+    as _i17;
 import 'package:veda_server/src/generated/protocol.dart';
 import 'package:veda_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -148,8 +147,6 @@ class TestEndpoints {
 
   late final _GreetingEndpoint greeting;
 
-  late final _LiveEndpoint live;
-
   late final _LmsEndpoint lms;
 
   late final _VedaUserProfileEndpoint vedaUserProfile;
@@ -175,10 +172,6 @@ class _InternalTestEndpoints extends TestEndpoints
       serializationManager,
     );
     greeting = _GreetingEndpoint(
-      endpoints,
-      serializationManager,
-    );
-    live = _LiveEndpoint(
       endpoints,
       serializationManager,
     );
@@ -554,6 +547,117 @@ class _GeminiEndpoint {
       }
     });
   }
+
+  _i3.Future<String> startTeachingChat(
+    _i1.TestSessionBuilder sessionBuilder,
+    int courseId, {
+    required String systemPrompt,
+    required String firstMessage,
+    required int minWords,
+    required int maxWords,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'gemini',
+            method: 'startTeachingChat',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'gemini',
+          methodName: 'startTeachingChat',
+          parameters: _i1.testObjectToJson({
+            'courseId': courseId,
+            'systemPrompt': systemPrompt,
+            'firstMessage': firstMessage,
+            'minWords': minWords,
+            'maxWords': maxWords,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<String>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<String> answerTeachingQuestion(
+    _i1.TestSessionBuilder sessionBuilder,
+    int courseId, {
+    required String moduleTitle,
+    required String question,
+    List<Map<String, String>>? history,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'gemini',
+            method: 'answerTeachingQuestion',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'gemini',
+          methodName: 'answerTeachingQuestion',
+          parameters: _i1.testObjectToJson({
+            'courseId': courseId,
+            'moduleTitle': moduleTitle,
+            'question': question,
+            'history': history,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<String>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<int>> generateSpeech(
+    _i1.TestSessionBuilder sessionBuilder,
+    String text,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'gemini',
+            method: 'generateSpeech',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'gemini',
+          methodName: 'generateSpeech',
+          parameters: _i1.testObjectToJson({'text': text}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<int>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
 }
 
 class _GreetingEndpoint {
@@ -598,49 +702,6 @@ class _GreetingEndpoint {
   }
 }
 
-class _LiveEndpoint {
-  _LiveEndpoint(
-    this._endpointDispatch,
-    this._serializationManager,
-  );
-
-  final _i2.EndpointDispatch _endpointDispatch;
-
-  final _i2.SerializationManager _serializationManager;
-
-  _i3.Stream<_i10.LiveMessage> audioSession(
-    _i1.TestSessionBuilder sessionBuilder,
-    _i3.Stream<_i10.LiveMessage> inputStream,
-  ) {
-    var _localTestStreamManager = _i1.TestStreamManager<_i10.LiveMessage>();
-    _i1.callStreamFunctionAndHandleExceptions(
-      () async {
-        var _localUniqueSession =
-            (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
-              endpoint: 'live',
-              method: 'audioSession',
-            );
-        var _localCallContext = await _endpointDispatch
-            .getMethodStreamCallContext(
-              createSessionCallback: (_) => _localUniqueSession,
-              endpointPath: 'live',
-              methodName: 'audioSession',
-              arguments: {},
-              requestedInputStreams: ['inputStream'],
-              serializationManager: _serializationManager,
-            );
-        await _localTestStreamManager.callStreamMethod(
-          _localCallContext,
-          _localUniqueSession,
-          {'inputStream': inputStream},
-        );
-      },
-      _localTestStreamManager.outputStreamController,
-    );
-    return _localTestStreamManager.outputStreamController.stream;
-  }
-}
-
 class _LmsEndpoint {
   _LmsEndpoint(
     this._endpointDispatch,
@@ -651,9 +712,9 @@ class _LmsEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i11.Course> createCourse(
+  _i3.Future<_i10.Course> createCourse(
     _i1.TestSessionBuilder sessionBuilder,
-    _i11.Course course,
+    _i10.Course course,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -674,7 +735,7 @@ class _LmsEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i11.Course>);
+                as _i3.Future<_i10.Course>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -682,9 +743,9 @@ class _LmsEndpoint {
     });
   }
 
-  _i3.Future<_i11.Course> updateCourse(
+  _i3.Future<_i10.Course> updateCourse(
     _i1.TestSessionBuilder sessionBuilder,
-    _i11.Course course,
+    _i10.Course course,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -705,7 +766,7 @@ class _LmsEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i11.Course>);
+                as _i3.Future<_i10.Course>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -744,7 +805,7 @@ class _LmsEndpoint {
     });
   }
 
-  _i3.Future<_i11.Course?> getCourseById(
+  _i3.Future<_i10.Course?> getCourseById(
     _i1.TestSessionBuilder sessionBuilder,
     int id,
   ) async {
@@ -767,7 +828,7 @@ class _LmsEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i11.Course?>);
+                as _i3.Future<_i10.Course?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -775,10 +836,10 @@ class _LmsEndpoint {
     });
   }
 
-  _i3.Future<List<_i11.Course>> listCourses(
+  _i3.Future<List<_i10.Course>> listCourses(
     _i1.TestSessionBuilder sessionBuilder, {
     String? keyword,
-    _i12.CourseVisibility? visibility,
+    _i11.CourseVisibility? visibility,
   }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -802,7 +863,7 @@ class _LmsEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i11.Course>>);
+                as _i3.Future<List<_i10.Course>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -810,9 +871,9 @@ class _LmsEndpoint {
     });
   }
 
-  _i3.Future<_i13.KnowledgeFile> addFileToCourse(
+  _i3.Future<_i12.KnowledgeFile> addFileToCourse(
     _i1.TestSessionBuilder sessionBuilder,
-    _i13.KnowledgeFile file,
+    _i12.KnowledgeFile file,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -833,7 +894,7 @@ class _LmsEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i13.KnowledgeFile>);
+                as _i3.Future<_i12.KnowledgeFile>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -841,7 +902,69 @@ class _LmsEndpoint {
     });
   }
 
-  _i3.Future<List<_i13.KnowledgeFile>> getFilesForCourse(
+  _i3.Future<_i12.KnowledgeFile> processFileEmbedding(
+    _i1.TestSessionBuilder sessionBuilder,
+    int fileId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'lms',
+            method: 'processFileEmbedding',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'lms',
+          methodName: 'processFileEmbedding',
+          parameters: _i1.testObjectToJson({'fileId': fileId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i12.KnowledgeFile>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i12.KnowledgeFile>> processAllFileEmbeddings(
+    _i1.TestSessionBuilder sessionBuilder,
+    int courseId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'lms',
+            method: 'processAllFileEmbeddings',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'lms',
+          methodName: 'processAllFileEmbeddings',
+          parameters: _i1.testObjectToJson({'courseId': courseId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i12.KnowledgeFile>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i12.KnowledgeFile>> getFilesForCourse(
     _i1.TestSessionBuilder sessionBuilder,
     int courseId,
   ) async {
@@ -864,7 +987,7 @@ class _LmsEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i13.KnowledgeFile>>);
+                as _i3.Future<List<_i12.KnowledgeFile>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -903,7 +1026,7 @@ class _LmsEndpoint {
     });
   }
 
-  _i3.Future<List<_i14.Module>> getModules(
+  _i3.Future<List<_i13.Module>> getModules(
     _i1.TestSessionBuilder sessionBuilder,
     int courseId,
   ) async {
@@ -926,7 +1049,7 @@ class _LmsEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i14.Module>>);
+                as _i3.Future<List<_i13.Module>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -934,9 +1057,9 @@ class _LmsEndpoint {
     });
   }
 
-  _i3.Future<_i14.Module> createModule(
+  _i3.Future<_i13.Module> createModule(
     _i1.TestSessionBuilder sessionBuilder,
-    _i14.Module module,
+    _i13.Module module,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -957,7 +1080,7 @@ class _LmsEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i14.Module>);
+                as _i3.Future<_i13.Module>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -965,9 +1088,9 @@ class _LmsEndpoint {
     });
   }
 
-  _i3.Future<_i14.Module> updateModule(
+  _i3.Future<_i13.Module> updateModule(
     _i1.TestSessionBuilder sessionBuilder,
-    _i14.Module module,
+    _i13.Module module,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -988,7 +1111,7 @@ class _LmsEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i14.Module>);
+                as _i3.Future<_i13.Module>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1058,9 +1181,9 @@ class _LmsEndpoint {
     });
   }
 
-  _i3.Future<_i15.Topic> createTopic(
+  _i3.Future<_i14.Topic> createTopic(
     _i1.TestSessionBuilder sessionBuilder,
-    _i15.Topic topic,
+    _i14.Topic topic,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -1081,7 +1204,7 @@ class _LmsEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i15.Topic>);
+                as _i3.Future<_i14.Topic>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1089,9 +1212,9 @@ class _LmsEndpoint {
     });
   }
 
-  _i3.Future<_i15.Topic> updateTopic(
+  _i3.Future<_i14.Topic> updateTopic(
     _i1.TestSessionBuilder sessionBuilder,
-    _i15.Topic topic,
+    _i14.Topic topic,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -1112,7 +1235,7 @@ class _LmsEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i15.Topic>);
+                as _i3.Future<_i14.Topic>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1120,7 +1243,7 @@ class _LmsEndpoint {
     });
   }
 
-  _i3.Future<_i15.Topic?> getTopicById(
+  _i3.Future<_i14.Topic?> getTopicById(
     _i1.TestSessionBuilder sessionBuilder,
     int id,
   ) async {
@@ -1143,7 +1266,7 @@ class _LmsEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i15.Topic?>);
+                as _i3.Future<_i14.Topic?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1151,9 +1274,9 @@ class _LmsEndpoint {
     });
   }
 
-  _i3.Future<_i16.ModuleItem> createModuleItem(
+  _i3.Future<_i15.ModuleItem> createModuleItem(
     _i1.TestSessionBuilder sessionBuilder,
-    _i16.ModuleItem moduleItem,
+    _i15.ModuleItem moduleItem,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -1174,7 +1297,7 @@ class _LmsEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i16.ModuleItem>);
+                as _i3.Future<_i15.ModuleItem>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1182,9 +1305,9 @@ class _LmsEndpoint {
     });
   }
 
-  _i3.Future<_i16.ModuleItem> updateModuleItem(
+  _i3.Future<_i15.ModuleItem> updateModuleItem(
     _i1.TestSessionBuilder sessionBuilder,
-    _i16.ModuleItem moduleItem,
+    _i15.ModuleItem moduleItem,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -1205,7 +1328,7 @@ class _LmsEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i16.ModuleItem>);
+                as _i3.Future<_i15.ModuleItem>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1237,6 +1360,41 @@ class _LmsEndpoint {
                   _localCallContext.arguments,
                 )
                 as _i3.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i13.Module>> generateCourseTableOfContents(
+    _i1.TestSessionBuilder sessionBuilder,
+    int courseId, {
+    String? customPrompt,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'lms',
+            method: 'generateCourseTableOfContents',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'lms',
+          methodName: 'generateCourseTableOfContents',
+          parameters: _i1.testObjectToJson({
+            'courseId': courseId,
+            'customPrompt': customPrompt,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i13.Module>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1336,6 +1494,45 @@ class _LmsEndpoint {
       }
     });
   }
+
+  _i3.Future<List<_i12.KnowledgeFile>> findRelevantKnowledge(
+    _i1.TestSessionBuilder sessionBuilder,
+    String query,
+    int courseId, {
+    required int limit,
+    required double similarityThreshold,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'lms',
+            method: 'findRelevantKnowledge',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'lms',
+          methodName: 'findRelevantKnowledge',
+          parameters: _i1.testObjectToJson({
+            'query': query,
+            'courseId': courseId,
+            'limit': limit,
+            'similarityThreshold': similarityThreshold,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i12.KnowledgeFile>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
 }
 
 class _VedaUserProfileEndpoint {
@@ -1348,7 +1545,7 @@ class _VedaUserProfileEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i17.VedaUserProfile> upsertProfile(
+  _i3.Future<_i16.VedaUserProfile> upsertProfile(
     _i1.TestSessionBuilder sessionBuilder, {
     required String fullName,
     String? bio,
@@ -1379,7 +1576,7 @@ class _VedaUserProfileEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i17.VedaUserProfile>);
+                as _i3.Future<_i16.VedaUserProfile>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1387,7 +1584,7 @@ class _VedaUserProfileEndpoint {
     });
   }
 
-  _i3.Future<_i17.VedaUserProfile?> getMyProfile(
+  _i3.Future<_i16.VedaUserProfile?> getMyProfile(
     _i1.TestSessionBuilder sessionBuilder,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
@@ -1409,7 +1606,7 @@ class _VedaUserProfileEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i17.VedaUserProfile?>);
+                as _i3.Future<_i16.VedaUserProfile?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1447,7 +1644,7 @@ class _VedaUserProfileEndpoint {
     });
   }
 
-  _i3.Future<_i18.VedaUserProfileWithEmail?> getMyProfileWithEmail(
+  _i3.Future<_i17.VedaUserProfileWithEmail?> getMyProfileWithEmail(
     _i1.TestSessionBuilder sessionBuilder,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
@@ -1469,7 +1666,7 @@ class _VedaUserProfileEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i18.VedaUserProfileWithEmail?>);
+                as _i3.Future<_i17.VedaUserProfileWithEmail?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

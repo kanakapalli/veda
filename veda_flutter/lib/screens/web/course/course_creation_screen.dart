@@ -8,7 +8,7 @@ import '../../../services/gemini_service.dart';
 import '../../../services/upload_service.dart';
 import 'models/course_models.dart';
 import 'widgets/chat_panel.dart';
-import 'widgets/course_index_panel.dart';
+import 'widgets/course_toc_panel.dart';
 import 'widgets/knowledge_base_panel.dart';
 
 /// Course Creation Screen - AI-powered course architect
@@ -27,7 +27,7 @@ class _CourseCreationScreenState extends State<CourseCreationScreen> {
   final _scrollController = ScrollController();
 
   ChatMode _chatMode = ChatMode.create;
-  String _activeTab = 'index';
+  String _activeTab = 'toc';
   bool _isLoading = false;
 
   // Knowledge files loaded from server
@@ -35,8 +35,9 @@ class _CourseCreationScreenState extends State<CourseCreationScreen> {
 
   final List<ChatMessage> _messages = [];
 
-  // Modules loaded from server
-  final List<CourseModule> _modules = [];
+  // Modules loaded from server (actual veda.Module objects)
+  List<veda.Module> _serverModules = [];
+  bool _isGeneratingToc = false;
 
   // Track the current course state (may be updated by AI tools)
   late veda.Course _course;
@@ -68,6 +69,30 @@ class _CourseCreationScreenState extends State<CourseCreationScreen> {
 
     _initializeChat();
     _loadKnowledgeFiles();
+    _loadModules();
+  }
+
+  Future<void> _loadModules() async {
+    if (_course.id == null) return;
+    try {
+      print('🔄 [Flutter] Loading modules for course ${_course.id}...');
+      final modules = await client.lms.getModules(_course.id!);
+      print('✅ [Flutter] Received ${modules.length} modules');
+      for (final module in modules) {
+        print('  📦 Module: "${module.title}" - Items: ${module.items?.length ?? 0}');
+        if (module.items != null && module.items!.isNotEmpty) {
+          for (final item in module.items!) {
+            print('    📄 Topic: "${item.topic?.title ?? "NULL"}"');
+          }
+        }
+      }
+      if (!mounted) return;
+      setState(() {
+        _serverModules = modules;
+      });
+    } catch (e) {
+      print('❌ [Flutter] Error loading modules: $e');
+    }
   }
 
   Future<void> _loadKnowledgeFiles() async {
@@ -177,7 +202,9 @@ Reference specific files when making suggestions based on their content.
     _scrollToBottom();
 
     try {
-      // Use course chat with tool calling support
+      // CREATE mode: Course creation with tool calling
+      print('🔨 [CourseCreation] Sending CREATE chat message');
+
       final result = await GeminiService.instance.sendCourseMessage(
         userText,
         courseId: _course.id,
@@ -236,6 +263,8 @@ Reference specific files when making suggestions based on their content.
         );
         _isLoading = false;
       });
+
+      print('❌ [CourseCreation] Error sending message: $e');
     }
 
     _scrollToBottom();
@@ -323,15 +352,54 @@ Reference specific files when making suggestions based on their content.
     });
   }
 
+  // Track which modules are expanded in the UI
+  final Set<int> _expandedModuleIds = {};
+  final Set<int> _expandedTopicIds = {};
+
   void _toggleModule(String id) {
     setState(() {
-      final index = _modules.indexWhere((m) => m.id == id);
-      if (index != -1) {
-        _modules[index] = _modules[index].copyWith(
-          expanded: !_modules[index].expanded,
-        );
+      final intId = int.tryParse(id);
+      if (intId != null) {
+        if (_expandedModuleIds.contains(intId)) {
+          _expandedModuleIds.remove(intId);
+        } else {
+          _expandedModuleIds.add(intId);
+        }
       }
     });
+  }
+
+  void _toggleTopic(String id) {
+    setState(() {
+      final intId = int.tryParse(id);
+      if (intId != null) {
+        if (_expandedTopicIds.contains(intId)) {
+          _expandedTopicIds.remove(intId);
+        } else {
+          _expandedTopicIds.add(intId);
+        }
+      }
+    });
+  }
+
+  Future<void> _updateModule(veda.Module module) async {
+    try {
+      await client.lms.updateModule(module);
+      // Reload modules to get updated data
+      await _loadModules();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> _updateTopic(veda.Topic topic) async {
+    try {
+      await client.lms.updateTopic(topic);
+      // Reload modules to refresh topic data
+      await _loadModules();
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<void> _updateVisibility(bool isPublic) async {
@@ -354,11 +422,25 @@ Reference specific files when making suggestions based on their content.
     }
   }
 
-  void _generateIndex() {
-    // Send a message to AI to generate course index
-    _messageController.text =
-        'Please generate a course index/outline for "${_course.title}" based on the uploaded knowledge files.';
-    _sendMessage();
+  Future<void> _generateToc() async {
+    if (_course.id == null || _isGeneratingToc) return;
+
+    setState(() => _isGeneratingToc = true);
+
+    try {
+      final modules =
+          await client.lms.generateCourseTableOfContents(_course.id!);
+      if (!mounted) return;
+      setState(() {
+        _serverModules = modules;
+        _isGeneratingToc = false;
+      });
+      _showSuccessSnackBar('TOC GENERATED: ${modules.length} MODULES');
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isGeneratingToc = false);
+      _showErrorSnackBar('FAILED TO GENERATE TOC');
+    }
   }
 
   Future<void> _editCourseImage() async {
@@ -627,6 +709,8 @@ Reference specific files when making suggestions based on their content.
           courseImageUrl: _course.courseImageUrl,
           onEditCourseImage: _editCourseImage,
           courseId: _course.id,
+          course: _course,
+          modules: _serverModules,
         ),
       );
     }
@@ -662,6 +746,8 @@ Reference specific files when making suggestions based on their content.
               courseImageUrl: _course.courseImageUrl,
               onEditCourseImage: _editCourseImage,
               courseId: _course.id,
+              course: _course,
+              modules: _serverModules,
             ),
           ),
           // Vertical divider
@@ -669,9 +755,11 @@ Reference specific files when making suggestions based on their content.
           // Right panel: Course Index
           SizedBox(
             width: 384,
-            child: CourseIndexPanel(
+            child: CourseTocPanel(
               activeTab: _activeTab,
-              modules: _modules,
+              serverModules: _serverModules,
+              expandedModuleIds: _expandedModuleIds,
+              isGeneratingToc: _isGeneratingToc,
               courseTitle: _course.title,
               courseDescription: _course.description,
               courseStatus: _courseStatus,
@@ -685,8 +773,9 @@ Reference specific files when making suggestions based on their content.
               isPublic: _isPublic,
               onTabChanged: (tab) => setState(() => _activeTab = tab),
               onModuleToggle: _toggleModule,
+              onTopicToggle: _toggleTopic,
               onVisibilityChanged: _updateVisibility,
-              onGenerateIndex: _generateIndex,
+              onGenerateToc: _generateToc,
               onEditCourseImage: _editCourseImage,
               onEditBannerImage: _editBannerImage,
               onTitleChanged: _updateTitle,
@@ -695,6 +784,8 @@ Reference specific files when making suggestions based on their content.
               onSystemPromptChanged: _updateSystemPrompt,
               onDeleteCourse: _deleteCourse,
               onSaveSettings: _saveAllSettings,
+              onUpdateModule: _updateModule,
+              onUpdateTopic: _updateTopic,
             ),
           ),
         ],

@@ -22,28 +22,24 @@ import 'gemini/chat_response.dart' as _i7;
 import 'gemini/course_chat_request.dart' as _i8;
 import 'gemini/course_chat_response.dart' as _i9;
 import 'greetings/greeting.dart' as _i10;
-import 'live/live_message.dart' as _i11;
-import 'live/live_session_config.dart' as _i12;
-import 'lms/course.dart' as _i13;
-import 'lms/course_index.dart' as _i14;
-import 'lms/course_visibility.dart' as _i15;
-import 'lms/knowledge_file.dart' as _i16;
-import 'lms/module.dart' as _i17;
-import 'lms/module_item.dart' as _i18;
-import 'lms/topic.dart' as _i19;
-import 'profiles/user_profile.dart' as _i20;
-import 'profiles/user_profile_with_email.dart' as _i21;
-import 'package:veda_server/src/generated/lms/course.dart' as _i22;
-import 'package:veda_server/src/generated/lms/knowledge_file.dart' as _i23;
-import 'package:veda_server/src/generated/lms/module.dart' as _i24;
+import 'lms/course.dart' as _i11;
+import 'lms/course_index.dart' as _i12;
+import 'lms/course_visibility.dart' as _i13;
+import 'lms/knowledge_file.dart' as _i14;
+import 'lms/module.dart' as _i15;
+import 'lms/module_item.dart' as _i16;
+import 'lms/topic.dart' as _i17;
+import 'profiles/user_profile.dart' as _i18;
+import 'profiles/user_profile_with_email.dart' as _i19;
+import 'package:veda_server/src/generated/lms/course.dart' as _i20;
+import 'package:veda_server/src/generated/lms/knowledge_file.dart' as _i21;
+import 'package:veda_server/src/generated/lms/module.dart' as _i22;
 export 'gemini/chat_message.dart';
 export 'gemini/chat_request.dart';
 export 'gemini/chat_response.dart';
 export 'gemini/course_chat_request.dart';
 export 'gemini/course_chat_response.dart';
 export 'greetings/greeting.dart';
-export 'live/live_message.dart';
-export 'live/live_session_config.dart';
 export 'lms/course.dart';
 export 'lms/course_index.dart';
 export 'lms/course_visibility.dart';
@@ -341,6 +337,19 @@ class Protocol extends _i1.SerializationManagerServer {
           dartType: 'String?',
         ),
         _i2.ColumnDefinition(
+          name: 'textContent',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'embedding',
+          columnType: _i2.ColumnType.vector,
+          isNullable: true,
+          dartType: 'Vector(3072)?',
+          vectorDimension: 3072,
+        ),
+        _i2.ColumnDefinition(
           name: 'uploadedAt',
           columnType: _i2.ColumnType.timestampWithoutTimeZone,
           isNullable: false,
@@ -415,6 +424,25 @@ class Protocol extends _i1.SerializationManagerServer {
           isUnique: false,
           isPrimary: false,
         ),
+        _i2.IndexDefinition(
+          indexName: 'knowledge_files_embedding_hnsw_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'embedding',
+            ),
+          ],
+          type: 'hnsw',
+          isUnique: false,
+          isPrimary: false,
+          vectorDistanceFunction: _i2.VectorDistanceFunction.cosine,
+          vectorColumnType: _i2.ColumnType.vector,
+          parameters: {
+            'm': '16',
+            'ef_construction': '64',
+          },
+        ),
       ],
       managed: true,
     ),
@@ -467,12 +495,6 @@ class Protocol extends _i1.SerializationManagerServer {
           isNullable: true,
           dartType: 'protocol:Topic?',
         ),
-        _i2.ColumnDefinition(
-          name: '_modulesItemsModulesId',
-          columnType: _i2.ColumnType.bigint,
-          isNullable: true,
-          dartType: 'int?',
-        ),
       ],
       foreignKeys: [
         _i2.ForeignKeyDefinition(
@@ -493,16 +515,6 @@ class Protocol extends _i1.SerializationManagerServer {
           referenceColumns: ['id'],
           onUpdate: _i2.ForeignKeyAction.noAction,
           onDelete: _i2.ForeignKeyAction.cascade,
-          matchType: null,
-        ),
-        _i2.ForeignKeyDefinition(
-          constraintName: 'module_items_fk_2',
-          columns: ['_modulesItemsModulesId'],
-          referenceTable: 'modules',
-          referenceTableSchema: 'public',
-          referenceColumns: ['id'],
-          onUpdate: _i2.ForeignKeyAction.noAction,
-          onDelete: _i2.ForeignKeyAction.noAction,
           matchType: null,
         ),
       ],
@@ -622,6 +634,12 @@ class Protocol extends _i1.SerializationManagerServer {
           columnType: _i2.ColumnType.json,
           isNullable: true,
           dartType: 'protocol:Course?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'items',
+          columnType: _i2.ColumnType.json,
+          isNullable: true,
+          dartType: 'List<protocol:ModuleItem>?',
         ),
         _i2.ColumnDefinition(
           name: '_coursesModulesCoursesId',
@@ -932,38 +950,32 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i10.Greeting) {
       return _i10.Greeting.fromJson(data) as T;
     }
-    if (t == _i11.LiveMessage) {
-      return _i11.LiveMessage.fromJson(data) as T;
+    if (t == _i11.Course) {
+      return _i11.Course.fromJson(data) as T;
     }
-    if (t == _i12.LiveSessionConfig) {
-      return _i12.LiveSessionConfig.fromJson(data) as T;
+    if (t == _i12.CourseIndex) {
+      return _i12.CourseIndex.fromJson(data) as T;
     }
-    if (t == _i13.Course) {
-      return _i13.Course.fromJson(data) as T;
+    if (t == _i13.CourseVisibility) {
+      return _i13.CourseVisibility.fromJson(data) as T;
     }
-    if (t == _i14.CourseIndex) {
-      return _i14.CourseIndex.fromJson(data) as T;
+    if (t == _i14.KnowledgeFile) {
+      return _i14.KnowledgeFile.fromJson(data) as T;
     }
-    if (t == _i15.CourseVisibility) {
-      return _i15.CourseVisibility.fromJson(data) as T;
+    if (t == _i15.Module) {
+      return _i15.Module.fromJson(data) as T;
     }
-    if (t == _i16.KnowledgeFile) {
-      return _i16.KnowledgeFile.fromJson(data) as T;
+    if (t == _i16.ModuleItem) {
+      return _i16.ModuleItem.fromJson(data) as T;
     }
-    if (t == _i17.Module) {
-      return _i17.Module.fromJson(data) as T;
+    if (t == _i17.Topic) {
+      return _i17.Topic.fromJson(data) as T;
     }
-    if (t == _i18.ModuleItem) {
-      return _i18.ModuleItem.fromJson(data) as T;
+    if (t == _i18.VedaUserProfile) {
+      return _i18.VedaUserProfile.fromJson(data) as T;
     }
-    if (t == _i19.Topic) {
-      return _i19.Topic.fromJson(data) as T;
-    }
-    if (t == _i20.VedaUserProfile) {
-      return _i20.VedaUserProfile.fromJson(data) as T;
-    }
-    if (t == _i21.VedaUserProfileWithEmail) {
-      return _i21.VedaUserProfileWithEmail.fromJson(data) as T;
+    if (t == _i19.VedaUserProfileWithEmail) {
+      return _i19.VedaUserProfileWithEmail.fromJson(data) as T;
     }
     if (t == _i1.getType<_i5.ChatMessage?>()) {
       return (data != null ? _i5.ChatMessage.fromJson(data) : null) as T;
@@ -983,39 +995,33 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i1.getType<_i10.Greeting?>()) {
       return (data != null ? _i10.Greeting.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i11.LiveMessage?>()) {
-      return (data != null ? _i11.LiveMessage.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i11.Course?>()) {
+      return (data != null ? _i11.Course.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i12.LiveSessionConfig?>()) {
-      return (data != null ? _i12.LiveSessionConfig.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i12.CourseIndex?>()) {
+      return (data != null ? _i12.CourseIndex.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i13.Course?>()) {
-      return (data != null ? _i13.Course.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i13.CourseVisibility?>()) {
+      return (data != null ? _i13.CourseVisibility.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i14.CourseIndex?>()) {
-      return (data != null ? _i14.CourseIndex.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i14.KnowledgeFile?>()) {
+      return (data != null ? _i14.KnowledgeFile.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i15.CourseVisibility?>()) {
-      return (data != null ? _i15.CourseVisibility.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i15.Module?>()) {
+      return (data != null ? _i15.Module.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i16.KnowledgeFile?>()) {
-      return (data != null ? _i16.KnowledgeFile.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i16.ModuleItem?>()) {
+      return (data != null ? _i16.ModuleItem.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i17.Module?>()) {
-      return (data != null ? _i17.Module.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i17.Topic?>()) {
+      return (data != null ? _i17.Topic.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i18.ModuleItem?>()) {
-      return (data != null ? _i18.ModuleItem.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i18.VedaUserProfile?>()) {
+      return (data != null ? _i18.VedaUserProfile.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i19.Topic?>()) {
-      return (data != null ? _i19.Topic.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i20.VedaUserProfile?>()) {
-      return (data != null ? _i20.VedaUserProfile.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i21.VedaUserProfileWithEmail?>()) {
+    if (t == _i1.getType<_i19.VedaUserProfileWithEmail?>()) {
       return (data != null
-              ? _i21.VedaUserProfileWithEmail.fromJson(data)
+              ? _i19.VedaUserProfileWithEmail.fromJson(data)
               : null)
           as T;
     }
@@ -1040,68 +1046,91 @@ class Protocol extends _i1.SerializationManagerServer {
               : null)
           as T;
     }
-    if (t == List<_i17.Module>) {
-      return (data as List).map((e) => deserialize<_i17.Module>(e)).toList()
+    if (t == List<_i15.Module>) {
+      return (data as List).map((e) => deserialize<_i15.Module>(e)).toList()
           as T;
     }
-    if (t == _i1.getType<List<_i17.Module>?>()) {
+    if (t == _i1.getType<List<_i15.Module>?>()) {
       return (data != null
-              ? (data as List).map((e) => deserialize<_i17.Module>(e)).toList()
+              ? (data as List).map((e) => deserialize<_i15.Module>(e)).toList()
               : null)
           as T;
     }
-    if (t == List<_i14.CourseIndex>) {
+    if (t == List<_i12.CourseIndex>) {
       return (data as List)
-              .map((e) => deserialize<_i14.CourseIndex>(e))
+              .map((e) => deserialize<_i12.CourseIndex>(e))
               .toList()
           as T;
     }
-    if (t == _i1.getType<List<_i14.CourseIndex>?>()) {
+    if (t == _i1.getType<List<_i12.CourseIndex>?>()) {
       return (data != null
               ? (data as List)
-                    .map((e) => deserialize<_i14.CourseIndex>(e))
+                    .map((e) => deserialize<_i12.CourseIndex>(e))
                     .toList()
               : null)
           as T;
     }
-    if (t == List<_i16.KnowledgeFile>) {
+    if (t == List<_i14.KnowledgeFile>) {
       return (data as List)
-              .map((e) => deserialize<_i16.KnowledgeFile>(e))
+              .map((e) => deserialize<_i14.KnowledgeFile>(e))
               .toList()
           as T;
     }
-    if (t == _i1.getType<List<_i16.KnowledgeFile>?>()) {
+    if (t == _i1.getType<List<_i14.KnowledgeFile>?>()) {
       return (data != null
               ? (data as List)
-                    .map((e) => deserialize<_i16.KnowledgeFile>(e))
+                    .map((e) => deserialize<_i14.KnowledgeFile>(e))
                     .toList()
               : null)
           as T;
     }
-    if (t == List<_i18.ModuleItem>) {
-      return (data as List).map((e) => deserialize<_i18.ModuleItem>(e)).toList()
+    if (t == List<_i16.ModuleItem>) {
+      return (data as List).map((e) => deserialize<_i16.ModuleItem>(e)).toList()
           as T;
     }
-    if (t == _i1.getType<List<_i18.ModuleItem>?>()) {
+    if (t == _i1.getType<List<_i16.ModuleItem>?>()) {
       return (data != null
               ? (data as List)
-                    .map((e) => deserialize<_i18.ModuleItem>(e))
+                    .map((e) => deserialize<_i16.ModuleItem>(e))
                     .toList()
               : null)
           as T;
     }
-    if (t == List<_i22.Course>) {
-      return (data as List).map((e) => deserialize<_i22.Course>(e)).toList()
-          as T;
-    }
-    if (t == List<_i23.KnowledgeFile>) {
+    if (t == List<Map<String, String>>) {
       return (data as List)
-              .map((e) => deserialize<_i23.KnowledgeFile>(e))
+              .map((e) => deserialize<Map<String, String>>(e))
               .toList()
           as T;
     }
-    if (t == List<_i24.Module>) {
-      return (data as List).map((e) => deserialize<_i24.Module>(e)).toList()
+    if (t == Map<String, String>) {
+      return (data as Map).map(
+            (k, v) => MapEntry(deserialize<String>(k), deserialize<String>(v)),
+          )
+          as T;
+    }
+    if (t == _i1.getType<List<Map<String, String>>?>()) {
+      return (data != null
+              ? (data as List)
+                    .map((e) => deserialize<Map<String, String>>(e))
+                    .toList()
+              : null)
+          as T;
+    }
+    if (t == List<int>) {
+      return (data as List).map((e) => deserialize<int>(e)).toList() as T;
+    }
+    if (t == List<_i20.Course>) {
+      return (data as List).map((e) => deserialize<_i20.Course>(e)).toList()
+          as T;
+    }
+    if (t == List<_i21.KnowledgeFile>) {
+      return (data as List)
+              .map((e) => deserialize<_i21.KnowledgeFile>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i22.Module>) {
+      return (data as List).map((e) => deserialize<_i22.Module>(e)).toList()
           as T;
     }
     if (t == List<String>) {
@@ -1127,17 +1156,15 @@ class Protocol extends _i1.SerializationManagerServer {
       _i8.CourseChatRequest => 'CourseChatRequest',
       _i9.CourseChatResponse => 'CourseChatResponse',
       _i10.Greeting => 'Greeting',
-      _i11.LiveMessage => 'LiveMessage',
-      _i12.LiveSessionConfig => 'LiveSessionConfig',
-      _i13.Course => 'Course',
-      _i14.CourseIndex => 'CourseIndex',
-      _i15.CourseVisibility => 'CourseVisibility',
-      _i16.KnowledgeFile => 'KnowledgeFile',
-      _i17.Module => 'Module',
-      _i18.ModuleItem => 'ModuleItem',
-      _i19.Topic => 'Topic',
-      _i20.VedaUserProfile => 'VedaUserProfile',
-      _i21.VedaUserProfileWithEmail => 'VedaUserProfileWithEmail',
+      _i11.Course => 'Course',
+      _i12.CourseIndex => 'CourseIndex',
+      _i13.CourseVisibility => 'CourseVisibility',
+      _i14.KnowledgeFile => 'KnowledgeFile',
+      _i15.Module => 'Module',
+      _i16.ModuleItem => 'ModuleItem',
+      _i17.Topic => 'Topic',
+      _i18.VedaUserProfile => 'VedaUserProfile',
+      _i19.VedaUserProfileWithEmail => 'VedaUserProfileWithEmail',
       _ => null,
     };
   }
@@ -1164,27 +1191,23 @@ class Protocol extends _i1.SerializationManagerServer {
         return 'CourseChatResponse';
       case _i10.Greeting():
         return 'Greeting';
-      case _i11.LiveMessage():
-        return 'LiveMessage';
-      case _i12.LiveSessionConfig():
-        return 'LiveSessionConfig';
-      case _i13.Course():
+      case _i11.Course():
         return 'Course';
-      case _i14.CourseIndex():
+      case _i12.CourseIndex():
         return 'CourseIndex';
-      case _i15.CourseVisibility():
+      case _i13.CourseVisibility():
         return 'CourseVisibility';
-      case _i16.KnowledgeFile():
+      case _i14.KnowledgeFile():
         return 'KnowledgeFile';
-      case _i17.Module():
+      case _i15.Module():
         return 'Module';
-      case _i18.ModuleItem():
+      case _i16.ModuleItem():
         return 'ModuleItem';
-      case _i19.Topic():
+      case _i17.Topic():
         return 'Topic';
-      case _i20.VedaUserProfile():
+      case _i18.VedaUserProfile():
         return 'VedaUserProfile';
-      case _i21.VedaUserProfileWithEmail():
+      case _i19.VedaUserProfileWithEmail():
         return 'VedaUserProfileWithEmail';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -1226,38 +1249,32 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'Greeting') {
       return deserialize<_i10.Greeting>(data['data']);
     }
-    if (dataClassName == 'LiveMessage') {
-      return deserialize<_i11.LiveMessage>(data['data']);
-    }
-    if (dataClassName == 'LiveSessionConfig') {
-      return deserialize<_i12.LiveSessionConfig>(data['data']);
-    }
     if (dataClassName == 'Course') {
-      return deserialize<_i13.Course>(data['data']);
+      return deserialize<_i11.Course>(data['data']);
     }
     if (dataClassName == 'CourseIndex') {
-      return deserialize<_i14.CourseIndex>(data['data']);
+      return deserialize<_i12.CourseIndex>(data['data']);
     }
     if (dataClassName == 'CourseVisibility') {
-      return deserialize<_i15.CourseVisibility>(data['data']);
+      return deserialize<_i13.CourseVisibility>(data['data']);
     }
     if (dataClassName == 'KnowledgeFile') {
-      return deserialize<_i16.KnowledgeFile>(data['data']);
+      return deserialize<_i14.KnowledgeFile>(data['data']);
     }
     if (dataClassName == 'Module') {
-      return deserialize<_i17.Module>(data['data']);
+      return deserialize<_i15.Module>(data['data']);
     }
     if (dataClassName == 'ModuleItem') {
-      return deserialize<_i18.ModuleItem>(data['data']);
+      return deserialize<_i16.ModuleItem>(data['data']);
     }
     if (dataClassName == 'Topic') {
-      return deserialize<_i19.Topic>(data['data']);
+      return deserialize<_i17.Topic>(data['data']);
     }
     if (dataClassName == 'VedaUserProfile') {
-      return deserialize<_i20.VedaUserProfile>(data['data']);
+      return deserialize<_i18.VedaUserProfile>(data['data']);
     }
     if (dataClassName == 'VedaUserProfileWithEmail') {
-      return deserialize<_i21.VedaUserProfileWithEmail>(data['data']);
+      return deserialize<_i19.VedaUserProfileWithEmail>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -1295,20 +1312,20 @@ class Protocol extends _i1.SerializationManagerServer {
       }
     }
     switch (t) {
-      case _i13.Course:
-        return _i13.Course.t;
-      case _i14.CourseIndex:
-        return _i14.CourseIndex.t;
-      case _i16.KnowledgeFile:
-        return _i16.KnowledgeFile.t;
-      case _i17.Module:
-        return _i17.Module.t;
-      case _i18.ModuleItem:
-        return _i18.ModuleItem.t;
-      case _i19.Topic:
-        return _i19.Topic.t;
-      case _i20.VedaUserProfile:
-        return _i20.VedaUserProfile.t;
+      case _i11.Course:
+        return _i11.Course.t;
+      case _i12.CourseIndex:
+        return _i12.CourseIndex.t;
+      case _i14.KnowledgeFile:
+        return _i14.KnowledgeFile.t;
+      case _i15.Module:
+        return _i15.Module.t;
+      case _i16.ModuleItem:
+        return _i16.ModuleItem.t;
+      case _i17.Topic:
+        return _i17.Topic.t;
+      case _i18.VedaUserProfile:
+        return _i18.VedaUserProfile.t;
     }
     return null;
   }

@@ -14,7 +14,7 @@ import 'package:serverpod/serverpod.dart' as _i1;
 import '../lms/course.dart' as _i2;
 import 'package:veda_server/src/generated/protocol.dart' as _i3;
 
-/// KnowledgeFile - source material for AI course generation
+/// KnowledgeFile - source material for AI course generation with RAG support
 abstract class KnowledgeFile
     implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
   KnowledgeFile._({
@@ -23,6 +23,8 @@ abstract class KnowledgeFile
     required this.fileUrl,
     required this.fileSize,
     this.fileType,
+    this.textContent,
+    this.embedding,
     DateTime? uploadedAt,
     required this.courseId,
     this.course,
@@ -35,6 +37,8 @@ abstract class KnowledgeFile
     required String fileUrl,
     required int fileSize,
     String? fileType,
+    String? textContent,
+    _i1.Vector? embedding,
     DateTime? uploadedAt,
     required int courseId,
     _i2.Course? course,
@@ -47,6 +51,10 @@ abstract class KnowledgeFile
       fileUrl: jsonSerialization['fileUrl'] as String,
       fileSize: jsonSerialization['fileSize'] as int,
       fileType: jsonSerialization['fileType'] as String?,
+      textContent: jsonSerialization['textContent'] as String?,
+      embedding: jsonSerialization['embedding'] == null
+          ? null
+          : _i1.VectorJsonExtension.fromJson(jsonSerialization['embedding']),
       uploadedAt: jsonSerialization['uploadedAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['uploadedAt']),
@@ -78,6 +86,12 @@ abstract class KnowledgeFile
   /// File MIME type or extension
   String? fileType;
 
+  /// Extracted text content for RAG
+  String? textContent;
+
+  /// Embedding vector for semantic search (3072 dimensions for gemini-embedding-001)
+  _i1.Vector? embedding;
+
   /// Timestamp when the file was uploaded
   DateTime uploadedAt;
 
@@ -101,6 +115,8 @@ abstract class KnowledgeFile
     String? fileUrl,
     int? fileSize,
     String? fileType,
+    String? textContent,
+    _i1.Vector? embedding,
     DateTime? uploadedAt,
     int? courseId,
     _i2.Course? course,
@@ -114,6 +130,8 @@ abstract class KnowledgeFile
       'fileUrl': fileUrl,
       'fileSize': fileSize,
       if (fileType != null) 'fileType': fileType,
+      if (textContent != null) 'textContent': textContent,
+      if (embedding != null) 'embedding': embedding?.toJson(),
       'uploadedAt': uploadedAt.toJson(),
       'courseId': courseId,
       if (course != null) 'course': course?.toJson(),
@@ -131,6 +149,8 @@ abstract class KnowledgeFile
       'fileUrl': fileUrl,
       'fileSize': fileSize,
       if (fileType != null) 'fileType': fileType,
+      if (textContent != null) 'textContent': textContent,
+      if (embedding != null) 'embedding': embedding?.toJson(),
       'uploadedAt': uploadedAt.toJson(),
       'courseId': courseId,
       if (course != null) 'course': course?.toJsonForProtocol(),
@@ -176,6 +196,8 @@ class _KnowledgeFileImpl extends KnowledgeFile {
     required String fileUrl,
     required int fileSize,
     String? fileType,
+    String? textContent,
+    _i1.Vector? embedding,
     DateTime? uploadedAt,
     required int courseId,
     _i2.Course? course,
@@ -185,6 +207,8 @@ class _KnowledgeFileImpl extends KnowledgeFile {
          fileUrl: fileUrl,
          fileSize: fileSize,
          fileType: fileType,
+         textContent: textContent,
+         embedding: embedding,
          uploadedAt: uploadedAt,
          courseId: courseId,
          course: course,
@@ -200,6 +224,8 @@ class _KnowledgeFileImpl extends KnowledgeFile {
     String? fileUrl,
     int? fileSize,
     Object? fileType = _Undefined,
+    Object? textContent = _Undefined,
+    Object? embedding = _Undefined,
     DateTime? uploadedAt,
     int? courseId,
     Object? course = _Undefined,
@@ -210,6 +236,8 @@ class _KnowledgeFileImpl extends KnowledgeFile {
       fileUrl: fileUrl ?? this.fileUrl,
       fileSize: fileSize ?? this.fileSize,
       fileType: fileType is String? ? fileType : this.fileType,
+      textContent: textContent is String? ? textContent : this.textContent,
+      embedding: embedding is _i1.Vector? ? embedding : this.embedding?.clone(),
       uploadedAt: uploadedAt ?? this.uploadedAt,
       courseId: courseId ?? this.courseId,
       course: course is _i2.Course? ? course : this.course?.copyWith(),
@@ -225,6 +253,8 @@ class KnowledgeFileImplicit extends _KnowledgeFileImpl {
     required String fileUrl,
     required int fileSize,
     String? fileType,
+    String? textContent,
+    _i1.Vector? embedding,
     DateTime? uploadedAt,
     required int courseId,
     _i2.Course? course,
@@ -236,6 +266,8 @@ class KnowledgeFileImplicit extends _KnowledgeFileImpl {
          fileUrl: fileUrl,
          fileSize: fileSize,
          fileType: fileType,
+         textContent: textContent,
+         embedding: embedding,
          uploadedAt: uploadedAt,
          courseId: courseId,
          course: course,
@@ -251,6 +283,8 @@ class KnowledgeFileImplicit extends _KnowledgeFileImpl {
       fileUrl: knowledgeFile.fileUrl,
       fileSize: knowledgeFile.fileSize,
       fileType: knowledgeFile.fileType,
+      textContent: knowledgeFile.textContent,
+      embedding: knowledgeFile.embedding,
       uploadedAt: knowledgeFile.uploadedAt,
       courseId: knowledgeFile.courseId,
       course: knowledgeFile.course,
@@ -284,6 +318,17 @@ class KnowledgeFileUpdateTable extends _i1.UpdateTable<KnowledgeFileTable> {
     table.fileType,
     value,
   );
+
+  _i1.ColumnValue<String, String> textContent(String? value) => _i1.ColumnValue(
+    table.textContent,
+    value,
+  );
+
+  _i1.ColumnValue<_i1.Vector, _i1.Vector> embedding(_i1.Vector? value) =>
+      _i1.ColumnValue(
+        table.embedding,
+        value,
+      );
 
   _i1.ColumnValue<DateTime, DateTime> uploadedAt(DateTime value) =>
       _i1.ColumnValue(
@@ -329,6 +374,15 @@ class KnowledgeFileTable extends _i1.Table<int?> {
       'fileType',
       this,
     );
+    textContent = _i1.ColumnString(
+      'textContent',
+      this,
+    );
+    embedding = _i1.ColumnVector(
+      'embedding',
+      this,
+      dimension: 3072,
+    );
     uploadedAt = _i1.ColumnDateTime(
       'uploadedAt',
       this,
@@ -362,6 +416,12 @@ class KnowledgeFileTable extends _i1.Table<int?> {
   /// File MIME type or extension
   late final _i1.ColumnString fileType;
 
+  /// Extracted text content for RAG
+  late final _i1.ColumnString textContent;
+
+  /// Embedding vector for semantic search (3072 dimensions for gemini-embedding-001)
+  late final _i1.ColumnVector embedding;
+
   /// Timestamp when the file was uploaded
   late final _i1.ColumnDateTime uploadedAt;
 
@@ -380,6 +440,8 @@ class KnowledgeFileTable extends _i1.Table<int?> {
     fileUrl,
     fileSize,
     fileType,
+    textContent,
+    embedding,
     uploadedAt,
     courseId,
     course,
@@ -393,6 +455,8 @@ class KnowledgeFileTable extends _i1.Table<int?> {
     fileUrl,
     fileSize,
     fileType,
+    textContent,
+    embedding,
     uploadedAt,
     courseId,
     course,

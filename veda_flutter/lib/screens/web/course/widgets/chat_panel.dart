@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:veda_client/veda_client.dart' as veda;
 
 import '../../../../design_system/veda_colors.dart';
 import '../models/course_models.dart';
 import 'chat_bubble.dart';
-import 'live_audio_panel.dart';
 import 'mode_button.dart';
+import 'teaching_panel.dart';
 
 class ChatPanel extends StatelessWidget {
   final ChatMode chatMode;
@@ -15,12 +16,13 @@ class ChatPanel extends StatelessWidget {
   final int activeFilesCount;
   final VoidCallback onSendMessage;
   final void Function(ChatMode) onModeChanged;
-  final VoidCallback? onExport;
   final String? courseTitle;
   final String? courseStatus;
   final String? courseImageUrl;
   final VoidCallback? onEditCourseImage;
   final int? courseId;
+  final veda.Course? course;
+  final List<veda.Module>? modules;
 
   const ChatPanel({
     super.key,
@@ -31,12 +33,13 @@ class ChatPanel extends StatelessWidget {
     required this.activeFilesCount,
     required this.onSendMessage,
     required this.onModeChanged,
-    this.onExport,
     this.courseTitle,
     this.courseStatus,
     this.courseImageUrl,
     this.onEditCourseImage,
     this.courseId,
+    this.course,
+    this.modules,
   });
 
   @override
@@ -49,7 +52,7 @@ class ChatPanel extends StatelessWidget {
           Expanded(
             child: chatMode == ChatMode.create
                 ? _buildCreateModeContent()
-                : _buildTestModeContent(),
+                : _buildTeachModeContent(),
           ),
         ],
       ),
@@ -65,11 +68,11 @@ class ChatPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildTestModeContent() {
-    if (courseId == null) {
+  Widget _buildTeachModeContent() {
+    if (courseId == null || course == null) {
       return Center(
         child: Text(
-          'Save the course first to start a test session.',
+          'Save the course first to start teaching mode.',
           style: GoogleFonts.jetBrainsMono(
             fontSize: 11,
             color: VedaColors.zinc500,
@@ -78,9 +81,10 @@ class ChatPanel extends StatelessWidget {
       );
     }
 
-    return LiveAudioPanel(
-      courseId: courseId!,
-      moduleTitle: courseTitle,
+    // TEACH mode: Interactive teaching with TTS and STT
+    return TeachingPanel(
+      course: course!,
+      modules: modules ?? [],
     );
   }
 
@@ -183,7 +187,7 @@ class ChatPanel extends StatelessWidget {
                     Text(
                       chatMode == ChatMode.create
                           ? 'CREATION MODE'
-                          : 'TESTING MODE',
+                          : 'TEACHING MODE',
                       style: GoogleFonts.jetBrainsMono(
                         fontSize: 10,
                         color: VedaColors.zinc500,
@@ -209,46 +213,15 @@ class ChatPanel extends StatelessWidget {
                 ),
                 Container(width: 1, height: 32, color: VedaColors.zinc800),
                 ModeButton(
-                  label: 'TEST',
-                  isActive: chatMode == ChatMode.test,
-                  onTap: () => onModeChanged(ChatMode.test),
+                  label: 'TEACH',
+                  isActive: chatMode == ChatMode.teach,
+                  onTap: () => onModeChanged(ChatMode.teach),
                 ),
               ],
             ),
           ),
           const SizedBox(width: 16),
-          // Export button
-          InkWell(
-            onTap: onExport,
-            child: Container(
-              height: 40,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                border: Border.all(color: VedaColors.white, width: 1),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'EXPORT',
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w400,
-                      color: VedaColors.white,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  const Icon(
-                    Icons.arrow_forward,
-                    size: 14,
-                    color: VedaColors.white,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+  ],
       ),
     );
   }
@@ -291,9 +264,7 @@ class ChatPanel extends StatelessWidget {
                     letterSpacing: 0.2,
                   ),
                   decoration: InputDecoration(
-                    hintText: chatMode == ChatMode.create
-                        ? 'Generate module, quiz, or summary...'
-                        : 'Enter test scenario...',
+                    hintText: 'Generate module, quiz, or summary...',
                     hintStyle: GoogleFonts.inter(
                       fontSize: 13,
                       color: VedaColors.zinc700,

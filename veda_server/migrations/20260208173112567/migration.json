@@ -1,0 +1,61 @@
+{
+  "__className__": "serverpod.DatabaseMigration",
+  "actions": [
+    {
+      "__className__": "serverpod.DatabaseMigrationAction",
+      "type": "alterTable",
+      "alterTable": {
+        "__className__": "serverpod.TableMigration",
+        "name": "knowledge_files",
+        "schema": "public",
+        "addColumns": [
+          {
+            "__className__": "serverpod.ColumnDefinition",
+            "name": "textContent",
+            "columnType": 0,
+            "isNullable": true,
+            "dartType": "String?"
+          },
+          {
+            "__className__": "serverpod.ColumnDefinition",
+            "name": "embedding",
+            "columnType": 10,
+            "isNullable": true,
+            "dartType": "Vector(768)?",
+            "vectorDimension": 768
+          }
+        ],
+        "deleteColumns": [],
+        "modifyColumns": [],
+        "addIndexes": [
+          {
+            "__className__": "serverpod.IndexDefinition",
+            "indexName": "knowledge_files_embedding_hnsw_idx",
+            "elements": [
+              {
+                "__className__": "serverpod.IndexElementDefinition",
+                "type": 0,
+                "definition": "embedding"
+              }
+            ],
+            "type": "hnsw",
+            "isUnique": false,
+            "isPrimary": false,
+            "vectorDistanceFunction": "cosine",
+            "vectorColumnType": 10,
+            "parameters": {
+              "m": "16",
+              "ef_construction": "64"
+            }
+          }
+        ],
+        "deleteIndexes": [],
+        "addForeignKeys": [],
+        "deleteForeignKeys": [],
+        "warnings": []
+      }
+    }
+  ],
+  "warnings": [],
+  "migrationApiVersion": 1
+}

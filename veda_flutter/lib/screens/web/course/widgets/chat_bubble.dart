@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../design_system/veda_colors.dart';
@@ -41,13 +42,70 @@ class ChatBubble extends StatelessWidget {
             ),
             child: message.isLoading
                 ? _buildLoadingIndicator()
-                : Text(
-                    message.text,
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      color: VedaColors.white,
-                      letterSpacing: 0.2,
-                      height: 1.6,
+                : MarkdownBody(
+                    data: message.text,
+                    selectable: true,
+                    styleSheet: MarkdownStyleSheet(
+                      p: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: VedaColors.white,
+                        letterSpacing: 0.2,
+                        height: 1.6,
+                      ),
+                      code: GoogleFonts.jetBrainsMono(
+                        fontSize: 12,
+                        color: VedaColors.accent,
+                        backgroundColor: VedaColors.zinc900,
+                      ),
+                      codeblockDecoration: BoxDecoration(
+                        color: VedaColors.zinc900,
+                        border: Border.all(color: VedaColors.zinc800, width: 1),
+                      ),
+                      codeblockPadding: const EdgeInsets.all(12),
+                      h1: GoogleFonts.inter(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w300,
+                        color: VedaColors.white,
+                      ),
+                      h2: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w300,
+                        color: VedaColors.white,
+                      ),
+                      h3: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w300,
+                        color: VedaColors.white,
+                      ),
+                      listBullet: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: VedaColors.accent,
+                      ),
+                      blockquote: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: VedaColors.zinc500,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      blockquoteDecoration: BoxDecoration(
+                        border: Border(
+                          left: BorderSide(color: VedaColors.accent, width: 2),
+                        ),
+                      ),
+                      strong: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: VedaColors.white,
+                      ),
+                      em: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontStyle: FontStyle.italic,
+                        color: VedaColors.white,
+                      ),
+                      a: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: VedaColors.accent,
+                        decoration: TextDecoration.underline,
+                      ),
                     ),
                   ),
           ),

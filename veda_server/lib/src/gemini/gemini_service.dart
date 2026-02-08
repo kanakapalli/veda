@@ -155,6 +155,22 @@ class GeminiService {
             'required': ['title', 'sortOrder'],
           },
         },
+        {
+          'name': 'generateTableOfContents',
+          'description':
+              'Generate a complete table of contents (modules with topics) for the course based on uploaded knowledge files and course information. Use this when the user asks to create, generate, or update the course structure/syllabus/TOC.',
+          'parameters': {
+            'type': 'object',
+            'properties': {
+              'customPrompt': {
+                'type': 'string',
+                'description':
+                    'Optional custom instructions for how to structure the table of contents (e.g., "Focus on beginner-friendly progression", "Include advanced topics", "Split into 10 modules", "Make it practical with lots of examples")',
+              },
+            },
+            'required': [],
+          },
+        },
       ],
     },
   ];
@@ -672,6 +688,39 @@ class GeminiService {
       final error = jsonDecode(response.body);
       throw Exception(
         'Gemini API error: ${error['error']?['message'] ?? response.body}',
+      );
+    }
+  }
+
+  /// Generate text embedding using Gemini embedding model
+  /// Returns a 3072-dimensional vector for semantic search (gemini-embedding-001)
+  Future<List<double>> generateEmbedding(String text) async {
+    final url = Uri.parse(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key=$apiKey',
+    );
+
+    final body = jsonEncode({
+      'content': {
+        'parts': [
+          {'text': text}
+        ]
+      },
+    });
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: body,
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final values = data['embedding']['values'] as List;
+      return values.cast<double>();
+    } else {
+      final error = jsonDecode(response.body);
+      throw Exception(
+        'Gemini embedding API error: ${error['error']?['message'] ?? response.body}',
       );
     }
   }

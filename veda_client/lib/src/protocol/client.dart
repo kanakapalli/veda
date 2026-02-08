@@ -23,17 +23,16 @@ import 'package:veda_client/src/protocol/gemini/course_chat_response.dart'
 import 'package:veda_client/src/protocol/gemini/course_chat_request.dart'
     as _i8;
 import 'package:veda_client/src/protocol/greetings/greeting.dart' as _i9;
-import 'package:veda_client/src/protocol/live/live_message.dart' as _i10;
-import 'package:veda_client/src/protocol/lms/course.dart' as _i11;
-import 'package:veda_client/src/protocol/lms/course_visibility.dart' as _i12;
-import 'package:veda_client/src/protocol/lms/knowledge_file.dart' as _i13;
-import 'package:veda_client/src/protocol/lms/module.dart' as _i14;
-import 'package:veda_client/src/protocol/lms/topic.dart' as _i15;
-import 'package:veda_client/src/protocol/lms/module_item.dart' as _i16;
-import 'package:veda_client/src/protocol/profiles/user_profile.dart' as _i17;
+import 'package:veda_client/src/protocol/lms/course.dart' as _i10;
+import 'package:veda_client/src/protocol/lms/course_visibility.dart' as _i11;
+import 'package:veda_client/src/protocol/lms/knowledge_file.dart' as _i12;
+import 'package:veda_client/src/protocol/lms/module.dart' as _i13;
+import 'package:veda_client/src/protocol/lms/topic.dart' as _i14;
+import 'package:veda_client/src/protocol/lms/module_item.dart' as _i15;
+import 'package:veda_client/src/protocol/profiles/user_profile.dart' as _i16;
 import 'package:veda_client/src/protocol/profiles/user_profile_with_email.dart'
-    as _i18;
-import 'protocol.dart' as _i19;
+    as _i17;
+import 'protocol.dart' as _i18;
 
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
 /// are made available on the server and enable the corresponding sign-in widget
@@ -273,6 +272,53 @@ class EndpointGemini extends _i2.EndpointRef {
     'courseChat',
     {'request': request},
   );
+
+  /// Start a teaching chat session for a specific module
+  /// Generates comprehensive teaching content based on course and module context
+  _i3.Future<String> startTeachingChat(
+    int courseId, {
+    required String systemPrompt,
+    required String firstMessage,
+    required int minWords,
+    required int maxWords,
+  }) => caller.callServerEndpoint<String>(
+    'gemini',
+    'startTeachingChat',
+    {
+      'courseId': courseId,
+      'systemPrompt': systemPrompt,
+      'firstMessage': firstMessage,
+      'minWords': minWords,
+      'maxWords': maxWords,
+    },
+  );
+
+  /// Answer a student question during a teaching session
+  /// Provides clarification and additional explanations with RAG
+  _i3.Future<String> answerTeachingQuestion(
+    int courseId, {
+    required String moduleTitle,
+    required String question,
+    List<Map<String, String>>? history,
+  }) => caller.callServerEndpoint<String>(
+    'gemini',
+    'answerTeachingQuestion',
+    {
+      'courseId': courseId,
+      'moduleTitle': moduleTitle,
+      'question': question,
+      'history': history,
+    },
+  );
+
+  /// Generate speech from text using ElevenLabs API
+  /// Returns audio bytes (MP3 format)
+  _i3.Future<List<int>> generateSpeech(String text) =>
+      caller.callServerEndpoint<List<int>>(
+        'gemini',
+        'generateSpeech',
+        {'text': text},
+      );
 }
 
 /// This is an example endpoint that returns a greeting message through
@@ -293,44 +339,6 @@ class EndpointGreeting extends _i2.EndpointRef {
       );
 }
 
-/// Streaming endpoint for Gemini Live Audio conversations
-/// Completely independent from the existing GeminiEndpoint
-/// {@category Endpoint}
-class EndpointLive extends _i2.EndpointRef {
-  EndpointLive(_i2.EndpointCaller caller) : super(caller);
-
-  @override
-  String get name => 'live';
-
-  /// Bidirectional streaming for live audio/text conversation
-  ///
-  /// Client sends LiveMessage via input stream:
-  ///   type='config' (first message) — text=courseId, audioBase64=voiceName
-  ///   type='text' — text=user message
-  ///   type='audio' — audioBase64=base64 PCM data
-  ///   type='end_turn' — signals end of user audio turn
-  ///   type='interrupt' — interrupts AI while speaking
-  ///   type='disconnect' — close session
-  ///
-  /// Server returns LiveMessage via output stream:
-  ///   type='state' — text=connecting|connected|turn_complete|interrupted|disconnected
-  ///   type='text' — AI text response
-  ///   type='audio' — AI audio response (audioBase64)
-  ///   type='error' — error message
-  _i3.Stream<_i10.LiveMessage> audioSession(
-    _i3.Stream<_i10.LiveMessage> inputStream,
-  ) =>
-      caller.callStreamingServerEndpoint<
-        _i3.Stream<_i10.LiveMessage>,
-        _i10.LiveMessage
-      >(
-        'live',
-        'audioSession',
-        {},
-        {'inputStream': inputStream},
-      );
-}
-
 /// LMS Endpoint - handles course management operations
 /// {@category Endpoint}
 class EndpointLms extends _i2.EndpointRef {
@@ -340,16 +348,16 @@ class EndpointLms extends _i2.EndpointRef {
   String get name => 'lms';
 
   /// Creates a new course with default draft visibility
-  _i3.Future<_i11.Course> createCourse(_i11.Course course) =>
-      caller.callServerEndpoint<_i11.Course>(
+  _i3.Future<_i10.Course> createCourse(_i10.Course course) =>
+      caller.callServerEndpoint<_i10.Course>(
         'lms',
         'createCourse',
         {'course': course},
       );
 
   /// Updates an existing course
-  _i3.Future<_i11.Course> updateCourse(_i11.Course course) =>
-      caller.callServerEndpoint<_i11.Course>(
+  _i3.Future<_i10.Course> updateCourse(_i10.Course course) =>
+      caller.callServerEndpoint<_i10.Course>(
         'lms',
         'updateCourse',
         {'course': course},
@@ -363,18 +371,18 @@ class EndpointLms extends _i2.EndpointRef {
   );
 
   /// Gets a course by ID with all related data
-  _i3.Future<_i11.Course?> getCourseById(int id) =>
-      caller.callServerEndpoint<_i11.Course?>(
+  _i3.Future<_i10.Course?> getCourseById(int id) =>
+      caller.callServerEndpoint<_i10.Course?>(
         'lms',
         'getCourseById',
         {'id': id},
       );
 
   /// Lists courses with optional keyword and visibility filters
-  _i3.Future<List<_i11.Course>> listCourses({
+  _i3.Future<List<_i10.Course>> listCourses({
     String? keyword,
-    _i12.CourseVisibility? visibility,
-  }) => caller.callServerEndpoint<List<_i11.Course>>(
+    _i11.CourseVisibility? visibility,
+  }) => caller.callServerEndpoint<List<_i10.Course>>(
     'lms',
     'listCourses',
     {
@@ -384,16 +392,33 @@ class EndpointLms extends _i2.EndpointRef {
   );
 
   /// Adds a knowledge file to a course
-  _i3.Future<_i13.KnowledgeFile> addFileToCourse(_i13.KnowledgeFile file) =>
-      caller.callServerEndpoint<_i13.KnowledgeFile>(
+  /// Adds a knowledge file to a course and generates embedding
+  _i3.Future<_i12.KnowledgeFile> addFileToCourse(_i12.KnowledgeFile file) =>
+      caller.callServerEndpoint<_i12.KnowledgeFile>(
         'lms',
         'addFileToCourse',
         {'file': file},
       );
 
+  /// Manually process embeddings for a specific file (for re-processing)
+  _i3.Future<_i12.KnowledgeFile> processFileEmbedding(int fileId) =>
+      caller.callServerEndpoint<_i12.KnowledgeFile>(
+        'lms',
+        'processFileEmbedding',
+        {'fileId': fileId},
+      );
+
+  /// Process embeddings for all files in a course (batch processing)
+  _i3.Future<List<_i12.KnowledgeFile>> processAllFileEmbeddings(int courseId) =>
+      caller.callServerEndpoint<List<_i12.KnowledgeFile>>(
+        'lms',
+        'processAllFileEmbeddings',
+        {'courseId': courseId},
+      );
+
   /// Gets all knowledge files for a course
-  _i3.Future<List<_i13.KnowledgeFile>> getFilesForCourse(int courseId) =>
-      caller.callServerEndpoint<List<_i13.KnowledgeFile>>(
+  _i3.Future<List<_i12.KnowledgeFile>> getFilesForCourse(int courseId) =>
+      caller.callServerEndpoint<List<_i12.KnowledgeFile>>(
         'lms',
         'getFilesForCourse',
         {'courseId': courseId},
@@ -407,24 +432,24 @@ class EndpointLms extends _i2.EndpointRef {
   );
 
   /// Gets all modules for a course with items and topics
-  _i3.Future<List<_i14.Module>> getModules(int courseId) =>
-      caller.callServerEndpoint<List<_i14.Module>>(
+  _i3.Future<List<_i13.Module>> getModules(int courseId) =>
+      caller.callServerEndpoint<List<_i13.Module>>(
         'lms',
         'getModules',
         {'courseId': courseId},
       );
 
   /// Creates a new module
-  _i3.Future<_i14.Module> createModule(_i14.Module module) =>
-      caller.callServerEndpoint<_i14.Module>(
+  _i3.Future<_i13.Module> createModule(_i13.Module module) =>
+      caller.callServerEndpoint<_i13.Module>(
         'lms',
         'createModule',
         {'module': module},
       );
 
   /// Updates an existing module
-  _i3.Future<_i14.Module> updateModule(_i14.Module module) =>
-      caller.callServerEndpoint<_i14.Module>(
+  _i3.Future<_i13.Module> updateModule(_i13.Module module) =>
+      caller.callServerEndpoint<_i13.Module>(
         'lms',
         'updateModule',
         {'module': module},
@@ -447,40 +472,40 @@ class EndpointLms extends _i2.EndpointRef {
       );
 
   /// Creates a new topic
-  _i3.Future<_i15.Topic> createTopic(_i15.Topic topic) =>
-      caller.callServerEndpoint<_i15.Topic>(
+  _i3.Future<_i14.Topic> createTopic(_i14.Topic topic) =>
+      caller.callServerEndpoint<_i14.Topic>(
         'lms',
         'createTopic',
         {'topic': topic},
       );
 
   /// Updates an existing topic
-  _i3.Future<_i15.Topic> updateTopic(_i15.Topic topic) =>
-      caller.callServerEndpoint<_i15.Topic>(
+  _i3.Future<_i14.Topic> updateTopic(_i14.Topic topic) =>
+      caller.callServerEndpoint<_i14.Topic>(
         'lms',
         'updateTopic',
         {'topic': topic},
       );
 
   /// Gets a topic by ID
-  _i3.Future<_i15.Topic?> getTopicById(int id) =>
-      caller.callServerEndpoint<_i15.Topic?>(
+  _i3.Future<_i14.Topic?> getTopicById(int id) =>
+      caller.callServerEndpoint<_i14.Topic?>(
         'lms',
         'getTopicById',
         {'id': id},
       );
 
   /// Creates a module item (links topic to module)
-  _i3.Future<_i16.ModuleItem> createModuleItem(_i16.ModuleItem moduleItem) =>
-      caller.callServerEndpoint<_i16.ModuleItem>(
+  _i3.Future<_i15.ModuleItem> createModuleItem(_i15.ModuleItem moduleItem) =>
+      caller.callServerEndpoint<_i15.ModuleItem>(
         'lms',
         'createModuleItem',
         {'moduleItem': moduleItem},
       );
 
   /// Updates a module item
-  _i3.Future<_i16.ModuleItem> updateModuleItem(_i16.ModuleItem moduleItem) =>
-      caller.callServerEndpoint<_i16.ModuleItem>(
+  _i3.Future<_i15.ModuleItem> updateModuleItem(_i15.ModuleItem moduleItem) =>
+      caller.callServerEndpoint<_i15.ModuleItem>(
         'lms',
         'updateModuleItem',
         {'moduleItem': moduleItem},
@@ -493,6 +518,23 @@ class EndpointLms extends _i2.EndpointRef {
         'deleteModuleItem',
         {'moduleItemId': moduleItemId},
       );
+
+  /// Generates a full course table of contents using Gemini AI.
+  /// Creates Modules with Topics (via ModuleItems) based on course info
+  /// and uploaded knowledge files. Deletes existing modules first.
+  ///
+  /// [customPrompt] - Optional custom instructions for structuring the TOC
+  _i3.Future<List<_i13.Module>> generateCourseTableOfContents(
+    int courseId, {
+    String? customPrompt,
+  }) => caller.callServerEndpoint<List<_i13.Module>>(
+    'lms',
+    'generateCourseTableOfContents',
+    {
+      'courseId': courseId,
+      'customPrompt': customPrompt,
+    },
+  );
 
   /// Returns a signed upload description for direct client-to-S3 upload
   _i3.Future<String?> getUploadDescription(String path) =>
@@ -516,6 +558,24 @@ class EndpointLms extends _i2.EndpointRef {
         'getPublicUrl',
         {'path': path},
       );
+
+  /// Find relevant knowledge file chunks using semantic search
+  /// Returns top-k most similar documents based on cosine similarity
+  _i3.Future<List<_i12.KnowledgeFile>> findRelevantKnowledge(
+    String query,
+    int courseId, {
+    required int limit,
+    required double similarityThreshold,
+  }) => caller.callServerEndpoint<List<_i12.KnowledgeFile>>(
+    'lms',
+    'findRelevantKnowledge',
+    {
+      'query': query,
+      'courseId': courseId,
+      'limit': limit,
+      'similarityThreshold': similarityThreshold,
+    },
+  );
 }
 
 /// Endpoint for managing Veda user profiles linked to authenticated users.
@@ -527,12 +587,12 @@ class EndpointVedaUserProfile extends _i2.EndpointRef {
   String get name => 'vedaUserProfile';
 
   /// Creates or updates a user profile for the authenticated user.
-  _i3.Future<_i17.VedaUserProfile> upsertProfile({
+  _i3.Future<_i16.VedaUserProfile> upsertProfile({
     required String fullName,
     String? bio,
     required List<String> interests,
     String? learningGoal,
-  }) => caller.callServerEndpoint<_i17.VedaUserProfile>(
+  }) => caller.callServerEndpoint<_i16.VedaUserProfile>(
     'vedaUserProfile',
     'upsertProfile',
     {
@@ -544,8 +604,8 @@ class EndpointVedaUserProfile extends _i2.EndpointRef {
   );
 
   /// Gets the profile for the authenticated user.
-  _i3.Future<_i17.VedaUserProfile?> getMyProfile() =>
-      caller.callServerEndpoint<_i17.VedaUserProfile?>(
+  _i3.Future<_i16.VedaUserProfile?> getMyProfile() =>
+      caller.callServerEndpoint<_i16.VedaUserProfile?>(
         'vedaUserProfile',
         'getMyProfile',
         {},
@@ -559,8 +619,8 @@ class EndpointVedaUserProfile extends _i2.EndpointRef {
   );
 
   /// Gets the user profile with email from Serverpod's auth system.
-  _i3.Future<_i18.VedaUserProfileWithEmail?> getMyProfileWithEmail() =>
-      caller.callServerEndpoint<_i18.VedaUserProfileWithEmail?>(
+  _i3.Future<_i17.VedaUserProfileWithEmail?> getMyProfileWithEmail() =>
+      caller.callServerEndpoint<_i17.VedaUserProfileWithEmail?>(
         'vedaUserProfile',
         'getMyProfileWithEmail',
         {},
@@ -598,7 +658,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i19.Protocol(),
+         _i18.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,
@@ -611,7 +671,6 @@ class Client extends _i2.ServerpodClientShared {
     jwtRefresh = EndpointJwtRefresh(this);
     gemini = EndpointGemini(this);
     greeting = EndpointGreeting(this);
-    live = EndpointLive(this);
     lms = EndpointLms(this);
     vedaUserProfile = EndpointVedaUserProfile(this);
     modules = Modules(this);
@@ -625,8 +684,6 @@ class Client extends _i2.ServerpodClientShared {
 
   late final EndpointGreeting greeting;
 
-  late final EndpointLive live;
-
   late final EndpointLms lms;
 
   late final EndpointVedaUserProfile vedaUserProfile;
@@ -639,7 +696,6 @@ class Client extends _i2.ServerpodClientShared {
     'jwtRefresh': jwtRefresh,
     'gemini': gemini,
     'greeting': greeting,
-    'live': live,
     'lms': lms,
     'vedaUserProfile': vedaUserProfile,
   };

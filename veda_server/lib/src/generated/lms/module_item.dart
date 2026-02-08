@@ -26,7 +26,7 @@ abstract class ModuleItem
     this.module,
     required this.topicId,
     this.topic,
-  }) : _modulesItemsModulesId = null;
+  });
 
   factory ModuleItem({
     int? id,
@@ -39,7 +39,7 @@ abstract class ModuleItem
   }) = _ModuleItemImpl;
 
   factory ModuleItem.fromJson(Map<String, dynamic> jsonSerialization) {
-    return ModuleItemImplicit._(
+    return ModuleItem(
       id: jsonSerialization['id'] as int?,
       sortOrder: jsonSerialization['sortOrder'] as int,
       contextualDescription:
@@ -52,8 +52,6 @@ abstract class ModuleItem
       topic: jsonSerialization['topic'] == null
           ? null
           : _i4.Protocol().deserialize<_i3.Topic>(jsonSerialization['topic']),
-      $_modulesItemsModulesId:
-          jsonSerialization['_modulesItemsModulesId'] as int?,
     );
   }
 
@@ -82,8 +80,6 @@ abstract class ModuleItem
   /// Topic reference
   _i3.Topic? topic;
 
-  final int? _modulesItemsModulesId;
-
   @override
   _i1.Table<int?> get table => t;
 
@@ -111,8 +107,6 @@ abstract class ModuleItem
       if (module != null) 'module': module?.toJson(),
       'topicId': topicId,
       if (topic != null) 'topic': topic?.toJson(),
-      if (_modulesItemsModulesId != null)
-        '_modulesItemsModulesId': _modulesItemsModulesId,
     };
   }
 
@@ -195,7 +189,7 @@ class _ModuleItemImpl extends ModuleItem {
     int? topicId,
     Object? topic = _Undefined,
   }) {
-    return ModuleItemImplicit._(
+    return ModuleItem(
       id: id is int? ? id : this.id,
       sortOrder: sortOrder ?? this.sortOrder,
       contextualDescription: contextualDescription is String?
@@ -205,50 +199,8 @@ class _ModuleItemImpl extends ModuleItem {
       module: module is _i2.Module? ? module : this.module?.copyWith(),
       topicId: topicId ?? this.topicId,
       topic: topic is _i3.Topic? ? topic : this.topic?.copyWith(),
-      $_modulesItemsModulesId: this._modulesItemsModulesId,
     );
   }
-}
-
-class ModuleItemImplicit extends _ModuleItemImpl {
-  ModuleItemImplicit._({
-    int? id,
-    required int sortOrder,
-    String? contextualDescription,
-    required int moduleId,
-    _i2.Module? module,
-    required int topicId,
-    _i3.Topic? topic,
-    int? $_modulesItemsModulesId,
-  }) : _modulesItemsModulesId = $_modulesItemsModulesId,
-       super(
-         id: id,
-         sortOrder: sortOrder,
-         contextualDescription: contextualDescription,
-         moduleId: moduleId,
-         module: module,
-         topicId: topicId,
-         topic: topic,
-       );
-
-  factory ModuleItemImplicit(
-    ModuleItem moduleItem, {
-    int? $_modulesItemsModulesId,
-  }) {
-    return ModuleItemImplicit._(
-      id: moduleItem.id,
-      sortOrder: moduleItem.sortOrder,
-      contextualDescription: moduleItem.contextualDescription,
-      moduleId: moduleItem.moduleId,
-      module: moduleItem.module,
-      topicId: moduleItem.topicId,
-      topic: moduleItem.topic,
-      $_modulesItemsModulesId: $_modulesItemsModulesId,
-    );
-  }
-
-  @override
-  final int? _modulesItemsModulesId;
 }
 
 class ModuleItemUpdateTable extends _i1.UpdateTable<ModuleItemTable> {
@@ -286,12 +238,6 @@ class ModuleItemUpdateTable extends _i1.UpdateTable<ModuleItemTable> {
         table.topic,
         value,
       );
-
-  _i1.ColumnValue<int, int> $_modulesItemsModulesId(int? value) =>
-      _i1.ColumnValue(
-        table.$_modulesItemsModulesId,
-        value,
-      );
 }
 
 class ModuleItemTable extends _i1.Table<int?> {
@@ -321,10 +267,6 @@ class ModuleItemTable extends _i1.Table<int?> {
       'topic',
       this,
     );
-    $_modulesItemsModulesId = _i1.ColumnInt(
-      '_modulesItemsModulesId',
-      this,
-    );
   }
 
   late final ModuleItemUpdateTable updateTable;
@@ -347,22 +289,8 @@ class ModuleItemTable extends _i1.Table<int?> {
   /// Topic reference
   late final _i1.ColumnSerializable<_i3.Topic> topic;
 
-  late final _i1.ColumnInt $_modulesItemsModulesId;
-
   @override
   List<_i1.Column> get columns => [
-    id,
-    sortOrder,
-    contextualDescription,
-    moduleId,
-    module,
-    topicId,
-    topic,
-    $_modulesItemsModulesId,
-  ];
-
-  @override
-  List<_i1.Column> get managedColumns => [
     id,
     sortOrder,
     contextualDescription,

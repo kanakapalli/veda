@@ -20,7 +20,7 @@ fields:
   ### Parent course reference
   course: Course?
   ### List of module items (topics) in this module
-  items: List<ModuleItem>?, relation
+  items: List<ModuleItem>?
 
 indexes:
   modules_course_id_idx:

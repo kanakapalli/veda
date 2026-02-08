@@ -15,23 +15,21 @@ import '../auth/email_idp_endpoint.dart' as _i2;
 import '../auth/jwt_refresh_endpoint.dart' as _i3;
 import '../gemini/gemini_endpoint.dart' as _i4;
 import '../greetings/greeting_endpoint.dart' as _i5;
-import '../live/live_endpoint.dart' as _i6;
-import '../lms/lms_endpoint.dart' as _i7;
-import '../profiles/user_profile_endpoint.dart' as _i8;
-import 'package:veda_server/src/generated/gemini/chat_request.dart' as _i9;
+import '../lms/lms_endpoint.dart' as _i6;
+import '../profiles/user_profile_endpoint.dart' as _i7;
+import 'package:veda_server/src/generated/gemini/chat_request.dart' as _i8;
 import 'package:veda_server/src/generated/gemini/course_chat_request.dart'
-    as _i10;
-import 'package:veda_server/src/generated/live/live_message.dart' as _i11;
-import 'package:veda_server/src/generated/lms/course.dart' as _i12;
-import 'package:veda_server/src/generated/lms/course_visibility.dart' as _i13;
-import 'package:veda_server/src/generated/lms/knowledge_file.dart' as _i14;
-import 'package:veda_server/src/generated/lms/module.dart' as _i15;
-import 'package:veda_server/src/generated/lms/topic.dart' as _i16;
-import 'package:veda_server/src/generated/lms/module_item.dart' as _i17;
+    as _i9;
+import 'package:veda_server/src/generated/lms/course.dart' as _i10;
+import 'package:veda_server/src/generated/lms/course_visibility.dart' as _i11;
+import 'package:veda_server/src/generated/lms/knowledge_file.dart' as _i12;
+import 'package:veda_server/src/generated/lms/module.dart' as _i13;
+import 'package:veda_server/src/generated/lms/topic.dart' as _i14;
+import 'package:veda_server/src/generated/lms/module_item.dart' as _i15;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
-    as _i18;
+    as _i16;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
-    as _i19;
+    as _i17;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -61,19 +59,13 @@ class Endpoints extends _i1.EndpointDispatch {
           'greeting',
           null,
         ),
-      'live': _i6.LiveEndpoint()
-        ..initialize(
-          server,
-          'live',
-          null,
-        ),
-      'lms': _i7.LmsEndpoint()
+      'lms': _i6.LmsEndpoint()
         ..initialize(
           server,
           'lms',
           null,
         ),
-      'vedaUserProfile': _i8.VedaUserProfileEndpoint()
+      'vedaUserProfile': _i7.VedaUserProfileEndpoint()
         ..initialize(
           server,
           'vedaUserProfile',
@@ -283,7 +275,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'request': _i1.ParameterDescription(
               name: 'request',
-              type: _i1.getType<_i9.ChatRequest>(),
+              type: _i1.getType<_i8.ChatRequest>(),
               nullable: false,
             ),
           },
@@ -301,7 +293,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'request': _i1.ParameterDescription(
               name: 'request',
-              type: _i1.getType<_i10.CourseChatRequest>(),
+              type: _i1.getType<_i9.CourseChatRequest>(),
               nullable: false,
             ),
           },
@@ -313,6 +305,105 @@ class Endpoints extends _i1.EndpointDispatch {
                 session,
                 params['request'],
               ),
+        ),
+        'startTeachingChat': _i1.MethodConnector(
+          name: 'startTeachingChat',
+          params: {
+            'courseId': _i1.ParameterDescription(
+              name: 'courseId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'systemPrompt': _i1.ParameterDescription(
+              name: 'systemPrompt',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'firstMessage': _i1.ParameterDescription(
+              name: 'firstMessage',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'minWords': _i1.ParameterDescription(
+              name: 'minWords',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'maxWords': _i1.ParameterDescription(
+              name: 'maxWords',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['gemini'] as _i4.GeminiEndpoint).startTeachingChat(
+                    session,
+                    params['courseId'],
+                    systemPrompt: params['systemPrompt'],
+                    firstMessage: params['firstMessage'],
+                    minWords: params['minWords'],
+                    maxWords: params['maxWords'],
+                  ),
+        ),
+        'answerTeachingQuestion': _i1.MethodConnector(
+          name: 'answerTeachingQuestion',
+          params: {
+            'courseId': _i1.ParameterDescription(
+              name: 'courseId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'moduleTitle': _i1.ParameterDescription(
+              name: 'moduleTitle',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'question': _i1.ParameterDescription(
+              name: 'question',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'history': _i1.ParameterDescription(
+              name: 'history',
+              type: _i1.getType<List<Map<String, String>>?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['gemini'] as _i4.GeminiEndpoint)
+                  .answerTeachingQuestion(
+                    session,
+                    params['courseId'],
+                    moduleTitle: params['moduleTitle'],
+                    question: params['question'],
+                    history: params['history'],
+                  ),
+        ),
+        'generateSpeech': _i1.MethodConnector(
+          name: 'generateSpeech',
+          params: {
+            'text': _i1.ParameterDescription(
+              name: 'text',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['gemini'] as _i4.GeminiEndpoint).generateSpeech(
+                    session,
+                    params['text'],
+                  ),
         ),
       },
     );
@@ -340,32 +431,6 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
-    connectors['live'] = _i1.EndpointConnector(
-      name: 'live',
-      endpoint: endpoints['live']!,
-      methodConnectors: {
-        'audioSession': _i1.MethodStreamConnector(
-          name: 'audioSession',
-          params: {},
-          streamParams: {
-            'inputStream': _i1.StreamParameterDescription<_i11.LiveMessage>(
-              name: 'inputStream',
-              nullable: false,
-            ),
-          },
-          returnType: _i1.MethodStreamReturnType.streamType,
-          call:
-              (
-                _i1.Session session,
-                Map<String, dynamic> params,
-                Map<String, Stream> streamParams,
-              ) => (endpoints['live'] as _i6.LiveEndpoint).audioSession(
-                session,
-                streamParams['inputStream']!.cast<_i11.LiveMessage>(),
-              ),
-        ),
-      },
-    );
     connectors['lms'] = _i1.EndpointConnector(
       name: 'lms',
       endpoint: endpoints['lms']!,
@@ -375,7 +440,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'course': _i1.ParameterDescription(
               name: 'course',
-              type: _i1.getType<_i12.Course>(),
+              type: _i1.getType<_i10.Course>(),
               nullable: false,
             ),
           },
@@ -383,7 +448,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['lms'] as _i7.LmsEndpoint).createCourse(
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).createCourse(
                 session,
                 params['course'],
               ),
@@ -393,7 +458,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'course': _i1.ParameterDescription(
               name: 'course',
-              type: _i1.getType<_i12.Course>(),
+              type: _i1.getType<_i10.Course>(),
               nullable: false,
             ),
           },
@@ -401,7 +466,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['lms'] as _i7.LmsEndpoint).updateCourse(
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).updateCourse(
                 session,
                 params['course'],
               ),
@@ -419,7 +484,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['lms'] as _i7.LmsEndpoint).deleteCourse(
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).deleteCourse(
                 session,
                 params['id'],
               ),
@@ -437,7 +502,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['lms'] as _i7.LmsEndpoint).getCourseById(
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).getCourseById(
                 session,
                 params['id'],
               ),
@@ -452,7 +517,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'visibility': _i1.ParameterDescription(
               name: 'visibility',
-              type: _i1.getType<_i13.CourseVisibility?>(),
+              type: _i1.getType<_i11.CourseVisibility?>(),
               nullable: true,
             ),
           },
@@ -460,7 +525,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['lms'] as _i7.LmsEndpoint).listCourses(
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).listCourses(
                 session,
                 keyword: params['keyword'],
                 visibility: params['visibility'],
@@ -471,7 +536,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'file': _i1.ParameterDescription(
               name: 'file',
-              type: _i1.getType<_i14.KnowledgeFile>(),
+              type: _i1.getType<_i12.KnowledgeFile>(),
               nullable: false,
             ),
           },
@@ -479,10 +544,48 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['lms'] as _i7.LmsEndpoint).addFileToCourse(
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).addFileToCourse(
                 session,
                 params['file'],
               ),
+        ),
+        'processFileEmbedding': _i1.MethodConnector(
+          name: 'processFileEmbedding',
+          params: {
+            'fileId': _i1.ParameterDescription(
+              name: 'fileId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['lms'] as _i6.LmsEndpoint).processFileEmbedding(
+                    session,
+                    params['fileId'],
+                  ),
+        ),
+        'processAllFileEmbeddings': _i1.MethodConnector(
+          name: 'processAllFileEmbeddings',
+          params: {
+            'courseId': _i1.ParameterDescription(
+              name: 'courseId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint)
+                  .processAllFileEmbeddings(
+                    session,
+                    params['courseId'],
+                  ),
         ),
         'getFilesForCourse': _i1.MethodConnector(
           name: 'getFilesForCourse',
@@ -498,7 +601,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['lms'] as _i7.LmsEndpoint).getFilesForCourse(
+                  (endpoints['lms'] as _i6.LmsEndpoint).getFilesForCourse(
                     session,
                     params['courseId'],
                   ),
@@ -516,7 +619,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['lms'] as _i7.LmsEndpoint).deleteFile(
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).deleteFile(
                 session,
                 params['fileId'],
               ),
@@ -534,7 +637,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['lms'] as _i7.LmsEndpoint).getModules(
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).getModules(
                 session,
                 params['courseId'],
               ),
@@ -544,7 +647,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'module': _i1.ParameterDescription(
               name: 'module',
-              type: _i1.getType<_i15.Module>(),
+              type: _i1.getType<_i13.Module>(),
               nullable: false,
             ),
           },
@@ -552,7 +655,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['lms'] as _i7.LmsEndpoint).createModule(
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).createModule(
                 session,
                 params['module'],
               ),
@@ -562,7 +665,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'module': _i1.ParameterDescription(
               name: 'module',
-              type: _i1.getType<_i15.Module>(),
+              type: _i1.getType<_i13.Module>(),
               nullable: false,
             ),
           },
@@ -570,7 +673,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['lms'] as _i7.LmsEndpoint).updateModule(
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).updateModule(
                 session,
                 params['module'],
               ),
@@ -588,7 +691,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['lms'] as _i7.LmsEndpoint).deleteModule(
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).deleteModule(
                 session,
                 params['moduleId'],
               ),
@@ -606,7 +709,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['lms'] as _i7.LmsEndpoint).deleteAllModules(
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).deleteAllModules(
                 session,
                 params['courseId'],
               ),
@@ -616,7 +719,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'topic': _i1.ParameterDescription(
               name: 'topic',
-              type: _i1.getType<_i16.Topic>(),
+              type: _i1.getType<_i14.Topic>(),
               nullable: false,
             ),
           },
@@ -624,7 +727,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['lms'] as _i7.LmsEndpoint).createTopic(
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).createTopic(
                 session,
                 params['topic'],
               ),
@@ -634,7 +737,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'topic': _i1.ParameterDescription(
               name: 'topic',
-              type: _i1.getType<_i16.Topic>(),
+              type: _i1.getType<_i14.Topic>(),
               nullable: false,
             ),
           },
@@ -642,7 +745,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['lms'] as _i7.LmsEndpoint).updateTopic(
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).updateTopic(
                 session,
                 params['topic'],
               ),
@@ -660,7 +763,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['lms'] as _i7.LmsEndpoint).getTopicById(
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).getTopicById(
                 session,
                 params['id'],
               ),
@@ -670,7 +773,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'moduleItem': _i1.ParameterDescription(
               name: 'moduleItem',
-              type: _i1.getType<_i17.ModuleItem>(),
+              type: _i1.getType<_i15.ModuleItem>(),
               nullable: false,
             ),
           },
@@ -678,7 +781,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['lms'] as _i7.LmsEndpoint).createModuleItem(
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).createModuleItem(
                 session,
                 params['moduleItem'],
               ),
@@ -688,7 +791,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'moduleItem': _i1.ParameterDescription(
               name: 'moduleItem',
-              type: _i1.getType<_i17.ModuleItem>(),
+              type: _i1.getType<_i15.ModuleItem>(),
               nullable: false,
             ),
           },
@@ -696,7 +799,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['lms'] as _i7.LmsEndpoint).updateModuleItem(
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).updateModuleItem(
                 session,
                 params['moduleItem'],
               ),
@@ -714,10 +817,35 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['lms'] as _i7.LmsEndpoint).deleteModuleItem(
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).deleteModuleItem(
                 session,
                 params['moduleItemId'],
               ),
+        ),
+        'generateCourseTableOfContents': _i1.MethodConnector(
+          name: 'generateCourseTableOfContents',
+          params: {
+            'courseId': _i1.ParameterDescription(
+              name: 'courseId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'customPrompt': _i1.ParameterDescription(
+              name: 'customPrompt',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint)
+                  .generateCourseTableOfContents(
+                    session,
+                    params['courseId'],
+                    customPrompt: params['customPrompt'],
+                  ),
         ),
         'getUploadDescription': _i1.MethodConnector(
           name: 'getUploadDescription',
@@ -733,7 +861,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['lms'] as _i7.LmsEndpoint).getUploadDescription(
+                  (endpoints['lms'] as _i6.LmsEndpoint).getUploadDescription(
                     session,
                     params['path'],
                   ),
@@ -751,7 +879,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['lms'] as _i7.LmsEndpoint).verifyUpload(
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).verifyUpload(
                 session,
                 params['path'],
               ),
@@ -769,10 +897,47 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['lms'] as _i7.LmsEndpoint).getPublicUrl(
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).getPublicUrl(
                 session,
                 params['path'],
               ),
+        ),
+        'findRelevantKnowledge': _i1.MethodConnector(
+          name: 'findRelevantKnowledge',
+          params: {
+            'query': _i1.ParameterDescription(
+              name: 'query',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'courseId': _i1.ParameterDescription(
+              name: 'courseId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'limit': _i1.ParameterDescription(
+              name: 'limit',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'similarityThreshold': _i1.ParameterDescription(
+              name: 'similarityThreshold',
+              type: _i1.getType<double>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['lms'] as _i6.LmsEndpoint).findRelevantKnowledge(
+                    session,
+                    params['query'],
+                    params['courseId'],
+                    limit: params['limit'],
+                    similarityThreshold: params['similarityThreshold'],
+                  ),
         ),
       },
     );
@@ -809,7 +974,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['vedaUserProfile'] as _i8.VedaUserProfileEndpoint)
+                  (endpoints['vedaUserProfile'] as _i7.VedaUserProfileEndpoint)
                       .upsertProfile(
                         session,
                         fullName: params['fullName'],
@@ -826,7 +991,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['vedaUserProfile'] as _i8.VedaUserProfileEndpoint)
+                  (endpoints['vedaUserProfile'] as _i7.VedaUserProfileEndpoint)
                       .getMyProfile(session),
         ),
         'hasCompletedOnboarding': _i1.MethodConnector(
@@ -837,7 +1002,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['vedaUserProfile'] as _i8.VedaUserProfileEndpoint)
+                  (endpoints['vedaUserProfile'] as _i7.VedaUserProfileEndpoint)
                       .hasCompletedOnboarding(session),
         ),
         'getMyProfileWithEmail': _i1.MethodConnector(
@@ -848,14 +1013,14 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['vedaUserProfile'] as _i8.VedaUserProfileEndpoint)
+                  (endpoints['vedaUserProfile'] as _i7.VedaUserProfileEndpoint)
                       .getMyProfileWithEmail(session),
         ),
       },
     );
-    modules['serverpod_auth_idp'] = _i18.Endpoints()
+    modules['serverpod_auth_idp'] = _i16.Endpoints()
       ..initializeEndpoints(server);
-    modules['serverpod_auth_core'] = _i19.Endpoints()
+    modules['serverpod_auth_core'] = _i17.Endpoints()
       ..initializeEndpoints(server);
   }
 }

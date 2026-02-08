@@ -1,0 +1,11 @@
+SERVERPOD version: 3.2.3, dart: 3.10.4 (stable) (Tue Dec 9 00:01:55 2025 -0800) on "macos_arm64", time: 2026-02-08 19:35:24.881779Z
+runMode: development
+serverId: default
+role: monolith
+loggingMode: normal
+applyMigrations: true
+applyRepairMigration: false
+SERVERPOD initialized, time: 2026-02-08 19:35:24.931430Z
+Applied database migration:
+ - 20260208193510098
+2026-02-08 19:35:25.534192Z WebServer  INFO: Webserver listening on http://192.168.29.43:8082

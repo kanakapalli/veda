@@ -1,6 +1,0 @@
-class: LiveSessionConfig
-fields:
-  courseId: int
-  systemPrompt: String?
-  moduleTitle: String?
-  voiceName: String?

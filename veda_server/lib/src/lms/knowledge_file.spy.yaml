@@ -1,4 +1,4 @@
-### KnowledgeFile - source material for AI course generation
+### KnowledgeFile - source material for AI course generation with RAG support
 class: KnowledgeFile
 table: knowledge_files
 
@@ -11,6 +11,10 @@ fields:
   fileSize: int
   ### File MIME type or extension
   fileType: String?
+  ### Extracted text content for RAG
+  textContent: String?
+  ### Embedding vector for semantic search (3072 dimensions for gemini-embedding-001)
+  embedding: Vector(3072)?
   ### Timestamp when the file was uploaded
   uploadedAt: DateTime, default=now
   ### Foreign key to parent course
@@ -21,3 +25,10 @@ fields:
 indexes:
   knowledge_files_course_id_idx:
     fields: courseId
+  knowledge_files_embedding_hnsw_idx:
+    fields: embedding
+    type: hnsw
+    distanceFunction: cosine
+    parameters:
+      m: 16
+      ef_construction: 64
