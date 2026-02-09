@@ -90,6 +90,416 @@ Client calls: `client.greeting.hello(name)`
 ### Configuration
 Server configs in `veda_server/config/`: `development.yaml`, `staging.yaml`, `production.yaml`, `test.yaml`, `passwords.yaml`
 
+### Server Endpoints
+
+**GeminiEndpoint** (`veda_server/lib/src/gemini/gemini_endpoint.dart`):
+
+*Chat Methods:*
+- `chat(ChatRequest)` → `ChatResponse`
+  - Basic Gemini chat without tools
+  - Supports chat history and system instructions
+  - Used for general Q&A
+
+- `courseChat(CourseChatRequest)` → `CourseChatResponse`
+  - Chat with function calling enabled
+  - AI can call tools to modify courses (update fields, create modules, generate images)
+  - Returns list of tools executed and updated course object
+  - Used in CREATE mode
+
+*Teaching Methods:*
+- `startTeachingChat(courseId, systemPrompt, firstMessage, minWords, maxWords)` → `String`
+  - Generate initial teaching lecture with RAG
+  - Retrieves top 5 relevant knowledge chunks
+  - Returns lecture content with audio tags
+  - Used to start TEACH mode session
+
+- `answerTeachingQuestion(courseId, moduleTitle, question, history)` → `String`
+  - Answer student questions during teaching
+  - Retrieves top 3 relevant knowledge chunks
+  - Maintains conversation history
+  - Used for Q&A in TEACH mode
+
+*TTS Method:*
+- `generateSpeech(text)` → `Uint8List`
+  - Convert text to speech using ElevenLabs API
+  - Uses eleven_turbo_v2 model with audio tag support
+  - Returns MP3 audio bytes
+  - Supports expressiveness tags: [excited], [serious], [emphasizes], [pauses], [softly]
+
+**LmsEndpoint** (`veda_server/lib/src/lms/lms_endpoint.dart`):
+
+*Course Operations:*
+- `createCourse(Course)` → `Course` - Create new course
+- `getCourse(courseId)` → `Course?` - Retrieve course by ID
+- `updateCourse(Course)` → `Course` - Update course fields
+- `deleteCourse(courseId)` - Delete course (cascade deletes modules, files)
+- `listCourses()` → `List<Course>` - List all courses
+
+*Module Operations:*
+- `createModule(Module)` → `Module` - Create new module
+- `getModule(moduleId)` → `Module?` - Retrieve module by ID
+- `getModules(courseId)` → `List<Module>` - Get all modules in course (with topics)
+- `updateModule(Module)` → `Module` - Update module fields
+- `deleteModule(moduleId)` - Delete module (cascade deletes items)
+
+*Topic Operations:*
+- `createTopic(Topic)` → `Topic` - Create reusable topic
+- `getTopic(topicId)` → `Topic?` - Retrieve topic by ID
+- `updateTopic(Topic)` → `Topic` - Update topic fields
+- `deleteTopic(topicId)` - Delete topic
+
+*ModuleItem Operations:*
+- `addTopicToModule(moduleId, topicId, sortOrder)` → `ModuleItem` - Link topic to module
+- `removeTopicFromModule(moduleItemId)` - Unlink topic from module
+- `reorderModuleItems(moduleId, itemIds)` - Update topic order
+
+*Knowledge File Operations:*
+- `addFileToCourse(KnowledgeFile)` → `KnowledgeFile`
+  - Add file record to course
+  - **Automatically generates embedding synchronously**
+  - Reads file content, generates embedding, updates record
+  - Returns file with embedding populated
+
+- `getFilesForCourse(courseId)` → `List<KnowledgeFile>` - List course files
+- `deleteFile(fileId)` - Delete file record (does not delete from S3)
+- `processFileEmbedding(fileId)` - Manually regenerate embedding for existing file
+- `processAllFileEmbeddings(courseId)` - Batch regenerate embeddings for all course files
+
+*RAG Operations:*
+- `findRelevantKnowledge(query, courseId, limit)` → `List<KnowledgeFile>`
+  - Semantic search using cosine similarity
+  - Generates query embedding
+  - Returns top N most relevant files with content
+  - Used by teaching and TOC generation
+
+*TOC Generation:*
+- `generateCourseTableOfContents(courseId, customPrompt?)` → `List<Module>`
+  - Auto-generate course structure from knowledge files
+  - Uses RAG to retrieve top 10 relevant chunks
+  - AI creates modules with topics and descriptions
+  - Falls back to reading all files if no embeddings exist
+  - Returns created modules with nested topics
+
+*Cloud Storage:*
+- `getUploadDescription(path)` → `String` - Get signed upload URL for S3
+- `verifyUpload(path)` → `bool` - Verify file was uploaded successfully
+- `getPublicUrl(path)` → `String?` - Get public URL for uploaded file
+
+**UserProfileEndpoint** (`veda_server/lib/src/profiles/user_profile_endpoint.dart`):
+- `createProfile(VedaUserProfile)` → `VedaUserProfile` - Create user profile during onboarding
+- `getProfile(userId)` → `VedaUserProfile?` - Retrieve user profile
+- `updateProfile(VedaUserProfile)` → `VedaUserProfile` - Update profile fields
+- `getProfileWithEmail(userId)` → `VedaUserProfileWithEmail?` - Get profile with email from auth
+
+**EmailIdpEndpoint** (`veda_server/lib/src/auth/email_idp_endpoint.dart`):
+- Email/password authentication (Serverpod auth integration)
+- Sign in, sign up, password reset flows
+- OTP verification
+
+**JwtRefreshEndpoint** (`veda_server/lib/src/auth/jwt_refresh_endpoint.dart`):
+- JWT token refresh for maintaining sessions
+
+### Services
+
+**GeminiService** (`veda_server/lib/src/gemini/gemini_service.dart`):
+- `chat()` - Gemini API integration with history and system instructions
+- `chatWithTools()` - Function calling for course modification
+- `generateEmbedding()` - Text embedding with gemini-embedding-001 (3072d)
+- `generateSpeech()` - ElevenLabs TTS (eleven_turbo_v2 with audio tags)
+
+## Database Schema
+
+### Core Models (all in `veda_server/lib/src/lms/`)
+
+**Course** (`course.spy.yaml`):
+```yaml
+fields:
+  - title: String
+  - description: String?
+  - courseImageUrl: String?         # Thumbnail
+  - bannerImageUrl: String?         # Banner
+  - videoUrl: String?               # Intro video
+  - visibility: CourseVisibility    # draft/public/private
+  - systemPrompt: String?           # AI generation instructions
+  - createdAt: DateTime
+  - updatedAt: DateTime
+relations:
+  - modules: List<Module>
+  - courseIndices: List<CourseIndex>
+  - knowledgeFiles: List<KnowledgeFile>
+indexes:
+  - visibility, createdAt
+```
+
+**Module** (`module.spy.yaml`):
+```yaml
+fields:
+  - title: String
+  - description: String?
+  - sortOrder: int                  # Display order
+  - imageUrl: String?
+  - bannerImageUrl: String?
+  - videoUrl: String?
+  - courseId: int                   # FK to courses
+relations:
+  - course: Course
+  - items: List<ModuleItem>         # Ordered topics
+indexes:
+  - courseId, sortOrder
+```
+
+**Topic** (`topic.spy.yaml`):
+```yaml
+# Reusable lesson content - can be shared across modules
+fields:
+  - title: String
+  - description: String?            # Lesson body/content
+  - videoUrl: String?
+  - imageUrl: String?
+  - bannerImageUrl: String?
+  - createdAt: DateTime
+  - updatedAt: DateTime
+indexes:
+  - title
+```
+
+**ModuleItem** (`module_item.spy.yaml`):
+```yaml
+# Join table linking modules to topics with ordering
+fields:
+  - sortOrder: int
+  - moduleId: int                   # FK to modules
+  - topicId: int                    # FK to topics
+relations:
+  - module: Module
+  - topic: Topic
+indexes:
+  - moduleId, topicId, sortOrder
+```
+
+**KnowledgeFile** (`knowledge_file.spy.yaml`):
+```yaml
+# Source material for AI with RAG support
+fields:
+  - fileName: String
+  - fileUrl: String                 # S3 URL
+  - fileSize: int
+  - fileType: String?               # pdf/docx/txt
+  - textContent: String?            # Extracted text
+  - embedding: Vector(3072)?        # Semantic search vector
+  - uploadedAt: DateTime
+  - courseId: int                   # FK to courses
+relations:
+  - course: Course
+indexes:
+  - courseId
+  - embedding (HNSW, cosine distance, m=16, ef_construction=64)
+```
+
+**CourseIndex** (`course_index.spy.yaml`):
+```yaml
+# Searchable tags/keywords for courses
+fields:
+  - indexText: String               # Tag or keyword
+  - courseId: int                   # FK to courses
+relations:
+  - course: Course
+indexes:
+  - courseId, indexText
+```
+
+**CourseVisibility** (`course_visibility.spy.yaml`):
+```yaml
+enum: draft, public, private
+```
+
+### User Models (`veda_server/lib/src/profiles/`)
+
+**VedaUserProfile** (`user_profile.spy.yaml`):
+```yaml
+fields:
+  - authUser: AuthUser?             # Serverpod auth link
+  - fullName: String?
+  - bio: String?                    # Max 200 chars
+  - interests: List<String>?        # Tags from onboarding
+  - learningGoal: String?           # career_pivot or academic_depth
+  - createdAt: DateTime
+  - updatedAt: DateTime
+indexes:
+  - authUserId (unique)
+```
+
+### Gemini Protocol Models (`veda_server/lib/src/gemini/`)
+
+**ChatMessage** (`chat_message.spy.yaml`):
+```yaml
+# Chat history entry
+fields:
+  - role: String                    # 'user' or 'model'
+  - content: String
+```
+
+**ChatRequest/Response** (`chat_request.spy.yaml`, `chat_response.spy.yaml`):
+```yaml
+# Basic chat without tools
+request:
+  - message: String
+  - history: List<ChatMessage>?
+  - systemInstruction: String?
+response:
+  - text: String
+  - error: String?
+```
+
+**CourseChatRequest/Response** (`course_chat_request.spy.yaml`, `course_chat_response.spy.yaml`):
+```yaml
+# Chat with function calling for course modification
+request:
+  - message: String
+  - courseId: int
+  - history: List<ChatMessage>?
+  - systemInstruction: String?
+response:
+  - text: String
+  - toolsExecuted: List<String>?    # Names of tools called
+  - updatedCourse: Course?          # Modified course object
+  - error: String?
+```
+
+## Application Structure
+
+### Flutter Screens
+
+**Authentication Flow** (`lib/screens/auth/`):
+- `login_screen.dart` - Email/password login
+- `register_screen.dart` - New user registration
+- `otp_screen.dart` - OTP verification
+- `forgot_password_screen.dart` - Password reset flow
+- `reset_password_screen.dart` - New password entry
+- `auth_flow_screen.dart` - Authentication state management
+- `stark_widgets.dart` - Reusable auth UI components
+
+**Main Navigation** (`lib/screens/`):
+- `main_shell.dart` - Bottom navigation shell (4 tabs: Home, Search, Learn, Profile)
+- `dashboard_screen.dart` - Home screen with course overview
+- `search_screen.dart` - Course and content search
+- `learn_screen.dart` - Learning activity feed
+- `profile_screen.dart` - User profile and settings
+- `profile_edit_screen.dart` - Edit profile information
+
+**Onboarding** (`lib/screens/`):
+- `onboarding_screen.dart` - User onboarding flow (interests, learning goals)
+
+**Course Creation** (`lib/screens/web/course/`):
+- `course_onboarding_screen.dart` - New course setup wizard
+- `course_creation_screen.dart` - Main course architect interface (3-panel layout)
+  - Knowledge Base Panel (left) - File upload and management
+  - Chat Panel (center) - CREATE/TEACH mode switching
+  - TOC Panel (right) - Course structure and settings
+
+**Course Creation Widgets** (`lib/screens/web/course/widgets/`):
+- `chat_panel.dart` - Mode switching and chat interface
+- `teaching_panel.dart` - Interactive teaching with TTS/STT
+- `knowledge_base_panel.dart` - File management sidebar
+- `course_toc_panel.dart` - Table of contents and settings
+- `chat_bubble.dart` - Message display
+- `module_card.dart` - Module UI components
+- `file_item.dart` - Knowledge file list items
+- `mode_button.dart` - CREATE/TEACH mode toggles
+- `tab_button.dart` - Settings tab navigation
+
+### Flutter Services
+
+**GeminiService** (`lib/services/gemini_service.dart`):
+- Chat session management
+- Course chat with tool calling integration
+- Message history tracking
+- Integration with server Gemini endpoints
+
+**UploadService** (`lib/services/upload_service.dart`):
+- S3 file upload via Serverpod cloud storage
+- Multipart and binary upload modes
+- Course images (thumbnail, banner)
+- Module/topic media (images, videos)
+- Knowledge files (PDF, DOCX, TXT)
+- Upload verification and public URL retrieval
+
+**AudioRecorderService** (`lib/services/audio_recorder_service.dart`):
+- Microphone recording for STT
+- PCM audio format handling
+- Permission management
+
+**AudioPlayerService** (`lib/services/audio_player_service.dart`):
+- Audio playback utilities
+- Integration with just_audio package
+
+## Key Features
+
+### Course Creation Modes
+The app has two primary modes (defined in `ChatMode` enum in `course_models.dart`):
+
+1. **CREATE Mode** - AI-powered course architect
+   - Uses Gemini API with function calling/tool use
+   - Can update course fields (title, description, visibility, video URL)
+   - Generate images for course, modules, topics
+   - Create and modify course structure (modules, topics)
+   - AI can call tools to directly modify database
+   - System prompts in `veda_server/lib/src/gemini/gemini_endpoint.dart`
+   - Chat history maintained across conversation
+   - Real-time course updates with snackbar notifications
+
+2. **TEACH Mode** - Interactive teaching with TTS and STT
+   - Select module from course structure
+   - AI generates comprehensive lecture with RAG context
+   - Text-to-speech via ElevenLabs API (eleven_turbo_v2 model)
+   - Audio tag support ([excited], [serious], [emphasizes], [pauses])
+   - Real-time word highlighting synced to audio playback position
+   - Adjacent word highlighting (current + previous + next)
+   - Speech-to-text for Q&A interaction
+   - Pause/resume audio playback
+   - Lecture-style delivery (informative, not conversational)
+   - Chat history for contextual Q&A
+   - Implementation in `veda_flutter/lib/screens/web/course/widgets/teaching_panel.dart`
+
+### RAG (Retrieval-Augmented Generation)
+Knowledge files uploaded to courses are processed for semantic search:
+
+- **Embeddings**: Generated using `gemini-embedding-001` (3072 dimensions)
+- **Storage**: PostgreSQL with pgvector extension, HNSW indexing
+- **Generation**: Automatic on upload in `veda_server/lib/src/lms/lms_endpoint.dart`
+- **Usage**: Teaching mode, TOC generation, and Q&A use RAG
+- **Search**: Cosine similarity for semantic search
+- **Supported formats**: PDF, DOCX, TXT
+
+File processing flow:
+1. Upload file → Serverpod cloud storage (S3)
+2. Read and extract text content
+3. Generate embedding (truncated to 10,000 chars if needed)
+4. Store in `knowledge_files` table with embedding vector
+5. HNSW index for fast semantic search
+
+### Course Structure Hierarchy
+```
+Course (root)
+├── KnowledgeFiles (RAG sources)
+├── CourseIndices (searchable tags)
+└── Modules (organizational units)
+    └── ModuleItems (links to topics)
+        └── Topics (reusable lesson content)
+```
+
+- **Courses** can have multiple modules
+- **Modules** contain ordered topics via ModuleItems
+- **Topics** are reusable across multiple modules
+- **KnowledgeFiles** provide RAG context for entire course
+
+### Auto-Generated Table of Contents
+- Uses RAG to analyze uploaded knowledge files
+- Generates structured modules and topics
+- AI creates descriptions based on file content
+- Fallback to reading all files if no embeddings exist
+- Triggered manually from TOC panel
+
 ## Design System
 
 The app follows a **Neo-Minimalist Line Art** aesthetic (see `desgin guidlines.md`):
@@ -110,6 +520,138 @@ GitHub Actions workflows (`.github/workflows/`):
 - **analyze.yml**: `dart analyze --fatal-infos` on veda_server
 - **format.yml**: `dart format --set-exit-if-changed` check
 - **tests.yml**: Full test suite with Docker services (Flutter 3.32.8, Serverpod 3.2.3)
+
+## Implementation Patterns
+
+### File Upload Flow
+1. **Client**: Call `UploadService.pickAndUploadKnowledgeFile(courseId)`
+2. **Client**: Get upload description from `client.lms.getUploadDescription(path)`
+3. **Client**: Upload file bytes to S3 using signed URL
+4. **Client**: Verify upload with `client.lms.verifyUpload(path)`
+5. **Client**: Get public URL with `client.lms.getPublicUrl(path)`
+6. **Client**: Call `client.lms.addFileToCourse(KnowledgeFile)` with metadata
+7. **Server**: Automatically generates embedding and updates record
+
+### Course Creation Tool Calling
+The AI has access to these tools in CREATE mode:
+
+1. **update_course** - Modify title, description, visibility, video URL, system prompt
+2. **create_module** - Add new module with title, description, sort order
+3. **create_topic** - Create reusable topic
+4. **add_topic_to_module** - Link existing topic to module
+5. **generate_course_image** - AI-generated course thumbnail
+6. **generate_banner_image** - AI-generated banner
+7. **generate_module_image** - AI-generated module thumbnail
+
+Tools are defined in `GeminiService.chatWithTools()` and executed by the endpoint.
+
+### Teaching Mode Flow
+1. User selects module from course structure
+2. System builds comprehensive prompt with:
+   - Course context (title, description, system prompt)
+   - Module details (title, description)
+   - All topics in module (ordered list)
+   - RAG-retrieved knowledge (top 5 chunks)
+   - Word count constraints (min/max)
+   - Audio tag instructions
+3. AI generates lecture content with audio tags
+4. Client sends to ElevenLabs for TTS
+5. Audio plays with real-time word highlighting
+6. After completion, STT enabled for Q&A
+7. Questions answered with RAG context (top 3 chunks) and history
+
+### Word Highlighting Sync
+- Uses `just_audio` package's `positionStream`
+- Calculates progress: `position / duration`
+- Maps progress to word index: `(progress * wordCount).floor()`
+- Updates UI when index changes
+- Highlights current word (accent color, bold) and adjacent words (gray, medium weight)
+- Started immediately when audio begins playing (no await on play())
+
+### RAG Semantic Search
+```dart
+// 1. Generate query embedding
+final queryEmbedding = await gemini.generateEmbedding(query);
+final queryVector = Vector(queryEmbedding);
+
+// 2. Search with cosine similarity
+final results = await KnowledgeFile.db.find(
+  session,
+  where: (t) => t.courseId.equals(courseId),
+  orderBy: (t) => t.embedding.distanceCosine(queryVector),
+  limit: limit,
+);
+```
+
+### Common Patterns
+
+**Error Handling**:
+- Server methods return response objects with optional `error` field
+- Client checks for errors before processing results
+- UI shows error messages in chat or snackbars
+
+**State Management**:
+- Stateful widgets with setState for UI updates
+- Services use singleton pattern (`SomeService.instance`)
+- Chat history maintained in list structures
+
+**Logging**:
+- Server uses `session.log()` for debugging
+- Client uses `print()` statements (should be replaced with proper logging)
+- Emoji prefixes for log categorization (🔨, 📤, ✅, ❌, etc.)
+
+**Navigation**:
+- Main app uses bottom navigation (MainShell)
+- Course creation uses Navigator.push for modal screens
+- OnboardingScreen → CourseCreationScreen flow
+
+## Removed Features
+
+The following features have been intentionally removed from the codebase:
+
+- **Test Mode** (`ChatMode.test`) - Previously used for live audio testing
+- **Chat Test Mode** (`ChatMode.chatTest`) - Previously used for RAG-powered chat testing
+- **Gemini Live** - Real-time audio streaming with Gemini API
+  - `veda_server/lib/src/live/` directory (deleted)
+  - `veda_flutter/lib/services/gemini_live_service.dart` (deleted)
+  - `LiveMessage`, `LiveSession` protocol types (removed from generated code)
+  - `client.live` endpoint (removed)
+
+**Do not re-implement these features** unless explicitly requested. The app is simplified to only CREATE and TEACH modes.
+
+## Important Notes
+
+### Development Workflow
+1. Make changes to `*.spy.yaml` files for protocol/models
+2. Run `serverpod generate` in `veda_server/` directory
+3. Generated code appears in both server and client packages
+4. Run `flutter pub get` to update Flutter dependencies if needed
+5. Restart server and hot restart Flutter app
+
+### File Naming Conventions
+- Protocol files: `*.spy.yaml` (e.g., `course.spy.yaml`)
+- Endpoints: `*_endpoint.dart` (e.g., `lms_endpoint.dart`)
+- Services: `*_service.dart` (e.g., `gemini_service.dart`)
+- Screens: `*_screen.dart` (e.g., `dashboard_screen.dart`)
+- Widgets: Component names (e.g., `chat_panel.dart`, `module_card.dart`)
+
+### Database Migrations
+- Generated SQL files in `veda_server/migrations/`
+- Apply on server start: `dart bin/main.dart --apply-migrations`
+- Force migrations (e.g., vector dimension changes): `serverpod create-migration --force`
+- Migration registry tracks applied migrations
+
+### Cloud Storage Paths
+- Courses: `courses/{courseId}/course-image.{ext}`, `courses/{courseId}/banner-image.{ext}`
+- Modules: `courses/{courseId}/modules/{moduleId}/image.{ext}`
+- Topics: `topics/{topicId}/image.{ext}`
+- Knowledge files: `courses/{courseId}/files/{timestamp}-{filename}`
+
+### External APIs
+- **Gemini AI**: `gemini-2.0-flash-exp` for chat and tools
+- **Gemini Embeddings**: `gemini-embedding-001` for 3072d vectors
+- **ElevenLabs TTS**: `eleven_turbo_v2` model with audio tag support
+- All require API keys in `veda_server/config/passwords.yaml`
 
 ## Key Versions
 
