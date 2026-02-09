@@ -1,42 +1,33 @@
 BEGIN;
 
 --
--- ACTION DROP TABLE
---
-DROP TABLE "knowledge_files" CASCADE;
-
---
 -- ACTION CREATE TABLE
 --
-CREATE TABLE "knowledge_files" (
+CREATE TABLE "file_creation_drafts" (
     "id" bigserial PRIMARY KEY,
-    "fileName" text NOT NULL,
-    "fileUrl" text NOT NULL,
-    "fileSize" bigint NOT NULL,
-    "fileType" text,
-    "uploadedAt" timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "courseId" bigint NOT NULL,
-    "course" json,
-    "_coursesKnowledgefilesCoursesId" bigint
+    "creatorId" uuid NOT NULL,
+    "courseId" bigint,
+    "title" text NOT NULL,
+    "content" text NOT NULL,
+    "chatHistory" text,
+    "fileType" text NOT NULL DEFAULT 'md'::text,
+    "createdAt" timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Indexes
-CREATE INDEX "knowledge_files_course_id_idx" ON "knowledge_files" USING btree ("courseId");
+CREATE INDEX "file_creation_drafts_creator_idx" ON "file_creation_drafts" USING btree ("creatorId");
+CREATE INDEX "file_creation_drafts_course_idx" ON "file_creation_drafts" USING btree ("courseId");
+CREATE INDEX "file_creation_drafts_updated_idx" ON "file_creation_drafts" USING btree ("updatedAt");
 
 --
 -- ACTION CREATE FOREIGN KEY
 --
-ALTER TABLE ONLY "knowledge_files"
-    ADD CONSTRAINT "knowledge_files_fk_0"
-    FOREIGN KEY("courseId")
-    REFERENCES "courses"("id")
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION;
-ALTER TABLE ONLY "knowledge_files"
-    ADD CONSTRAINT "knowledge_files_fk_1"
-    FOREIGN KEY("_coursesKnowledgefilesCoursesId")
-    REFERENCES "courses"("id")
-    ON DELETE NO ACTION
+ALTER TABLE ONLY "file_creation_drafts"
+    ADD CONSTRAINT "file_creation_drafts_fk_0"
+    FOREIGN KEY("creatorId")
+    REFERENCES "serverpod_auth_core_user"("id")
+    ON DELETE SET NULL
     ON UPDATE NO ACTION;
 
 
@@ -44,9 +35,9 @@ ALTER TABLE ONLY "knowledge_files"
 -- MIGRATION VERSION FOR veda
 --
 INSERT INTO "serverpod_migrations" ("module", "version", "timestamp")
-    VALUES ('veda', '20260205143638913', now())
+    VALUES ('veda', '20260209185754797', now())
     ON CONFLICT ("module")
-    DO UPDATE SET "version" = '20260205143638913', "timestamp" = now();
+    DO UPDATE SET "version" = '20260209185754797', "timestamp" = now();
 
 --
 -- MIGRATION VERSION FOR serverpod

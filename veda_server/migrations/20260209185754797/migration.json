@@ -3,16 +3,11 @@
   "actions": [
     {
       "__className__": "serverpod.DatabaseMigrationAction",
-      "type": "deleteTable",
-      "deleteTable": "knowledge_files"
-    },
-    {
-      "__className__": "serverpod.DatabaseMigrationAction",
       "type": "createTable",
       "createTable": {
         "__className__": "serverpod.TableDefinition",
-        "name": "knowledge_files",
-        "dartName": "KnowledgeFile",
+        "name": "file_creation_drafts",
+        "dartName": "FileCreationDraft",
         "module": "veda",
         "schema": "public",
         "columns": [
@@ -21,40 +16,55 @@
             "name": "id",
             "columnType": 6,
             "isNullable": false,
-            "columnDefault": "nextval('knowledge_files_id_seq'::regclass)",
+            "columnDefault": "nextval('file_creation_drafts_id_seq'::regclass)",
             "dartType": "int?"
           },
           {
             "__className__": "serverpod.ColumnDefinition",
-            "name": "fileName",
-            "columnType": 0,
+            "name": "creatorId",
+            "columnType": 7,
             "isNullable": false,
-            "dartType": "String"
+            "dartType": "UuidValue"
           },
           {
             "__className__": "serverpod.ColumnDefinition",
-            "name": "fileUrl",
-            "columnType": 0,
-            "isNullable": false,
-            "dartType": "String"
-          },
-          {
-            "__className__": "serverpod.ColumnDefinition",
-            "name": "fileSize",
+            "name": "courseId",
             "columnType": 6,
-            "isNullable": false,
-            "dartType": "int"
+            "isNullable": true,
+            "dartType": "int?"
           },
           {
             "__className__": "serverpod.ColumnDefinition",
-            "name": "fileType",
+            "name": "title",
+            "columnType": 0,
+            "isNullable": false,
+            "dartType": "String"
+          },
+          {
+            "__className__": "serverpod.ColumnDefinition",
+            "name": "content",
+            "columnType": 0,
+            "isNullable": false,
+            "dartType": "String"
+          },
+          {
+            "__className__": "serverpod.ColumnDefinition",
+            "name": "chatHistory",
             "columnType": 0,
             "isNullable": true,
             "dartType": "String?"
           },
           {
             "__className__": "serverpod.ColumnDefinition",
-            "name": "uploadedAt",
+            "name": "fileType",
+            "columnType": 0,
+            "isNullable": false,
+            "columnDefault": "'md'::text",
+            "dartType": "String"
+          },
+          {
+            "__className__": "serverpod.ColumnDefinition",
+            "name": "createdAt",
             "columnType": 4,
             "isNullable": false,
             "columnDefault": "CURRENT_TIMESTAMP",
@@ -62,60 +72,33 @@
           },
           {
             "__className__": "serverpod.ColumnDefinition",
-            "name": "courseId",
-            "columnType": 6,
+            "name": "updatedAt",
+            "columnType": 4,
             "isNullable": false,
-            "dartType": "int"
-          },
-          {
-            "__className__": "serverpod.ColumnDefinition",
-            "name": "course",
-            "columnType": 8,
-            "isNullable": true,
-            "dartType": "protocol:Course?"
-          },
-          {
-            "__className__": "serverpod.ColumnDefinition",
-            "name": "_coursesKnowledgefilesCoursesId",
-            "columnType": 6,
-            "isNullable": true,
-            "dartType": "int?"
+            "columnDefault": "CURRENT_TIMESTAMP",
+            "dartType": "DateTime"
           }
         ],
         "foreignKeys": [
           {
             "__className__": "serverpod.ForeignKeyDefinition",
-            "constraintName": "knowledge_files_fk_0",
+            "constraintName": "file_creation_drafts_fk_0",
             "columns": [
-              "courseId"
+              "creatorId"
             ],
-            "referenceTable": "courses",
+            "referenceTable": "serverpod_auth_core_user",
             "referenceTableSchema": "public",
             "referenceColumns": [
               "id"
             ],
             "onUpdate": 3,
-            "onDelete": 4
-          },
-          {
-            "__className__": "serverpod.ForeignKeyDefinition",
-            "constraintName": "knowledge_files_fk_1",
-            "columns": [
-              "_coursesKnowledgefilesCoursesId"
-            ],
-            "referenceTable": "courses",
-            "referenceTableSchema": "public",
-            "referenceColumns": [
-              "id"
-            ],
-            "onUpdate": 3,
-            "onDelete": 3
+            "onDelete": 0
           }
         ],
         "indexes": [
           {
             "__className__": "serverpod.IndexDefinition",
-            "indexName": "knowledge_files_pkey",
+            "indexName": "file_creation_drafts_pkey",
             "elements": [
               {
                 "__className__": "serverpod.IndexElementDefinition",
@@ -129,12 +112,40 @@
           },
           {
             "__className__": "serverpod.IndexDefinition",
-            "indexName": "knowledge_files_course_id_idx",
+            "indexName": "file_creation_drafts_creator_idx",
+            "elements": [
+              {
+                "__className__": "serverpod.IndexElementDefinition",
+                "type": 0,
+                "definition": "creatorId"
+              }
+            ],
+            "type": "btree",
+            "isUnique": false,
+            "isPrimary": false
+          },
+          {
+            "__className__": "serverpod.IndexDefinition",
+            "indexName": "file_creation_drafts_course_idx",
             "elements": [
               {
                 "__className__": "serverpod.IndexElementDefinition",
                 "type": 0,
                 "definition": "courseId"
+              }
+            ],
+            "type": "btree",
+            "isUnique": false,
+            "isPrimary": false
+          },
+          {
+            "__className__": "serverpod.IndexDefinition",
+            "indexName": "file_creation_drafts_updated_idx",
+            "elements": [
+              {
+                "__className__": "serverpod.IndexElementDefinition",
+                "type": 0,
+                "definition": "updatedAt"
               }
             ],
             "type": "btree",
@@ -146,17 +157,6 @@
       }
     }
   ],
-  "warnings": [
-    {
-      "__className__": "serverpod.DatabaseMigrationWarning",
-      "type": "tableDropped",
-      "message": "One or more columns are added to table \"knowledge_files\" which cannot be added in a table migration. The complete table will be deleted and recreated.",
-      "table": "knowledge_files",
-      "columns": [
-        "fileSize"
-      ],
-      "destrucive": true
-    }
-  ],
+  "warnings": [],
   "migrationApiVersion": 1
 }

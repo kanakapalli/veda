@@ -8,14 +8,23 @@ table: veda_user_profile
 fields:
   ### Link to the authenticated user (creates authUserId automatically)
   authUser: module:serverpod_auth_core:AuthUser?, relation(onDelete=Cascade)
+  ### User types: can be both learner (mobile) and creator (web).
+  ### User must register on each platform separately to get both roles.
+  userTypes: List<UserType>
   ### Full name of the user.
   fullName: String?
-  ### User biography or context description (max 200 characters).
+  ### User biography or context description (max 500 characters for creators, 200 for learners).
   bio: String?
-  ### List of interest tags selected during onboarding.
+  ### List of interest tags selected during onboarding (learners only).
   interests: List<String>?
-  ### Learning goal: 'career_pivot' or 'academic_depth'.
+  ### Learning goal: 'career_pivot' or 'academic_depth' (learners only).
   learningGoal: String?
+  ### Creator website or portfolio URL (creators only).
+  websiteUrl: String?
+  ### Profile image URL (avatar) (creators only for now).
+  profileImageUrl: String?
+  ### Areas of expertise or teaching topics (creators only).
+  expertise: List<String>?
   ### Timestamp when the profile was created.
   createdAt: DateTime
   ### Timestamp when the profile was last updated.

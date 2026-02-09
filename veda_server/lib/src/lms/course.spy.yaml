@@ -3,6 +3,8 @@ class: Course
 table: courses
 
 fields:
+  ### Link to the authenticated user who created this course (nullable, set by server)
+  creator: module:serverpod_auth_core:AuthUser?, relation(onDelete=SetNull)
   ### Course title
   title: String
   ### Course description
@@ -33,3 +35,5 @@ indexes:
     fields: visibility
   courses_created_at_idx:
     fields: createdAt
+  courses_creator_idx:
+    fields: creatorId

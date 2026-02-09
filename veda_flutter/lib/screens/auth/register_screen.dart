@@ -140,35 +140,8 @@ class _RegisterScreenState extends State<RegisterScreen>
     setState(() => _isLoading = true);
 
     try {
-      // Try to login first to check if the account already exists
-      // This prevents going to OTP screen for existing emails
-      try {
-        await client.emailIdp.login(email: email, password: password);
-        // If login succeeds, the account exists - inform the user
-        setState(() =>
-            _emailError = 'Account already exists. Please sign in instead.');
-        return;
-      } on EmailAccountLoginException catch (e) {
-        // Invalid credentials means account exists but wrong password
-        if (e.reason == EmailAccountLoginExceptionReason.invalidCredentials) {
-          setState(
-              () => _emailError = 'An account with this email already exists');
-          return;
-        }
-        if (e.reason == EmailAccountLoginExceptionReason.tooManyAttempts) {
-          widget.setError('Too many attempts. Please try again later.');
-          return;
-        }
-        // Other login errors - continue with registration
-      } on AuthUserBlockedException {
-        setState(() => _emailError = 'This account has been blocked');
-        return;
-      } catch (e) {
-        // Login failed for other reasons (network, server error, or account doesn't exist)
-        // Continue with registration
-      }
-
       // Start registration (sends OTP)
+      // The server will handle duplicate email detection
       final requestId =
           await client.emailIdp.startRegistration(email: email);
 
@@ -183,8 +156,13 @@ class _RegisterScreenState extends State<RegisterScreen>
 
       widget.onOtpSent();
     } catch (e) {
-      widget.setError(
-          'Registration failed. Please check your connection and try again.');
+      // Check if it's a duplicate email error
+      final errorMessage = e.toString();
+      if (errorMessage.contains('already') || errorMessage.contains('exist')) {
+        setState(() => _emailError = 'An account with this email already exists. Please sign in instead.');
+      } else {
+        widget.setError('Registration failed. Please check your connection and try again.');
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

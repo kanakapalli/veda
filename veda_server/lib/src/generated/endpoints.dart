@@ -23,13 +23,15 @@ import 'package:veda_server/src/generated/gemini/course_chat_request.dart'
 import 'package:veda_server/src/generated/lms/course.dart' as _i10;
 import 'package:veda_server/src/generated/lms/course_visibility.dart' as _i11;
 import 'package:veda_server/src/generated/lms/knowledge_file.dart' as _i12;
-import 'package:veda_server/src/generated/lms/module.dart' as _i13;
-import 'package:veda_server/src/generated/lms/topic.dart' as _i14;
-import 'package:veda_server/src/generated/lms/module_item.dart' as _i15;
+import 'package:veda_server/src/generated/lms/file_creation_draft.dart' as _i13;
+import 'package:veda_server/src/generated/lms/module.dart' as _i14;
+import 'package:veda_server/src/generated/lms/topic.dart' as _i15;
+import 'package:veda_server/src/generated/lms/module_item.dart' as _i16;
+import 'package:veda_server/src/generated/profiles/user_type.dart' as _i17;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
-    as _i16;
+    as _i18;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
-    as _i17;
+    as _i19;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -531,6 +533,16 @@ class Endpoints extends _i1.EndpointDispatch {
                 visibility: params['visibility'],
               ),
         ),
+        'listMyCourses': _i1.MethodConnector(
+          name: 'listMyCourses',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['lms'] as _i6.LmsEndpoint).listMyCourses(session),
+        ),
         'addFileToCourse': _i1.MethodConnector(
           name: 'addFileToCourse',
           params: {
@@ -624,6 +636,89 @@ class Endpoints extends _i1.EndpointDispatch {
                 params['fileId'],
               ),
         ),
+        'saveDraft': _i1.MethodConnector(
+          name: 'saveDraft',
+          params: {
+            'draft': _i1.ParameterDescription(
+              name: 'draft',
+              type: _i1.getType<_i13.FileCreationDraft>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).saveDraft(
+                session,
+                params['draft'],
+              ),
+        ),
+        'getMyDrafts': _i1.MethodConnector(
+          name: 'getMyDrafts',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['lms'] as _i6.LmsEndpoint).getMyDrafts(session),
+        ),
+        'getDraftsForCourse': _i1.MethodConnector(
+          name: 'getDraftsForCourse',
+          params: {
+            'courseId': _i1.ParameterDescription(
+              name: 'courseId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['lms'] as _i6.LmsEndpoint).getDraftsForCourse(
+                    session,
+                    params['courseId'],
+                  ),
+        ),
+        'getDraft': _i1.MethodConnector(
+          name: 'getDraft',
+          params: {
+            'draftId': _i1.ParameterDescription(
+              name: 'draftId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).getDraft(
+                session,
+                params['draftId'],
+              ),
+        ),
+        'deleteDraft': _i1.MethodConnector(
+          name: 'deleteDraft',
+          params: {
+            'draftId': _i1.ParameterDescription(
+              name: 'draftId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).deleteDraft(
+                session,
+                params['draftId'],
+              ),
+        ),
         'getModules': _i1.MethodConnector(
           name: 'getModules',
           params: {
@@ -647,7 +742,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'module': _i1.ParameterDescription(
               name: 'module',
-              type: _i1.getType<_i13.Module>(),
+              type: _i1.getType<_i14.Module>(),
               nullable: false,
             ),
           },
@@ -665,7 +760,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'module': _i1.ParameterDescription(
               name: 'module',
-              type: _i1.getType<_i13.Module>(),
+              type: _i1.getType<_i14.Module>(),
               nullable: false,
             ),
           },
@@ -719,7 +814,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'topic': _i1.ParameterDescription(
               name: 'topic',
-              type: _i1.getType<_i14.Topic>(),
+              type: _i1.getType<_i15.Topic>(),
               nullable: false,
             ),
           },
@@ -737,7 +832,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'topic': _i1.ParameterDescription(
               name: 'topic',
-              type: _i1.getType<_i14.Topic>(),
+              type: _i1.getType<_i15.Topic>(),
               nullable: false,
             ),
           },
@@ -773,7 +868,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'moduleItem': _i1.ParameterDescription(
               name: 'moduleItem',
-              type: _i1.getType<_i15.ModuleItem>(),
+              type: _i1.getType<_i16.ModuleItem>(),
               nullable: false,
             ),
           },
@@ -791,7 +886,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'moduleItem': _i1.ParameterDescription(
               name: 'moduleItem',
-              type: _i1.getType<_i15.ModuleItem>(),
+              type: _i1.getType<_i16.ModuleItem>(),
               nullable: false,
             ),
           },
@@ -948,6 +1043,11 @@ class Endpoints extends _i1.EndpointDispatch {
         'upsertProfile': _i1.MethodConnector(
           name: 'upsertProfile',
           params: {
+            'userType': _i1.ParameterDescription(
+              name: 'userType',
+              type: _i1.getType<_i17.UserType>(),
+              nullable: false,
+            ),
             'fullName': _i1.ParameterDescription(
               name: 'fullName',
               type: _i1.getType<String>(),
@@ -960,12 +1060,27 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'interests': _i1.ParameterDescription(
               name: 'interests',
-              type: _i1.getType<List<String>>(),
-              nullable: false,
+              type: _i1.getType<List<String>?>(),
+              nullable: true,
             ),
             'learningGoal': _i1.ParameterDescription(
               name: 'learningGoal',
               type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'websiteUrl': _i1.ParameterDescription(
+              name: 'websiteUrl',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'profileImageUrl': _i1.ParameterDescription(
+              name: 'profileImageUrl',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'expertise': _i1.ParameterDescription(
+              name: 'expertise',
+              type: _i1.getType<List<String>?>(),
               nullable: true,
             ),
           },
@@ -977,10 +1092,14 @@ class Endpoints extends _i1.EndpointDispatch {
                   (endpoints['vedaUserProfile'] as _i7.VedaUserProfileEndpoint)
                       .upsertProfile(
                         session,
+                        userType: params['userType'],
                         fullName: params['fullName'],
                         bio: params['bio'],
                         interests: params['interests'],
                         learningGoal: params['learningGoal'],
+                        websiteUrl: params['websiteUrl'],
+                        profileImageUrl: params['profileImageUrl'],
+                        expertise: params['expertise'],
                       ),
         ),
         'getMyProfile': _i1.MethodConnector(
@@ -1018,9 +1137,9 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
-    modules['serverpod_auth_idp'] = _i16.Endpoints()
+    modules['serverpod_auth_idp'] = _i18.Endpoints()
       ..initializeEndpoints(server);
-    modules['serverpod_auth_core'] = _i17.Endpoints()
+    modules['serverpod_auth_core'] = _i19.Endpoints()
       ..initializeEndpoints(server);
   }
 }

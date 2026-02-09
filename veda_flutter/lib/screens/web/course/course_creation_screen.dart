@@ -6,6 +6,7 @@ import '../../../design_system/veda_colors.dart';
 import '../../../main.dart';
 import '../../../services/gemini_service.dart';
 import '../../../services/upload_service.dart';
+import 'file_creation_editor_screen.dart';
 import 'models/course_models.dart';
 import 'widgets/chat_panel.dart';
 import 'widgets/course_toc_panel.dart';
@@ -280,6 +281,24 @@ Reference specific files when making suggestions based on their content.
         );
       }
     });
+  }
+
+  /// Navigate to AI-powered file creation editor
+  Future<void> _navigateToFileCreation() async {
+    if (_course.id == null) return;
+
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (context) => FileCreationEditorScreen(
+          courseId: _course.id!,
+        ),
+      ),
+    );
+
+    // Reload files if a new file was added
+    if (result == true && mounted) {
+      await _loadKnowledgeFiles();
+    }
   }
 
   Future<void> _addFile() async {
@@ -726,6 +745,7 @@ Reference specific files when making suggestions based on their content.
             child: KnowledgeBasePanel(
               files: _files,
               onAddFile: _addFile,
+              onCreateFile: _navigateToFileCreation,
               onRemoveFile: _removeFile,
             ),
           ),

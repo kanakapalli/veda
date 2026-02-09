@@ -198,6 +198,41 @@ class UploadService {
     }
   }
 
+  /// Static helper to upload bytes to S3 using an upload description
+  /// Returns HTTP response for status checking
+  static Future<http.StreamedResponse> uploadBytesToS3(
+    String description,
+    Uint8List bytes,
+  ) async {
+    final data = jsonDecode(description) as Map<String, dynamic>;
+    final type = data['type'] as String;
+    final url = Uri.parse(data['url'] as String);
+
+    if (type == 'binary') {
+      final request = http.Request('POST', url);
+      request.headers['Content-Type'] = 'application/octet-stream';
+      request.headers['Accept'] = '*/*';
+      request.bodyBytes = bytes;
+      return await request.send();
+    } else if (type == 'multipart') {
+      final field = data['field'] as String;
+      final fileName = data['file-name'] as String;
+      final requestFields =
+          (data['request-fields'] as Map).cast<String, String>();
+
+      final request = http.MultipartRequest('POST', url);
+      request.files.add(http.MultipartFile.fromBytes(
+        field,
+        bytes,
+        filename: fileName,
+      ));
+      request.fields.addAll(requestFields);
+      return await request.send();
+    }
+
+    throw Exception('Unknown upload type: $type');
+  }
+
   // ---------------------------------------------------------------------------
   // Image extensions
   // ---------------------------------------------------------------------------

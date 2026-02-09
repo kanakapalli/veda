@@ -1,0 +1,29 @@
+### File Creation Draft - stores user's in-progress notes/files created with AI assistance
+class: FileCreationDraft
+table: file_creation_drafts
+
+fields:
+  ### Link to the user who created this draft
+  creator: module:serverpod_auth_core:AuthUser?, relation(onDelete=SetNull)
+  ### Link to the course this draft belongs to
+  courseId: int?
+  ### Title of the file/note
+  title: String
+  ### Content in markdown format
+  content: String
+  ### AI chat history for this draft (JSON string)
+  chatHistory: String?
+  ### File type (txt, md, pdf)
+  fileType: String, default='md'
+  ### Creation timestamp
+  createdAt: DateTime, default=now
+  ### Last update timestamp
+  updatedAt: DateTime, default=now
+
+indexes:
+  file_creation_drafts_creator_idx:
+    fields: creatorId
+  file_creation_drafts_course_idx:
+    fields: courseId
+  file_creation_drafts_updated_idx:
+    fields: updatedAt

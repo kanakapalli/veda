@@ -22,11 +22,17 @@ lms:
   - deleteCourse:
   - getCourseById:
   - listCourses:
+  - listMyCourses:
   - addFileToCourse:
   - processFileEmbedding:
   - processAllFileEmbeddings:
   - getFilesForCourse:
   - deleteFile:
+  - saveDraft:
+  - getMyDrafts:
+  - getDraftsForCourse:
+  - getDraft:
+  - deleteDraft:
   - getModules:
   - createModule:
   - updateModule:

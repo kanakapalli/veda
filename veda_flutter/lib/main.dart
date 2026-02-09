@@ -9,6 +9,7 @@ import 'firebase_options.dart';
 import 'screens/main_shell.dart';
 import 'screens/sign_in_screen.dart';
 import 'screens/web/course/course_onboarding_screen.dart';
+import 'screens/web/auth/web_creator_auth_flow.dart';
 
 /// Sets up a global client object that can be used to talk to the server from
 /// anywhere in our app. The client is generated from your server code
@@ -362,12 +363,14 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Web: Show Course Onboarding Screen -> Course Creation Screen
+    // Web: Show Creator Authentication -> Course Onboarding Screen
     if (kIsWeb) {
-      return const CourseOnboardingScreen();
+      return const WebCreatorAuthFlow(
+        child: CourseOnboardingScreen(),
+      );
     }
 
-    // Mobile (iOS/Android): Show authentication flow
+    // Mobile (iOS/Android): Show learner authentication flow
     return SignInScreen(
       child: MainShell(
         onSignOut: () async {

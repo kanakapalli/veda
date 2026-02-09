@@ -14,7 +14,8 @@
 import 'package:serverpod/serverpod.dart' as _i1;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _i2;
-import 'package:veda_server/src/generated/protocol.dart' as _i3;
+import '../profiles/user_type.dart' as _i3;
+import 'package:veda_server/src/generated/protocol.dart' as _i4;
 
 /// Veda user profile data linked to authenticated user.
 /// Uses relation to AuthUser as per Serverpod recommended pattern.
@@ -24,10 +25,14 @@ abstract class VedaUserProfile
     this.id,
     required this.authUserId,
     this.authUser,
+    required this.userTypes,
     this.fullName,
     this.bio,
     this.interests,
     this.learningGoal,
+    this.websiteUrl,
+    this.profileImageUrl,
+    this.expertise,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -36,10 +41,14 @@ abstract class VedaUserProfile
     int? id,
     required _i1.UuidValue authUserId,
     _i2.AuthUser? authUser,
+    required List<_i3.UserType> userTypes,
     String? fullName,
     String? bio,
     List<String>? interests,
     String? learningGoal,
+    String? websiteUrl,
+    String? profileImageUrl,
+    List<String>? expertise,
     required DateTime createdAt,
     required DateTime updatedAt,
   }) = _VedaUserProfileImpl;
@@ -52,17 +61,27 @@ abstract class VedaUserProfile
       ),
       authUser: jsonSerialization['authUser'] == null
           ? null
-          : _i3.Protocol().deserialize<_i2.AuthUser>(
+          : _i4.Protocol().deserialize<_i2.AuthUser>(
               jsonSerialization['authUser'],
             ),
+      userTypes: _i4.Protocol().deserialize<List<_i3.UserType>>(
+        jsonSerialization['userTypes'],
+      ),
       fullName: jsonSerialization['fullName'] as String?,
       bio: jsonSerialization['bio'] as String?,
       interests: jsonSerialization['interests'] == null
           ? null
-          : _i3.Protocol().deserialize<List<String>>(
+          : _i4.Protocol().deserialize<List<String>>(
               jsonSerialization['interests'],
             ),
       learningGoal: jsonSerialization['learningGoal'] as String?,
+      websiteUrl: jsonSerialization['websiteUrl'] as String?,
+      profileImageUrl: jsonSerialization['profileImageUrl'] as String?,
+      expertise: jsonSerialization['expertise'] == null
+          ? null
+          : _i4.Protocol().deserialize<List<String>>(
+              jsonSerialization['expertise'],
+            ),
       createdAt: _i1.DateTimeJsonExtension.fromJson(
         jsonSerialization['createdAt'],
       ),
@@ -84,17 +103,30 @@ abstract class VedaUserProfile
   /// Link to the authenticated user (creates authUserId automatically)
   _i2.AuthUser? authUser;
 
+  /// User types: can be both learner (mobile) and creator (web).
+  /// User must register on each platform separately to get both roles.
+  List<_i3.UserType> userTypes;
+
   /// Full name of the user.
   String? fullName;
 
-  /// User biography or context description (max 200 characters).
+  /// User biography or context description (max 500 characters for creators, 200 for learners).
   String? bio;
 
-  /// List of interest tags selected during onboarding.
+  /// List of interest tags selected during onboarding (learners only).
   List<String>? interests;
 
-  /// Learning goal: 'career_pivot' or 'academic_depth'.
+  /// Learning goal: 'career_pivot' or 'academic_depth' (learners only).
   String? learningGoal;
+
+  /// Creator website or portfolio URL (creators only).
+  String? websiteUrl;
+
+  /// Profile image URL (avatar) (creators only for now).
+  String? profileImageUrl;
+
+  /// Areas of expertise or teaching topics (creators only).
+  List<String>? expertise;
 
   /// Timestamp when the profile was created.
   DateTime createdAt;
@@ -112,10 +144,14 @@ abstract class VedaUserProfile
     int? id,
     _i1.UuidValue? authUserId,
     _i2.AuthUser? authUser,
+    List<_i3.UserType>? userTypes,
     String? fullName,
     String? bio,
     List<String>? interests,
     String? learningGoal,
+    String? websiteUrl,
+    String? profileImageUrl,
+    List<String>? expertise,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -126,10 +162,14 @@ abstract class VedaUserProfile
       if (id != null) 'id': id,
       'authUserId': authUserId.toJson(),
       if (authUser != null) 'authUser': authUser?.toJson(),
+      'userTypes': userTypes.toJson(valueToJson: (v) => v.toJson()),
       if (fullName != null) 'fullName': fullName,
       if (bio != null) 'bio': bio,
       if (interests != null) 'interests': interests?.toJson(),
       if (learningGoal != null) 'learningGoal': learningGoal,
+      if (websiteUrl != null) 'websiteUrl': websiteUrl,
+      if (profileImageUrl != null) 'profileImageUrl': profileImageUrl,
+      if (expertise != null) 'expertise': expertise?.toJson(),
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -142,10 +182,14 @@ abstract class VedaUserProfile
       if (id != null) 'id': id,
       'authUserId': authUserId.toJson(),
       if (authUser != null) 'authUser': authUser?.toJsonForProtocol(),
+      'userTypes': userTypes.toJson(valueToJson: (v) => v.toJson()),
       if (fullName != null) 'fullName': fullName,
       if (bio != null) 'bio': bio,
       if (interests != null) 'interests': interests?.toJson(),
       if (learningGoal != null) 'learningGoal': learningGoal,
+      if (websiteUrl != null) 'websiteUrl': websiteUrl,
+      if (profileImageUrl != null) 'profileImageUrl': profileImageUrl,
+      if (expertise != null) 'expertise': expertise?.toJson(),
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -188,20 +232,28 @@ class _VedaUserProfileImpl extends VedaUserProfile {
     int? id,
     required _i1.UuidValue authUserId,
     _i2.AuthUser? authUser,
+    required List<_i3.UserType> userTypes,
     String? fullName,
     String? bio,
     List<String>? interests,
     String? learningGoal,
+    String? websiteUrl,
+    String? profileImageUrl,
+    List<String>? expertise,
     required DateTime createdAt,
     required DateTime updatedAt,
   }) : super._(
          id: id,
          authUserId: authUserId,
          authUser: authUser,
+         userTypes: userTypes,
          fullName: fullName,
          bio: bio,
          interests: interests,
          learningGoal: learningGoal,
+         websiteUrl: websiteUrl,
+         profileImageUrl: profileImageUrl,
+         expertise: expertise,
          createdAt: createdAt,
          updatedAt: updatedAt,
        );
@@ -214,10 +266,14 @@ class _VedaUserProfileImpl extends VedaUserProfile {
     Object? id = _Undefined,
     _i1.UuidValue? authUserId,
     Object? authUser = _Undefined,
+    List<_i3.UserType>? userTypes,
     Object? fullName = _Undefined,
     Object? bio = _Undefined,
     Object? interests = _Undefined,
     Object? learningGoal = _Undefined,
+    Object? websiteUrl = _Undefined,
+    Object? profileImageUrl = _Undefined,
+    Object? expertise = _Undefined,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -227,12 +283,20 @@ class _VedaUserProfileImpl extends VedaUserProfile {
       authUser: authUser is _i2.AuthUser?
           ? authUser
           : this.authUser?.copyWith(),
+      userTypes: userTypes ?? this.userTypes.map((e0) => e0).toList(),
       fullName: fullName is String? ? fullName : this.fullName,
       bio: bio is String? ? bio : this.bio,
       interests: interests is List<String>?
           ? interests
           : this.interests?.map((e0) => e0).toList(),
       learningGoal: learningGoal is String? ? learningGoal : this.learningGoal,
+      websiteUrl: websiteUrl is String? ? websiteUrl : this.websiteUrl,
+      profileImageUrl: profileImageUrl is String?
+          ? profileImageUrl
+          : this.profileImageUrl,
+      expertise: expertise is List<String>?
+          ? expertise
+          : this.expertise?.map((e0) => e0).toList(),
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -246,6 +310,13 @@ class VedaUserProfileUpdateTable extends _i1.UpdateTable<VedaUserProfileTable> {
     _i1.UuidValue value,
   ) => _i1.ColumnValue(
     table.authUserId,
+    value,
+  );
+
+  _i1.ColumnValue<List<_i3.UserType>, List<_i3.UserType>> userTypes(
+    List<_i3.UserType> value,
+  ) => _i1.ColumnValue(
+    table.userTypes,
     value,
   );
 
@@ -271,6 +342,23 @@ class VedaUserProfileUpdateTable extends _i1.UpdateTable<VedaUserProfileTable> {
         value,
       );
 
+  _i1.ColumnValue<String, String> websiteUrl(String? value) => _i1.ColumnValue(
+    table.websiteUrl,
+    value,
+  );
+
+  _i1.ColumnValue<String, String> profileImageUrl(String? value) =>
+      _i1.ColumnValue(
+        table.profileImageUrl,
+        value,
+      );
+
+  _i1.ColumnValue<List<String>, List<String>> expertise(List<String>? value) =>
+      _i1.ColumnValue(
+        table.expertise,
+        value,
+      );
+
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
       _i1.ColumnValue(
         table.createdAt,
@@ -292,6 +380,10 @@ class VedaUserProfileTable extends _i1.Table<int?> {
       'authUserId',
       this,
     );
+    userTypes = _i1.ColumnSerializable<List<_i3.UserType>>(
+      'userTypes',
+      this,
+    );
     fullName = _i1.ColumnString(
       'fullName',
       this,
@@ -306,6 +398,18 @@ class VedaUserProfileTable extends _i1.Table<int?> {
     );
     learningGoal = _i1.ColumnString(
       'learningGoal',
+      this,
+    );
+    websiteUrl = _i1.ColumnString(
+      'websiteUrl',
+      this,
+    );
+    profileImageUrl = _i1.ColumnString(
+      'profileImageUrl',
+      this,
+    );
+    expertise = _i1.ColumnSerializable<List<String>>(
+      'expertise',
       this,
     );
     createdAt = _i1.ColumnDateTime(
@@ -325,17 +429,30 @@ class VedaUserProfileTable extends _i1.Table<int?> {
   /// Link to the authenticated user (creates authUserId automatically)
   _i2.AuthUserTable? _authUser;
 
+  /// User types: can be both learner (mobile) and creator (web).
+  /// User must register on each platform separately to get both roles.
+  late final _i1.ColumnSerializable<List<_i3.UserType>> userTypes;
+
   /// Full name of the user.
   late final _i1.ColumnString fullName;
 
-  /// User biography or context description (max 200 characters).
+  /// User biography or context description (max 500 characters for creators, 200 for learners).
   late final _i1.ColumnString bio;
 
-  /// List of interest tags selected during onboarding.
+  /// List of interest tags selected during onboarding (learners only).
   late final _i1.ColumnSerializable<List<String>> interests;
 
-  /// Learning goal: 'career_pivot' or 'academic_depth'.
+  /// Learning goal: 'career_pivot' or 'academic_depth' (learners only).
   late final _i1.ColumnString learningGoal;
+
+  /// Creator website or portfolio URL (creators only).
+  late final _i1.ColumnString websiteUrl;
+
+  /// Profile image URL (avatar) (creators only for now).
+  late final _i1.ColumnString profileImageUrl;
+
+  /// Areas of expertise or teaching topics (creators only).
+  late final _i1.ColumnSerializable<List<String>> expertise;
 
   /// Timestamp when the profile was created.
   late final _i1.ColumnDateTime createdAt;
@@ -360,10 +477,14 @@ class VedaUserProfileTable extends _i1.Table<int?> {
   List<_i1.Column> get columns => [
     id,
     authUserId,
+    userTypes,
     fullName,
     bio,
     interests,
     learningGoal,
+    websiteUrl,
+    profileImageUrl,
+    expertise,
     createdAt,
     updatedAt,
   ];

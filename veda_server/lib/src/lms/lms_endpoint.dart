@@ -2,17 +2,27 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:serverpod/serverpod.dart';
+import 'package:serverpod_auth_idp_server/core.dart'; // gives authUserId extension
 import '../gemini/gemini_service.dart';
 import '../generated/protocol.dart';
 
 /// LMS Endpoint - handles course management operations
 class LmsEndpoint extends Endpoint {
+  @override
+  bool get requireLogin => true;
+
   // ---------------------------------------------------------------------------
   // Course Management
   // ---------------------------------------------------------------------------
 
   /// Creates a new course with default draft visibility
   Future<Course> createCourse(Session session, Course course) async {
+    final authInfo = session.authenticated;
+    if (authInfo == null) {
+      throw Exception('User not authenticated');
+    }
+
+    course.creatorId = authInfo.authUserId;
     course.createdAt = DateTime.now();
     course.updatedAt = DateTime.now();
     return await Course.db.insertRow(session, course);
@@ -69,6 +79,23 @@ class LmsEndpoint extends Endpoint {
 
         return whereExpr;
       },
+      orderBy: (t) => t.createdAt,
+      orderDescending: true,
+    );
+  }
+
+  /// Lists courses created by the authenticated user
+  Future<List<Course>> listMyCourses(Session session) async {
+    final authInfo = session.authenticated;
+    if (authInfo == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final creatorId = authInfo.authUserId;
+
+    return await Course.db.find(
+      session,
+      where: (t) => t.creatorId.equals(creatorId),
       orderBy: (t) => t.createdAt,
       orderDescending: true,
     );
@@ -218,6 +245,83 @@ class LmsEndpoint extends Endpoint {
     final result = await KnowledgeFile.db.deleteWhere(
       session,
       where: (t) => t.id.equals(fileId),
+    );
+    return result.isNotEmpty;
+  }
+
+  // ---------------------------------------------------------------------------
+  // File Creation Draft Management
+  // ---------------------------------------------------------------------------
+
+  /// Create or update a file creation draft
+  Future<FileCreationDraft> saveDraft(
+    Session session,
+    FileCreationDraft draft,
+  ) async {
+    final authInfo = session.authenticated;
+    if (authInfo == null) {
+      throw Exception('User not authenticated');
+    }
+
+    // Always set creator from authenticated user
+    draft.creatorId = authInfo.authUserId;
+    draft.updatedAt = DateTime.now();
+
+    if (draft.id == null) {
+      // New draft
+      draft.createdAt = DateTime.now();
+      return await FileCreationDraft.db.insertRow(session, draft);
+    } else {
+      // Update existing draft
+      return await FileCreationDraft.db.updateRow(session, draft);
+    }
+  }
+
+  /// Get all drafts for the authenticated user
+  Future<List<FileCreationDraft>> getMyDrafts(Session session) async {
+    final authInfo = session.authenticated;
+    if (authInfo == null) {
+      throw Exception('User not authenticated');
+    }
+
+    return await FileCreationDraft.db.find(
+      session,
+      where: (t) => t.creatorId.equals(authInfo.authUserId),
+      orderBy: (t) => t.updatedAt,
+      orderDescending: true,
+    );
+  }
+
+  /// Get drafts for a specific course
+  Future<List<FileCreationDraft>> getDraftsForCourse(
+    Session session,
+    int courseId,
+  ) async {
+    final authInfo = session.authenticated;
+    if (authInfo == null) {
+      throw Exception('User not authenticated');
+    }
+
+    return await FileCreationDraft.db.find(
+      session,
+      where: (t) =>
+          t.creatorId.equals(authInfo.authUserId) &
+          t.courseId.equals(courseId),
+      orderBy: (t) => t.updatedAt,
+      orderDescending: true,
+    );
+  }
+
+  /// Get a specific draft by ID
+  Future<FileCreationDraft?> getDraft(Session session, int draftId) async {
+    return await FileCreationDraft.db.findById(session, draftId);
+  }
+
+  /// Delete a draft
+  Future<bool> deleteDraft(Session session, int draftId) async {
+    final result = await FileCreationDraft.db.deleteWhere(
+      session,
+      where: (t) => t.id.equals(draftId),
     );
     return result.isNotEmpty;
   }

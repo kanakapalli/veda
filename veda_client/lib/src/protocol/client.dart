@@ -26,13 +26,15 @@ import 'package:veda_client/src/protocol/greetings/greeting.dart' as _i9;
 import 'package:veda_client/src/protocol/lms/course.dart' as _i10;
 import 'package:veda_client/src/protocol/lms/course_visibility.dart' as _i11;
 import 'package:veda_client/src/protocol/lms/knowledge_file.dart' as _i12;
-import 'package:veda_client/src/protocol/lms/module.dart' as _i13;
-import 'package:veda_client/src/protocol/lms/topic.dart' as _i14;
-import 'package:veda_client/src/protocol/lms/module_item.dart' as _i15;
-import 'package:veda_client/src/protocol/profiles/user_profile.dart' as _i16;
+import 'package:veda_client/src/protocol/lms/file_creation_draft.dart' as _i13;
+import 'package:veda_client/src/protocol/lms/module.dart' as _i14;
+import 'package:veda_client/src/protocol/lms/topic.dart' as _i15;
+import 'package:veda_client/src/protocol/lms/module_item.dart' as _i16;
+import 'package:veda_client/src/protocol/profiles/user_profile.dart' as _i17;
+import 'package:veda_client/src/protocol/profiles/user_type.dart' as _i18;
 import 'package:veda_client/src/protocol/profiles/user_profile_with_email.dart'
-    as _i17;
-import 'protocol.dart' as _i18;
+    as _i19;
+import 'protocol.dart' as _i20;
 
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
 /// are made available on the server and enable the corresponding sign-in widget
@@ -391,6 +393,14 @@ class EndpointLms extends _i2.EndpointRef {
     },
   );
 
+  /// Lists courses created by the authenticated user
+  _i3.Future<List<_i10.Course>> listMyCourses() =>
+      caller.callServerEndpoint<List<_i10.Course>>(
+        'lms',
+        'listMyCourses',
+        {},
+      );
+
   /// Adds a knowledge file to a course
   /// Adds a knowledge file to a course and generates embedding
   _i3.Future<_i12.KnowledgeFile> addFileToCourse(_i12.KnowledgeFile file) =>
@@ -431,25 +441,64 @@ class EndpointLms extends _i2.EndpointRef {
     {'fileId': fileId},
   );
 
+  /// Create or update a file creation draft
+  _i3.Future<_i13.FileCreationDraft> saveDraft(_i13.FileCreationDraft draft) =>
+      caller.callServerEndpoint<_i13.FileCreationDraft>(
+        'lms',
+        'saveDraft',
+        {'draft': draft},
+      );
+
+  /// Get all drafts for the authenticated user
+  _i3.Future<List<_i13.FileCreationDraft>> getMyDrafts() =>
+      caller.callServerEndpoint<List<_i13.FileCreationDraft>>(
+        'lms',
+        'getMyDrafts',
+        {},
+      );
+
+  /// Get drafts for a specific course
+  _i3.Future<List<_i13.FileCreationDraft>> getDraftsForCourse(int courseId) =>
+      caller.callServerEndpoint<List<_i13.FileCreationDraft>>(
+        'lms',
+        'getDraftsForCourse',
+        {'courseId': courseId},
+      );
+
+  /// Get a specific draft by ID
+  _i3.Future<_i13.FileCreationDraft?> getDraft(int draftId) =>
+      caller.callServerEndpoint<_i13.FileCreationDraft?>(
+        'lms',
+        'getDraft',
+        {'draftId': draftId},
+      );
+
+  /// Delete a draft
+  _i3.Future<bool> deleteDraft(int draftId) => caller.callServerEndpoint<bool>(
+    'lms',
+    'deleteDraft',
+    {'draftId': draftId},
+  );
+
   /// Gets all modules for a course with items and topics
-  _i3.Future<List<_i13.Module>> getModules(int courseId) =>
-      caller.callServerEndpoint<List<_i13.Module>>(
+  _i3.Future<List<_i14.Module>> getModules(int courseId) =>
+      caller.callServerEndpoint<List<_i14.Module>>(
         'lms',
         'getModules',
         {'courseId': courseId},
       );
 
   /// Creates a new module
-  _i3.Future<_i13.Module> createModule(_i13.Module module) =>
-      caller.callServerEndpoint<_i13.Module>(
+  _i3.Future<_i14.Module> createModule(_i14.Module module) =>
+      caller.callServerEndpoint<_i14.Module>(
         'lms',
         'createModule',
         {'module': module},
       );
 
   /// Updates an existing module
-  _i3.Future<_i13.Module> updateModule(_i13.Module module) =>
-      caller.callServerEndpoint<_i13.Module>(
+  _i3.Future<_i14.Module> updateModule(_i14.Module module) =>
+      caller.callServerEndpoint<_i14.Module>(
         'lms',
         'updateModule',
         {'module': module},
@@ -472,40 +521,40 @@ class EndpointLms extends _i2.EndpointRef {
       );
 
   /// Creates a new topic
-  _i3.Future<_i14.Topic> createTopic(_i14.Topic topic) =>
-      caller.callServerEndpoint<_i14.Topic>(
+  _i3.Future<_i15.Topic> createTopic(_i15.Topic topic) =>
+      caller.callServerEndpoint<_i15.Topic>(
         'lms',
         'createTopic',
         {'topic': topic},
       );
 
   /// Updates an existing topic
-  _i3.Future<_i14.Topic> updateTopic(_i14.Topic topic) =>
-      caller.callServerEndpoint<_i14.Topic>(
+  _i3.Future<_i15.Topic> updateTopic(_i15.Topic topic) =>
+      caller.callServerEndpoint<_i15.Topic>(
         'lms',
         'updateTopic',
         {'topic': topic},
       );
 
   /// Gets a topic by ID
-  _i3.Future<_i14.Topic?> getTopicById(int id) =>
-      caller.callServerEndpoint<_i14.Topic?>(
+  _i3.Future<_i15.Topic?> getTopicById(int id) =>
+      caller.callServerEndpoint<_i15.Topic?>(
         'lms',
         'getTopicById',
         {'id': id},
       );
 
   /// Creates a module item (links topic to module)
-  _i3.Future<_i15.ModuleItem> createModuleItem(_i15.ModuleItem moduleItem) =>
-      caller.callServerEndpoint<_i15.ModuleItem>(
+  _i3.Future<_i16.ModuleItem> createModuleItem(_i16.ModuleItem moduleItem) =>
+      caller.callServerEndpoint<_i16.ModuleItem>(
         'lms',
         'createModuleItem',
         {'moduleItem': moduleItem},
       );
 
   /// Updates a module item
-  _i3.Future<_i15.ModuleItem> updateModuleItem(_i15.ModuleItem moduleItem) =>
-      caller.callServerEndpoint<_i15.ModuleItem>(
+  _i3.Future<_i16.ModuleItem> updateModuleItem(_i16.ModuleItem moduleItem) =>
+      caller.callServerEndpoint<_i16.ModuleItem>(
         'lms',
         'updateModuleItem',
         {'moduleItem': moduleItem},
@@ -524,10 +573,10 @@ class EndpointLms extends _i2.EndpointRef {
   /// and uploaded knowledge files. Deletes existing modules first.
   ///
   /// [customPrompt] - Optional custom instructions for structuring the TOC
-  _i3.Future<List<_i13.Module>> generateCourseTableOfContents(
+  _i3.Future<List<_i14.Module>> generateCourseTableOfContents(
     int courseId, {
     String? customPrompt,
-  }) => caller.callServerEndpoint<List<_i13.Module>>(
+  }) => caller.callServerEndpoint<List<_i14.Module>>(
     'lms',
     'generateCourseTableOfContents',
     {
@@ -587,25 +636,35 @@ class EndpointVedaUserProfile extends _i2.EndpointRef {
   String get name => 'vedaUserProfile';
 
   /// Creates or updates a user profile for the authenticated user.
-  _i3.Future<_i16.VedaUserProfile> upsertProfile({
+  /// Adds the specified userType to the user's roles if not already present.
+  /// This allows users to be both learners and creators by registering on both platforms.
+  _i3.Future<_i17.VedaUserProfile> upsertProfile({
+    required _i18.UserType userType,
     required String fullName,
     String? bio,
-    required List<String> interests,
+    List<String>? interests,
     String? learningGoal,
-  }) => caller.callServerEndpoint<_i16.VedaUserProfile>(
+    String? websiteUrl,
+    String? profileImageUrl,
+    List<String>? expertise,
+  }) => caller.callServerEndpoint<_i17.VedaUserProfile>(
     'vedaUserProfile',
     'upsertProfile',
     {
+      'userType': userType,
       'fullName': fullName,
       'bio': bio,
       'interests': interests,
       'learningGoal': learningGoal,
+      'websiteUrl': websiteUrl,
+      'profileImageUrl': profileImageUrl,
+      'expertise': expertise,
     },
   );
 
   /// Gets the profile for the authenticated user.
-  _i3.Future<_i16.VedaUserProfile?> getMyProfile() =>
-      caller.callServerEndpoint<_i16.VedaUserProfile?>(
+  _i3.Future<_i17.VedaUserProfile?> getMyProfile() =>
+      caller.callServerEndpoint<_i17.VedaUserProfile?>(
         'vedaUserProfile',
         'getMyProfile',
         {},
@@ -619,8 +678,8 @@ class EndpointVedaUserProfile extends _i2.EndpointRef {
   );
 
   /// Gets the user profile with email from Serverpod's auth system.
-  _i3.Future<_i17.VedaUserProfileWithEmail?> getMyProfileWithEmail() =>
-      caller.callServerEndpoint<_i17.VedaUserProfileWithEmail?>(
+  _i3.Future<_i19.VedaUserProfileWithEmail?> getMyProfileWithEmail() =>
+      caller.callServerEndpoint<_i19.VedaUserProfileWithEmail?>(
         'vedaUserProfile',
         'getMyProfileWithEmail',
         {},
@@ -658,7 +717,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i18.Protocol(),
+         _i20.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,

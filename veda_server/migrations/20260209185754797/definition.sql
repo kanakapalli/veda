@@ -66,6 +66,7 @@ CREATE INDEX "course_indices_title_idx" ON "course_indices" USING btree ("title"
 --
 CREATE TABLE "courses" (
     "id" bigserial PRIMARY KEY,
+    "creatorId" uuid NOT NULL,
     "title" text NOT NULL,
     "description" text,
     "courseImageUrl" text,
@@ -80,6 +81,27 @@ CREATE TABLE "courses" (
 -- Indexes
 CREATE INDEX "courses_visibility_idx" ON "courses" USING btree ("visibility");
 CREATE INDEX "courses_created_at_idx" ON "courses" USING btree ("createdAt");
+CREATE INDEX "courses_creator_idx" ON "courses" USING btree ("creatorId");
+
+--
+-- Class FileCreationDraft as table file_creation_drafts
+--
+CREATE TABLE "file_creation_drafts" (
+    "id" bigserial PRIMARY KEY,
+    "creatorId" uuid NOT NULL,
+    "courseId" bigint,
+    "title" text NOT NULL,
+    "content" text NOT NULL,
+    "chatHistory" text,
+    "fileType" text NOT NULL DEFAULT 'md'::text,
+    "createdAt" timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexes
+CREATE INDEX "file_creation_drafts_creator_idx" ON "file_creation_drafts" USING btree ("creatorId");
+CREATE INDEX "file_creation_drafts_course_idx" ON "file_creation_drafts" USING btree ("courseId");
+CREATE INDEX "file_creation_drafts_updated_idx" ON "file_creation_drafts" USING btree ("updatedAt");
 
 --
 -- Class KnowledgeFile as table knowledge_files
@@ -91,7 +113,7 @@ CREATE TABLE "knowledge_files" (
     "fileSize" bigint NOT NULL,
     "fileType" text,
     "textContent" text,
-    "embedding" vector(768),
+    "embedding" vector(3072),
     "uploadedAt" timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "courseId" bigint NOT NULL,
     "course" json,
@@ -100,7 +122,6 @@ CREATE TABLE "knowledge_files" (
 
 -- Indexes
 CREATE INDEX "knowledge_files_course_id_idx" ON "knowledge_files" USING btree ("courseId");
-CREATE INDEX "knowledge_files_embedding_hnsw_idx" ON "knowledge_files" USING hnsw ("embedding" vector_cosine_ops) WITH (m=16, ef_construction=64);
 
 --
 -- Class ModuleItem as table module_items
@@ -112,8 +133,7 @@ CREATE TABLE "module_items" (
     "moduleId" bigint NOT NULL,
     "module" json,
     "topicId" bigint NOT NULL,
-    "topic" json,
-    "_modulesItemsModulesId" bigint
+    "topic" json
 );
 
 -- Indexes
@@ -134,6 +154,7 @@ CREATE TABLE "modules" (
     "videoUrl" text,
     "courseId" bigint NOT NULL,
     "course" json,
+    "items" json,
     "_coursesModulesCoursesId" bigint
 );
 
@@ -164,10 +185,14 @@ CREATE INDEX "topics_title_idx" ON "topics" USING btree ("title");
 CREATE TABLE "veda_user_profile" (
     "id" bigserial PRIMARY KEY,
     "authUserId" uuid NOT NULL,
+    "userTypes" json NOT NULL,
     "fullName" text,
     "bio" text,
     "interests" json,
     "learningGoal" text,
+    "websiteUrl" text,
+    "profileImageUrl" text,
+    "expertise" json,
     "createdAt" timestamp without time zone NOT NULL,
     "updatedAt" timestamp without time zone NOT NULL
 );
@@ -610,6 +635,26 @@ ALTER TABLE ONLY "course_indices"
     ON UPDATE NO ACTION;
 
 --
+-- Foreign relations for "courses" table
+--
+ALTER TABLE ONLY "courses"
+    ADD CONSTRAINT "courses_fk_0"
+    FOREIGN KEY("creatorId")
+    REFERENCES "serverpod_auth_core_user"("id")
+    ON DELETE SET NULL
+    ON UPDATE NO ACTION;
+
+--
+-- Foreign relations for "file_creation_drafts" table
+--
+ALTER TABLE ONLY "file_creation_drafts"
+    ADD CONSTRAINT "file_creation_drafts_fk_0"
+    FOREIGN KEY("creatorId")
+    REFERENCES "serverpod_auth_core_user"("id")
+    ON DELETE SET NULL
+    ON UPDATE NO ACTION;
+
+--
 -- Foreign relations for "knowledge_files" table
 --
 ALTER TABLE ONLY "knowledge_files"
@@ -639,12 +684,6 @@ ALTER TABLE ONLY "module_items"
     FOREIGN KEY("topicId")
     REFERENCES "topics"("id")
     ON DELETE CASCADE
-    ON UPDATE NO ACTION;
-ALTER TABLE ONLY "module_items"
-    ADD CONSTRAINT "module_items_fk_2"
-    FOREIGN KEY("_modulesItemsModulesId")
-    REFERENCES "modules"("id")
-    ON DELETE NO ACTION
     ON UPDATE NO ACTION;
 
 --
@@ -842,9 +881,9 @@ ALTER TABLE ONLY "serverpod_auth_core_session"
 -- MIGRATION VERSION FOR veda
 --
 INSERT INTO "serverpod_migrations" ("module", "version", "timestamp")
-    VALUES ('veda', '20260208173112567', now())
+    VALUES ('veda', '20260209185754797', now())
     ON CONFLICT ("module")
-    DO UPDATE SET "version" = '20260208173112567', "timestamp" = now();
+    DO UPDATE SET "version" = '20260209185754797', "timestamp" = now();
 
 --
 -- MIGRATION VERSION FOR serverpod

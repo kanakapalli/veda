@@ -29,7 +29,7 @@ class GeminiService {
       'function_declarations': [
         {
           'name': 'updateCourseTitle',
-          'description': 'Update the title of the current course',
+          'description': 'Update the title of the current course. ONLY use when user EXPLICITLY requests to change the title (e.g., "change the title to...", "rename the course to..."). Do NOT use based on conversation context alone.',
           'parameters': {
             'type': 'object',
             'properties': {
@@ -43,7 +43,7 @@ class GeminiService {
         },
         {
           'name': 'updateCourseDescription',
-          'description': 'Update the description of the current course',
+          'description': 'Update the description of the current course. ONLY use when user EXPLICITLY requests to change the description (e.g., "update the description to...", "change description..."). Do NOT use based on conversation context alone.',
           'parameters': {
             'type': 'object',
             'properties': {
@@ -58,7 +58,7 @@ class GeminiService {
         {
           'name': 'updateCourseVisibility',
           'description':
-              'Update the visibility status of the current course (draft, public, or private)',
+              'Update the visibility status of the current course (draft, public, or private). ONLY use when user explicitly requests to change visibility (e.g., "make it public", "set to draft", "change visibility to private").',
           'parameters': {
             'type': 'object',
             'properties': {
@@ -74,7 +74,7 @@ class GeminiService {
         {
           'name': 'updateCourseVideoUrl',
           'description':
-              'Update the intro video URL for the current course',
+              'Update the intro video URL for the current course. ONLY use when user explicitly provides a video URL to add/update (e.g., "add this video as intro: https://...", "set the intro video to...").',
           'parameters': {
             'type': 'object',
             'properties': {
@@ -89,13 +89,13 @@ class GeminiService {
         {
           'name': 'updateCourseSystemPrompt',
           'description':
-              'Update the AI system prompt used for course interactions',
+              'Update the AI system prompt that guides teaching mode and content generation for this course. Use PROACTIVELY as you learn about the course through conversation - update whenever you gain insights about: topic focus, target audience, teaching style, learning objectives, difficulty level, or subject matter context. You can call this multiple times as understanding evolves. Do NOT ask permission - just update it intelligently to capture course context.',
           'parameters': {
             'type': 'object',
             'properties': {
               'systemPrompt': {
                 'type': 'string',
-                'description': 'The system prompt to guide AI behavior for this course'
+                'description': 'Comprehensive system prompt describing the course focus, target audience, teaching approach, and key context for AI-generated content. Example: "Beginner-friendly Python course for data science professionals transitioning from Excel. Focus on practical applications, real-world datasets, and gradual progression from basic syntax to pandas and visualization."'
               },
             },
             'required': ['systemPrompt'],

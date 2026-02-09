@@ -11,16 +11,20 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
-import '../lms/course_visibility.dart' as _i2;
-import '../lms/module.dart' as _i3;
-import '../lms/course_index.dart' as _i4;
-import '../lms/knowledge_file.dart' as _i5;
-import 'package:veda_client/src/protocol/protocol.dart' as _i6;
+import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
+    as _i2;
+import '../lms/course_visibility.dart' as _i3;
+import '../lms/module.dart' as _i4;
+import '../lms/course_index.dart' as _i5;
+import '../lms/knowledge_file.dart' as _i6;
+import 'package:veda_client/src/protocol/protocol.dart' as _i7;
 
 /// Course container - defines high-level course settings and AI parameters
 abstract class Course implements _i1.SerializableModel {
   Course._({
     this.id,
+    required this.creatorId,
+    this.creator,
     required this.title,
     this.description,
     this.courseImageUrl,
@@ -38,29 +42,39 @@ abstract class Course implements _i1.SerializableModel {
 
   factory Course({
     int? id,
+    required _i1.UuidValue creatorId,
+    _i2.AuthUser? creator,
     required String title,
     String? description,
     String? courseImageUrl,
     String? bannerImageUrl,
     String? videoUrl,
-    required _i2.CourseVisibility visibility,
+    required _i3.CourseVisibility visibility,
     String? systemPrompt,
     DateTime? createdAt,
     DateTime? updatedAt,
-    List<_i3.Module>? modules,
-    List<_i4.CourseIndex>? courseIndices,
-    List<_i5.KnowledgeFile>? knowledgeFiles,
+    List<_i4.Module>? modules,
+    List<_i5.CourseIndex>? courseIndices,
+    List<_i6.KnowledgeFile>? knowledgeFiles,
   }) = _CourseImpl;
 
   factory Course.fromJson(Map<String, dynamic> jsonSerialization) {
     return Course(
       id: jsonSerialization['id'] as int?,
+      creatorId: _i1.UuidValueJsonExtension.fromJson(
+        jsonSerialization['creatorId'],
+      ),
+      creator: jsonSerialization['creator'] == null
+          ? null
+          : _i7.Protocol().deserialize<_i2.AuthUser>(
+              jsonSerialization['creator'],
+            ),
       title: jsonSerialization['title'] as String,
       description: jsonSerialization['description'] as String?,
       courseImageUrl: jsonSerialization['courseImageUrl'] as String?,
       bannerImageUrl: jsonSerialization['bannerImageUrl'] as String?,
       videoUrl: jsonSerialization['videoUrl'] as String?,
-      visibility: _i2.CourseVisibility.fromJson(
+      visibility: _i3.CourseVisibility.fromJson(
         (jsonSerialization['visibility'] as String),
       ),
       systemPrompt: jsonSerialization['systemPrompt'] as String?,
@@ -72,17 +86,17 @@ abstract class Course implements _i1.SerializableModel {
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
       modules: jsonSerialization['modules'] == null
           ? null
-          : _i6.Protocol().deserialize<List<_i3.Module>>(
+          : _i7.Protocol().deserialize<List<_i4.Module>>(
               jsonSerialization['modules'],
             ),
       courseIndices: jsonSerialization['courseIndices'] == null
           ? null
-          : _i6.Protocol().deserialize<List<_i4.CourseIndex>>(
+          : _i7.Protocol().deserialize<List<_i5.CourseIndex>>(
               jsonSerialization['courseIndices'],
             ),
       knowledgeFiles: jsonSerialization['knowledgeFiles'] == null
           ? null
-          : _i6.Protocol().deserialize<List<_i5.KnowledgeFile>>(
+          : _i7.Protocol().deserialize<List<_i6.KnowledgeFile>>(
               jsonSerialization['knowledgeFiles'],
             ),
     );
@@ -92,6 +106,11 @@ abstract class Course implements _i1.SerializableModel {
   /// database or if it has been fetched from the database. Otherwise,
   /// the id will be null.
   int? id;
+
+  _i1.UuidValue creatorId;
+
+  /// Link to the authenticated user who created this course (nullable, set by server)
+  _i2.AuthUser? creator;
 
   /// Course title
   String title;
@@ -109,7 +128,7 @@ abstract class Course implements _i1.SerializableModel {
   String? videoUrl;
 
   /// Course visibility status (draft, public, private)
-  _i2.CourseVisibility visibility;
+  _i3.CourseVisibility visibility;
 
   /// System prompt for AI course generation
   String? systemPrompt;
@@ -121,37 +140,41 @@ abstract class Course implements _i1.SerializableModel {
   DateTime updatedAt;
 
   /// List of modules in this course
-  List<_i3.Module>? modules;
+  List<_i4.Module>? modules;
 
   /// List of course indices (searchable tags/keywords)
-  List<_i4.CourseIndex>? courseIndices;
+  List<_i5.CourseIndex>? courseIndices;
 
   /// List of knowledge files for AI generation
-  List<_i5.KnowledgeFile>? knowledgeFiles;
+  List<_i6.KnowledgeFile>? knowledgeFiles;
 
   /// Returns a shallow copy of this [Course]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
   Course copyWith({
     int? id,
+    _i1.UuidValue? creatorId,
+    _i2.AuthUser? creator,
     String? title,
     String? description,
     String? courseImageUrl,
     String? bannerImageUrl,
     String? videoUrl,
-    _i2.CourseVisibility? visibility,
+    _i3.CourseVisibility? visibility,
     String? systemPrompt,
     DateTime? createdAt,
     DateTime? updatedAt,
-    List<_i3.Module>? modules,
-    List<_i4.CourseIndex>? courseIndices,
-    List<_i5.KnowledgeFile>? knowledgeFiles,
+    List<_i4.Module>? modules,
+    List<_i5.CourseIndex>? courseIndices,
+    List<_i6.KnowledgeFile>? knowledgeFiles,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'Course',
       if (id != null) 'id': id,
+      'creatorId': creatorId.toJson(),
+      if (creator != null) 'creator': creator?.toJson(),
       'title': title,
       if (description != null) 'description': description,
       if (courseImageUrl != null) 'courseImageUrl': courseImageUrl,
@@ -183,20 +206,24 @@ class _Undefined {}
 class _CourseImpl extends Course {
   _CourseImpl({
     int? id,
+    required _i1.UuidValue creatorId,
+    _i2.AuthUser? creator,
     required String title,
     String? description,
     String? courseImageUrl,
     String? bannerImageUrl,
     String? videoUrl,
-    required _i2.CourseVisibility visibility,
+    required _i3.CourseVisibility visibility,
     String? systemPrompt,
     DateTime? createdAt,
     DateTime? updatedAt,
-    List<_i3.Module>? modules,
-    List<_i4.CourseIndex>? courseIndices,
-    List<_i5.KnowledgeFile>? knowledgeFiles,
+    List<_i4.Module>? modules,
+    List<_i5.CourseIndex>? courseIndices,
+    List<_i6.KnowledgeFile>? knowledgeFiles,
   }) : super._(
          id: id,
+         creatorId: creatorId,
+         creator: creator,
          title: title,
          description: description,
          courseImageUrl: courseImageUrl,
@@ -217,12 +244,14 @@ class _CourseImpl extends Course {
   @override
   Course copyWith({
     Object? id = _Undefined,
+    _i1.UuidValue? creatorId,
+    Object? creator = _Undefined,
     String? title,
     Object? description = _Undefined,
     Object? courseImageUrl = _Undefined,
     Object? bannerImageUrl = _Undefined,
     Object? videoUrl = _Undefined,
-    _i2.CourseVisibility? visibility,
+    _i3.CourseVisibility? visibility,
     Object? systemPrompt = _Undefined,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -232,6 +261,8 @@ class _CourseImpl extends Course {
   }) {
     return Course(
       id: id is int? ? id : this.id,
+      creatorId: creatorId ?? this.creatorId,
+      creator: creator is _i2.AuthUser? ? creator : this.creator?.copyWith(),
       title: title ?? this.title,
       description: description is String? ? description : this.description,
       courseImageUrl: courseImageUrl is String?
@@ -245,13 +276,13 @@ class _CourseImpl extends Course {
       systemPrompt: systemPrompt is String? ? systemPrompt : this.systemPrompt,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      modules: modules is List<_i3.Module>?
+      modules: modules is List<_i4.Module>?
           ? modules
           : this.modules?.map((e0) => e0.copyWith()).toList(),
-      courseIndices: courseIndices is List<_i4.CourseIndex>?
+      courseIndices: courseIndices is List<_i5.CourseIndex>?
           ? courseIndices
           : this.courseIndices?.map((e0) => e0.copyWith()).toList(),
-      knowledgeFiles: knowledgeFiles is List<_i5.KnowledgeFile>?
+      knowledgeFiles: knowledgeFiles is List<_i6.KnowledgeFile>?
           ? knowledgeFiles
           : this.knowledgeFiles?.map((e0) => e0.copyWith()).toList(),
     );

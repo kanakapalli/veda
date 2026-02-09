@@ -25,10 +25,4 @@ fields:
 indexes:
   knowledge_files_course_id_idx:
     fields: courseId
-  knowledge_files_embedding_hnsw_idx:
-    fields: embedding
-    type: hnsw
-    distanceFunction: cosine
-    parameters:
-      m: 16
-      ef_construction: 64
+

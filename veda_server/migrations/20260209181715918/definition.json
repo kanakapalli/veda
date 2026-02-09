@@ -167,6 +167,13 @@
         },
         {
           "__className__": "serverpod.ColumnDefinition",
+          "name": "creatorId",
+          "columnType": 7,
+          "isNullable": false,
+          "dartType": "UuidValue"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
           "name": "title",
           "columnType": 0,
           "isNullable": false,
@@ -231,7 +238,22 @@
           "dartType": "DateTime"
         }
       ],
-      "foreignKeys": [],
+      "foreignKeys": [
+        {
+          "__className__": "serverpod.ForeignKeyDefinition",
+          "constraintName": "courses_fk_0",
+          "columns": [
+            "creatorId"
+          ],
+          "referenceTable": "serverpod_auth_core_user",
+          "referenceTableSchema": "public",
+          "referenceColumns": [
+            "id"
+          ],
+          "onUpdate": 3,
+          "onDelete": 0
+        }
+      ],
       "indexes": [
         {
           "__className__": "serverpod.IndexDefinition",
@@ -274,6 +296,20 @@
           "type": "btree",
           "isUnique": false,
           "isPrimary": false
+        },
+        {
+          "__className__": "serverpod.IndexDefinition",
+          "indexName": "courses_creator_idx",
+          "elements": [
+            {
+              "__className__": "serverpod.IndexElementDefinition",
+              "type": 0,
+              "definition": "creatorId"
+            }
+          ],
+          "type": "btree",
+          "isUnique": false,
+          "isPrimary": false
         }
       ],
       "managed": true
@@ -309,10 +345,32 @@
         },
         {
           "__className__": "serverpod.ColumnDefinition",
+          "name": "fileSize",
+          "columnType": 6,
+          "isNullable": false,
+          "dartType": "int"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
           "name": "fileType",
           "columnType": 0,
           "isNullable": true,
           "dartType": "String?"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "textContent",
+          "columnType": 0,
+          "isNullable": true,
+          "dartType": "String?"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "embedding",
+          "columnType": 10,
+          "isNullable": true,
+          "dartType": "Vector(3072)?",
+          "vectorDimension": 3072
         },
         {
           "__className__": "serverpod.ColumnDefinition",
@@ -462,13 +520,6 @@
           "columnType": 8,
           "isNullable": true,
           "dartType": "protocol:Topic?"
-        },
-        {
-          "__className__": "serverpod.ColumnDefinition",
-          "name": "_modulesItemsModulesId",
-          "columnType": 6,
-          "isNullable": true,
-          "dartType": "int?"
         }
       ],
       "foreignKeys": [
@@ -499,20 +550,6 @@
           ],
           "onUpdate": 3,
           "onDelete": 4
-        },
-        {
-          "__className__": "serverpod.ForeignKeyDefinition",
-          "constraintName": "module_items_fk_2",
-          "columns": [
-            "_modulesItemsModulesId"
-          ],
-          "referenceTable": "modules",
-          "referenceTableSchema": "public",
-          "referenceColumns": [
-            "id"
-          ],
-          "onUpdate": 3,
-          "onDelete": 3
         }
       ],
       "indexes": [
@@ -645,6 +682,13 @@
           "columnType": 8,
           "isNullable": true,
           "dartType": "protocol:Course?"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "items",
+          "columnType": 8,
+          "isNullable": true,
+          "dartType": "List<protocol:ModuleItem>?"
         },
         {
           "__className__": "serverpod.ColumnDefinition",
@@ -854,6 +898,13 @@
         },
         {
           "__className__": "serverpod.ColumnDefinition",
+          "name": "userTypes",
+          "columnType": 8,
+          "isNullable": false,
+          "dartType": "List<protocol:UserType>"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
           "name": "fullName",
           "columnType": 0,
           "isNullable": true,
@@ -879,6 +930,27 @@
           "columnType": 0,
           "isNullable": true,
           "dartType": "String?"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "websiteUrl",
+          "columnType": 0,
+          "isNullable": true,
+          "dartType": "String?"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "profileImageUrl",
+          "columnType": 0,
+          "isNullable": true,
+          "dartType": "String?"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "expertise",
+          "columnType": 8,
+          "isNullable": true,
+          "dartType": "List<String>?"
         },
         {
           "__className__": "serverpod.ColumnDefinition",
@@ -3714,7 +3786,7 @@
     {
       "__className__": "serverpod.DatabaseMigrationVersion",
       "module": "veda",
-      "version": "20260205125828538"
+      "version": "20260209181715918"
     },
     {
       "__className__": "serverpod.DatabaseMigrationVersion",

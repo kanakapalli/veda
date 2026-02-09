@@ -10,6 +10,7 @@ import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
         EmailAccountRequestExceptionReason,
         EmailAccountPasswordResetException,
         EmailAccountPasswordResetExceptionReason;
+import 'package:veda_client/veda_client.dart';
 import '../../main.dart';
 import 'auth_flow_screen.dart';
 import 'stark_widgets.dart';
@@ -181,6 +182,7 @@ class _OtpScreenState extends State<OtpScreen>
       // Save profile data (email is already in auth system)
       try {
         await client.vedaUserProfile.upsertProfile(
+          userType: UserType.learner,
           fullName: widget.registrationData!.fullName,
           bio: widget.registrationData!.bio.isEmpty
               ? null

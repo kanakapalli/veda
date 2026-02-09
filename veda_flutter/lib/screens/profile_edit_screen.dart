@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../design_system/veda_colors.dart';
 import '../main.dart';
+import 'package:veda_client/veda_client.dart';
 
 class ProfileEditScreen extends StatefulWidget {
   const ProfileEditScreen({super.key});
@@ -526,7 +527,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     try {
       // Save profile to server
       // Note: Email is read-only and managed by Serverpod auth system
+      // We update as learner type - the endpoint will preserve existing creator role if present
       await client.vedaUserProfile.upsertProfile(
+        userType: UserType.learner,
         fullName: _nameController.text.trim(),
         bio: _bioController.text.trim().isEmpty
             ? null

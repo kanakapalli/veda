@@ -39,7 +39,7 @@ class _CourseOnboardingScreenState extends State<CourseOnboardingScreen> {
 
   Future<void> _loadCourses() async {
     try {
-      final courses = await client.lms.listCourses();
+      final courses = await client.lms.listMyCourses();
       if (mounted) {
         setState(() {
           _courses = courses;
@@ -115,8 +115,10 @@ class _CourseOnboardingScreenState extends State<CourseOnboardingScreen> {
     try {
       print('🚀 [Onboarding] Creating course...');
 
-      // Create the course via API with draft visibility (image uploaded after)
+      // Create the course via API with draft visibility
+      // Note: creatorId uses a placeholder - server will set the actual value from authenticated user
       final course = Course(
+        creatorId: UuidValue.fromString('00000000-0000-0000-0000-000000000000'), // Placeholder - server will override
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
         visibility: CourseVisibility.draft,

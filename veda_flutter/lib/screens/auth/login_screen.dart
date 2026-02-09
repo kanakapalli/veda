@@ -52,6 +52,12 @@ class _LoginScreenState extends State<LoginScreen>
       duration: const Duration(milliseconds: 500),
     );
     _animController.forward();
+
+    // Pre-fill with default credentials for development
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _emailController.text = 'kanakapalli.anurag@gmail.com';
+      _passwordController.text = 'asdasdasd';
+    });
   }
 
   @override

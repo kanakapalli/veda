@@ -68,6 +68,12 @@ class _AuthFlowScreenState extends State<AuthFlowScreen> {
   void _popToLogin({String? successMessage}) {
     _successMessage = successMessage;
     Navigator.of(context).popUntil((route) => route.isFirst);
+    // Clear message after frame so it displays once
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() => _successMessage = null);
+      }
+    });
   }
 
   @override

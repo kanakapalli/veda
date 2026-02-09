@@ -1,0 +1,5 @@
+### User type enum to distinguish between learners and creators
+enum: UserType
+values:
+  - learner    # Mobile app users who consume courses
+  - creator    # Web users who create courses
