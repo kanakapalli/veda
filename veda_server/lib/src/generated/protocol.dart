@@ -39,9 +39,10 @@ import 'package:veda_server/src/generated/lms/course.dart' as _i24;
 import 'package:veda_server/src/generated/lms/knowledge_file.dart' as _i25;
 import 'package:veda_server/src/generated/lms/file_creation_draft.dart' as _i26;
 import 'package:veda_server/src/generated/lms/module.dart' as _i27;
-import 'package:veda_server/src/generated/lms/enrollment.dart' as _i28;
-import 'package:veda_server/src/generated/lms/module_progress.dart' as _i29;
-import 'package:veda_server/src/generated/profiles/user_profile.dart' as _i30;
+import 'package:veda_server/src/generated/lms/topic.dart' as _i28;
+import 'package:veda_server/src/generated/lms/enrollment.dart' as _i29;
+import 'package:veda_server/src/generated/lms/module_progress.dart' as _i30;
+import 'package:veda_server/src/generated/profiles/user_profile.dart' as _i31;
 export 'gemini/chat_message.dart';
 export 'gemini/chat_request.dart';
 export 'gemini/chat_response.dart';
@@ -1643,13 +1644,17 @@ class Protocol extends _i1.SerializationManagerServer {
       return (data as List).map((e) => deserialize<_i27.Module>(e)).toList()
           as T;
     }
-    if (t == List<_i28.Enrollment>) {
-      return (data as List).map((e) => deserialize<_i28.Enrollment>(e)).toList()
+    if (t == List<_i28.Topic>) {
+      return (data as List).map((e) => deserialize<_i28.Topic>(e)).toList()
           as T;
     }
-    if (t == List<_i29.ModuleProgress>) {
+    if (t == List<_i29.Enrollment>) {
+      return (data as List).map((e) => deserialize<_i29.Enrollment>(e)).toList()
+          as T;
+    }
+    if (t == List<_i30.ModuleProgress>) {
       return (data as List)
-              .map((e) => deserialize<_i29.ModuleProgress>(e))
+              .map((e) => deserialize<_i30.ModuleProgress>(e))
               .toList()
           as T;
     }
@@ -1662,9 +1667,9 @@ class Protocol extends _i1.SerializationManagerServer {
               : null)
           as T;
     }
-    if (t == List<_i30.VedaUserProfile>) {
+    if (t == List<_i31.VedaUserProfile>) {
       return (data as List)
-              .map((e) => deserialize<_i30.VedaUserProfile>(e))
+              .map((e) => deserialize<_i31.VedaUserProfile>(e))
               .toList()
           as T;
     }

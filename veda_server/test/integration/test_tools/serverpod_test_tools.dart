@@ -1493,6 +1493,68 @@ class _LmsEndpoint {
     });
   }
 
+  _i3.Future<List<_i15.Topic>> searchTopics(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required String keyword,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'lms',
+            method: 'searchTopics',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'lms',
+          methodName: 'searchTopics',
+          parameters: _i1.testObjectToJson({'keyword': keyword}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i15.Topic>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i10.Course?> getCourseByTopicId(
+    _i1.TestSessionBuilder sessionBuilder,
+    int topicId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'lms',
+            method: 'getCourseByTopicId',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'lms',
+          methodName: 'getCourseByTopicId',
+          parameters: _i1.testObjectToJson({'topicId': topicId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i10.Course?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _i3.Future<_i16.ModuleItem> createModuleItem(
     _i1.TestSessionBuilder sessionBuilder,
     _i16.ModuleItem moduleItem,

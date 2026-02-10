@@ -29,10 +29,14 @@ class _SearchScreenState extends State<SearchScreen> {
   List<Course> _recentCourses = [];
   List<VedaUserProfile> _creatorResults = [];
   List<Course> _courseResults = [];
+  List<Topic> _topicResults = [];
   bool _isSearching = false;
   bool _hasSearched = false;
   String _currentQuery = '';
   SearchFilter _activeFilter = SearchFilter.coaches;
+
+  // Cache: creatorId -> display name
+  final Map<String, String> _creatorNameCache = {};
 
   static const String _historyKey = 'search_history';
   static const String _recentCoachesKey = 'recent_coaches';
@@ -215,6 +219,31 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
+  Future<void> _onTopicTap(Topic topic) async {
+    if (topic.id == null) return;
+    try {
+      final course = await client.lms.getCourseByTopicId(topic.id!);
+      if (course != null && mounted) {
+        _saveRecentCourse(course);
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => CourseDetailScreen(course: course),
+          ),
+        );
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No course found for this topic')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    }
+  }
+
   void _onSearchChanged() {
     _searchTimer?.cancel();
 
@@ -227,6 +256,7 @@ class _SearchScreenState extends State<SearchScreen> {
           _hasSearched = false;
           _creatorResults = [];
           _courseResults = [];
+          _topicResults = [];
           _currentQuery = '';
         });
       }
@@ -245,22 +275,43 @@ class _SearchScreenState extends State<SearchScreen> {
       final results = await Future.wait([
         client.vedaUserProfile.listCreators(username: query),
         client.lms.listCourses(keyword: query, visibility: CourseVisibility.public),
+        client.lms.searchTopics(keyword: query),
       ]);
 
       final creators = results[0] as List<VedaUserProfile>;
       final courses = results[1] as List<Course>;
+      final topics = results[2] as List<Topic>;
 
-      print('✅ Found ${creators.length} creators and ${courses.length} courses');
+      print('✅ Found ${creators.length} creators, ${courses.length} courses, ${topics.length} topics');
+
+      // Resolve creator names for courses
+      final creatorIds = courses
+          .map((c) => c.creatorId.toString())
+          .where((id) => !_creatorNameCache.containsKey(id))
+          .toSet();
+
+      if (creatorIds.isNotEmpty) {
+        await Future.wait(creatorIds.map((id) async {
+          try {
+            final profile = await client.vedaUserProfile
+                .getUserProfileById(UuidValue.fromString(id));
+            if (profile?.profile?.fullName != null) {
+              _creatorNameCache[id] = profile!.profile!.fullName!;
+            }
+          } catch (_) {}
+        }));
+      }
 
       if (mounted) {
         setState(() {
           _creatorResults = creators;
           _courseResults = courses;
+          _topicResults = topics;
           _isSearching = false;
           _hasSearched = true;
         });
 
-        if (creators.isNotEmpty || courses.isNotEmpty) {
+        if (creators.isNotEmpty || courses.isNotEmpty || topics.isNotEmpty) {
           _addToHistory(query);
         }
       }
@@ -469,9 +520,9 @@ class _SearchScreenState extends State<SearchScreen> {
                       ...List.generate(_recentCourses.length, (index) {
                         return Padding(
                           padding: EdgeInsets.only(
-                            bottom: index < _recentCourses.length - 1 ? 16 : 0,
+                            bottom: index < _recentCourses.length - 1 ? 12 : 0,
                           ),
-                          child: _CourseCard(
+                          child: _RecentCourseCard(
                             course: _recentCourses[index],
                             onTap: () => _onCourseTap(_recentCourses[index]),
                           ),
@@ -505,13 +556,16 @@ class _SearchScreenState extends State<SearchScreen> {
                     if (_activeFilter == SearchFilter.courses) ...[
                       if (_courseResults.isNotEmpty)
                         ...List.generate(_courseResults.length, (index) {
+                          final course = _courseResults[index];
+                          final creatorName = _creatorNameCache[course.creatorId.toString()];
                           return Padding(
                             padding: EdgeInsets.only(
                               bottom: index < _courseResults.length - 1 ? 16 : 0,
                             ),
                             child: _CourseCard(
-                              course: _courseResults[index],
-                              onTap: () => _onCourseTap(_courseResults[index]),
+                              course: course,
+                              creatorName: creatorName,
+                              onTap: () => _onCourseTap(course),
                             ),
                           );
                         })
@@ -519,8 +573,23 @@ class _SearchScreenState extends State<SearchScreen> {
                         _buildNoResults(),
                     ],
 
-                    // Topics (not implemented)
-                    if (_activeFilter == SearchFilter.topics) _buildNoResults(),
+                    // Topics
+                    if (_activeFilter == SearchFilter.topics) ...[
+                      if (_topicResults.isNotEmpty)
+                        ...List.generate(_topicResults.length, (index) {
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              bottom: index < _topicResults.length - 1 ? 12 : 0,
+                            ),
+                            child: _TopicCard(
+                              topic: _topicResults[index],
+                              onTap: () => _onTopicTap(_topicResults[index]),
+                            ),
+                          );
+                        })
+                      else
+                        _buildNoResults(),
+                    ],
                   ],
                 ],
               ),
@@ -840,13 +909,132 @@ class _CoachCard extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
+// RECENT COURSE CARD — compact, no banner/image
+// ---------------------------------------------------------------------------
+class _RecentCourseCard extends StatelessWidget {
+  final Course course;
+  final VoidCallback? onTap;
+
+  const _RecentCourseCard({required this.course, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: VedaColors.white, width: 1),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Icon placeholder
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                border: Border.all(color: VedaColors.white, width: 1),
+              ),
+              child: const Icon(
+                Icons.school_outlined,
+                color: VedaColors.white,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 16),
+            // Course info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    course.title.toUpperCase(),
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: VedaColors.white,
+                      letterSpacing: 0.3,
+                      height: 1.2,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: VedaColors.white.withValues(alpha: 0.4),
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(
+                          'COURSE',
+                          style: GoogleFonts.jetBrainsMono(
+                            fontSize: 7,
+                            fontWeight: FontWeight.w700,
+                            color: VedaColors.white.withValues(alpha: 0.7),
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                      ),
+                      if (course.visibility == CourseVisibility.public) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: VedaColors.white.withValues(alpha: 0.4),
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            'PUBLIC',
+                            style: GoogleFonts.jetBrainsMono(
+                              fontSize: 7,
+                              fontWeight: FontWeight.w700,
+                              color: VedaColors.white.withValues(alpha: 0.7),
+                              letterSpacing: 1.0,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Icon(
+              Icons.arrow_forward,
+              color: VedaColors.white,
+              size: 16,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
 // COURSE CARD - Matches design
 // ---------------------------------------------------------------------------
 class _CourseCard extends StatelessWidget {
   final Course course;
+  final String? creatorName;
   final VoidCallback? onTap;
 
-  const _CourseCard({required this.course, this.onTap});
+  const _CourseCard({required this.course, this.creatorName, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -960,7 +1148,7 @@ class _CourseCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'DR. THORNE',
+                          creatorName?.toUpperCase() ?? 'CREATOR',
                           style: GoogleFonts.jetBrainsMono(
                             fontSize: 9,
                             fontWeight: FontWeight.w700,
@@ -970,18 +1158,124 @@ class _CourseCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                    // Module count
-                    Text(
-                      '12',
-                      style: GoogleFonts.inter(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: VedaColors.white,
+                    // Topic count
+                    if (course.courseTopics != null && course.courseTopics!.isNotEmpty)
+                      Text(
+                        '${course.courseTopics!.length}',
+                        style: GoogleFonts.inter(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: VedaColors.white,
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// TOPIC CARD – shown in Topics filter results
+// ---------------------------------------------------------------------------
+class _TopicCard extends StatelessWidget {
+  final Topic topic;
+  final VoidCallback? onTap;
+
+  const _TopicCard({required this.topic, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        border: Border.all(color: VedaColors.white, width: 1),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Icon
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              border: Border.all(color: VedaColors.white, width: 1),
+            ),
+            child: topic.imageUrl != null
+                ? Image.network(
+                    topic.imageUrl!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const Icon(
+                      Icons.topic_outlined,
+                      color: VedaColors.white,
+                      size: 20,
+                    ),
+                  )
+                : const Icon(
+                    Icons.topic_outlined,
+                    color: VedaColors.white,
+                    size: 20,
+                  ),
+          ),
+          const SizedBox(width: 16),
+          // Topic info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  topic.title.toUpperCase(),
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: VedaColors.white,
+                    letterSpacing: 0.3,
+                    height: 1.2,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (topic.description != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    topic.description!,
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w400,
+                      color: VedaColors.zinc500,
+                      height: 1.3,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: VedaColors.white.withValues(alpha: 0.4),
+                width: 1,
+              ),
+            ),
+            child: Text(
+              'TOPIC',
+              style: GoogleFonts.jetBrainsMono(
+                fontSize: 7,
+                fontWeight: FontWeight.w700,
+                color: VedaColors.white.withValues(alpha: 0.7),
+                letterSpacing: 1.0,
+              ),
             ),
           ),
         ],

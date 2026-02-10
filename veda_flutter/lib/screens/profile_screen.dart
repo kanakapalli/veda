@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:veda_client/veda_client.dart';
 
 import '../design_system/veda_colors.dart';
+import '../main.dart';
 import 'profile_edit_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -17,6 +19,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _notificationsEnabled = true;
   bool _biometricEnabled = false;
   bool _signingOut = false;
+
+  VedaUserProfile? _profile;
+  String? _email;
+  int _enrolledCount = 0;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    try {
+      final results = await Future.wait([
+        client.vedaUserProfile.getMyProfileWithEmail(),
+        client.lms.getMyEnrollments(),
+      ]);
+
+      final profileWithEmail = results[0] as VedaUserProfileWithEmail?;
+      final enrollments = results[1] as List<Enrollment>;
+
+      if (mounted) {
+        setState(() {
+          _profile = profileWithEmail?.profile;
+          _email = profileWithEmail?.email;
+          _enrolledCount = enrollments.length;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading profile: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,31 +81,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          'VEDA OS // V.1',
-                          style: GoogleFonts.jetBrainsMono(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w400,
-                            color: VedaColors.zinc500,
-                            letterSpacing: 2.0,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'USER_ID',
-                          style: GoogleFonts.inter(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w900,
-                            color: VedaColors.white,
-                            letterSpacing: -1.5,
-                            height: 1.0,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      'VEDA OS // V.1',
+                      style: GoogleFonts.jetBrainsMono(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w400,
+                        color: VedaColors.zinc500,
+                        letterSpacing: 2.0,
+                      ),
                     ),
                     GestureDetector(
                       onTap: () {
@@ -74,7 +96,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           MaterialPageRoute(
                             builder: (context) => const ProfileEditScreen(),
                           ),
-                        );
+                        ).then((_) => _loadProfile());
                       },
                       child: Container(
                         width: 40,
@@ -134,6 +156,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // AVATAR
   // ---------------------------------------------------------------------------
   Widget _buildAvatarSection() {
+    final displayName = _profile?.fullName?.toUpperCase() ?? 'USER';
+    final initials = _profile?.fullName != null
+        ? _profile!.fullName!.split(' ').map((w) => w.isNotEmpty ? w[0] : '').take(2).join().toUpperCase()
+        : '?';
+    final hasImage = _profile?.profileImageUrl != null;
+
     return Center(
       child: Column(
         children: [
@@ -153,61 +181,109 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     shape: BoxShape.circle,
                     color: VedaColors.zinc800,
                   ),
-                  child: const Icon(
-                    Icons.person,
-                    size: 48,
-                    color: VedaColors.zinc500,
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: VedaColors.white,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: VedaColors.black, width: 2),
-                  ),
-                  child: const Icon(
-                    Icons.verified,
-                    size: 14,
-                    color: VedaColors.black,
-                  ),
+                  child: hasImage
+                      ? ClipOval(
+                          child: Image.network(
+                            _profile!.profileImageUrl!,
+                            fit: BoxFit.cover,
+                            width: 112,
+                            height: 112,
+                            errorBuilder: (_, __, ___) => Center(
+                              child: Text(
+                                initials,
+                                style: GoogleFonts.inter(
+                                  fontSize: 36,
+                                  fontWeight: FontWeight.w900,
+                                  color: VedaColors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                      : Center(
+                          child: Text(
+                            initials,
+                            style: GoogleFonts.inter(
+                              fontSize: 36,
+                              fontWeight: FontWeight.w900,
+                              color: VedaColors.white,
+                            ),
+                          ),
+                        ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 20),
           // Name
-          Text(
-            'ALEX VEDA',
-            style: GoogleFonts.inter(
-              fontSize: 28,
-              fontWeight: FontWeight.w900,
-              color: VedaColors.white,
-              letterSpacing: -0.5,
-            ),
-          ),
-          const SizedBox(height: 8),
-          // Rank badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: VedaColors.zinc900,
-              border: Border.all(color: VedaColors.zinc700, width: 1),
-            ),
-            child: Text(
-              'LEARNER_RANK: 04',
+          _isLoading
+              ? Container(
+                  width: 160,
+                  height: 28,
+                  color: VedaColors.zinc800,
+                )
+              : Text(
+                  displayName,
+                  style: GoogleFonts.inter(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w900,
+                    color: VedaColors.white,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+          if (_email != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              _email!,
               style: GoogleFonts.jetBrainsMono(
                 fontSize: 11,
                 fontWeight: FontWeight.w400,
                 color: VedaColors.zinc500,
-                letterSpacing: 2.0,
+                letterSpacing: 0.5,
               ),
             ),
-          ),
+          ],
+          const SizedBox(height: 8),
+          // Bio
+          if (_profile?.bio != null && _profile!.bio!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                _profile!.bio!,
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: VedaColors.white.withValues(alpha: 0.7),
+                  height: 1.4,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          // Interests
+          if (_profile?.interests != null && _profile!.interests!.isNotEmpty)
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              alignment: WrapAlignment.center,
+              children: _profile!.interests!.map((interest) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: VedaColors.white, width: 1),
+                  ),
+                  child: Text(
+                    interest.toUpperCase(),
+                    style: GoogleFonts.jetBrainsMono(
+                      fontSize: 8,
+                      fontWeight: FontWeight.w700,
+                      color: VedaColors.white,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
         ],
       ),
     );
@@ -441,7 +517,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '12 SAVED COURSES \u2022 45 NOTES',
+                      '$_enrolledCount ENROLLED COURSES',
                       style: GoogleFonts.jetBrainsMono(
                         fontSize: 9,
                         color: VedaColors.zinc500,

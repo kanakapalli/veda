@@ -882,6 +882,43 @@ class Endpoints extends _i1.EndpointDispatch {
                 params['id'],
               ),
         ),
+        'searchTopics': _i1.MethodConnector(
+          name: 'searchTopics',
+          params: {
+            'keyword': _i1.ParameterDescription(
+              name: 'keyword',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).searchTopics(
+                session,
+                keyword: params['keyword'],
+              ),
+        ),
+        'getCourseByTopicId': _i1.MethodConnector(
+          name: 'getCourseByTopicId',
+          params: {
+            'topicId': _i1.ParameterDescription(
+              name: 'topicId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['lms'] as _i6.LmsEndpoint).getCourseByTopicId(
+                    session,
+                    params['topicId'],
+                  ),
+        ),
         'createModuleItem': _i1.MethodConnector(
           name: 'createModuleItem',
           params: {

@@ -555,6 +555,22 @@ class EndpointLms extends _i2.EndpointRef {
         {'id': id},
       );
 
+  /// Searches topics by keyword (case-insensitive partial match on title)
+  _i3.Future<List<_i15.Topic>> searchTopics({required String keyword}) =>
+      caller.callServerEndpoint<List<_i15.Topic>>(
+        'lms',
+        'searchTopics',
+        {'keyword': keyword},
+      );
+
+  /// Finds the Course that contains a given Topic (via ModuleItem → Module → Course)
+  _i3.Future<_i10.Course?> getCourseByTopicId(int topicId) =>
+      caller.callServerEndpoint<_i10.Course?>(
+        'lms',
+        'getCourseByTopicId',
+        {'topicId': topicId},
+      );
+
   /// Creates a module item (links topic to module)
   _i3.Future<_i16.ModuleItem> createModuleItem(_i16.ModuleItem moduleItem) =>
       caller.callServerEndpoint<_i16.ModuleItem>(

@@ -45,6 +45,8 @@
 	<string>Veda uses speech recognition to let you ask questions during lessons.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Veda needs microphone access to capture your voice for speech recognition.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Veda needs photo library access to let you choose a profile picture.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

@@ -351,4 +351,18 @@ class UploadService {
       pathBuilder: (_, ext) => 'courses/$courseId/indices/$indexId/image.$ext',
     );
   }
+
+  // ---------------------------------------------------------------------------
+  // Profile uploads
+  // ---------------------------------------------------------------------------
+
+  Future<UploadResult?> pickAndUploadProfileImage() {
+    return _pickAndUpload(
+      allowedExtensions: _imageExtensions,
+      pathBuilder: (_, ext) {
+        final ts = DateTime.now().millisecondsSinceEpoch;
+        return 'profiles/$ts/avatar.$ext';
+      },
+    );
+  }
 }

@@ -61,9 +61,7 @@ class VedaUserProfileEndpoint extends Endpoint {
         websiteUrl: userType == UserType.creator
             ? (websiteUrl ?? existing.websiteUrl)
             : existing.websiteUrl,
-        profileImageUrl: userType == UserType.creator
-            ? (profileImageUrl ?? existing.profileImageUrl)
-            : existing.profileImageUrl,
+        profileImageUrl: profileImageUrl ?? existing.profileImageUrl,
         expertise: userType == UserType.creator
             ? (expertise ?? existing.expertise)
             : existing.expertise,

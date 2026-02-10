@@ -456,6 +456,36 @@ class LmsEndpoint extends Endpoint {
     return await Topic.db.findById(session, id);
   }
 
+  /// Searches topics by keyword (case-insensitive partial match on title)
+  Future<List<Topic>> searchTopics(
+    Session session, {
+    required String keyword,
+  }) async {
+    return await Topic.db.find(
+      session,
+      where: (t) => t.title.ilike('%$keyword%'),
+      orderBy: (t) => t.createdAt,
+      orderDescending: true,
+    );
+  }
+
+  /// Finds the Course that contains a given Topic (via ModuleItem → Module → Course)
+  Future<Course?> getCourseByTopicId(Session session, int topicId) async {
+    // Step 1: Find a ModuleItem that references this topic
+    final moduleItem = await ModuleItem.db.findFirstRow(
+      session,
+      where: (mi) => mi.topicId.equals(topicId),
+    );
+    if (moduleItem == null) return null;
+
+    // Step 2: Get the Module to find courseId
+    final module = await Module.db.findById(session, moduleItem.moduleId);
+    if (module == null) return null;
+
+    // Step 3: Get the Course
+    return await Course.db.findById(session, module.courseId);
+  }
+
   // ---------------------------------------------------------------------------
   // Module Item Management
   // ---------------------------------------------------------------------------

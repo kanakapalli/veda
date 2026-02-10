@@ -42,6 +42,8 @@ lms:
   - createTopic:
   - updateTopic:
   - getTopicById:
+  - searchTopics:
+  - getCourseByTopicId:
   - createModuleItem:
   - updateModuleItem:
   - deleteModuleItem:

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../design_system/veda_colors.dart';
 import '../main.dart';
+import '../services/upload_service.dart';
 import 'package:veda_client/veda_client.dart';
 
 class ProfileEditScreen extends StatefulWidget {
@@ -19,7 +20,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   final int _bioMaxLength = 200;
   bool _isSaving = false;
   bool _isLoading = true;
+  bool _isUploadingImage = false;
 
+  String? _profileImageUrl;
   List<String> _interests = [];
   String? _learningGoal;
 
@@ -50,6 +53,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           _bioController.text = profileWithEmail?.profile?.bio ?? '';
           _interests = profileWithEmail?.profile?.interests ?? [];
           _learningGoal = profileWithEmail?.profile?.learningGoal;
+          _profileImageUrl = profileWithEmail?.profile?.profileImageUrl;
           _isLoading = false;
         });
       }
@@ -211,6 +215,16 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   // IDENTITY VISUAL
   // ---------------------------------------------------------------------------
   Widget _buildIdentityVisualSection() {
+    final hasImage = _profileImageUrl != null && _profileImageUrl!.isNotEmpty;
+    final initials = _nameController.text.isNotEmpty
+        ? _nameController.text
+            .split(' ')
+            .map((w) => w.isNotEmpty ? w[0] : '')
+            .take(2)
+            .join()
+            .toUpperCase()
+        : '?';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -246,19 +260,39 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               ),
               child: Stack(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        color: VedaColors.zinc900,
+                  if (hasImage)
+                    Image.network(
+                      _profileImageUrl!,
+                      width: 128,
+                      height: 128,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Center(
+                        child: Text(
+                          initials,
+                          style: GoogleFonts.inter(
+                            fontSize: 36,
+                            fontWeight: FontWeight.w900,
+                            color: VedaColors.white,
+                          ),
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.person,
-                        size: 60,
-                        color: VedaColors.zinc500,
+                    )
+                  else
+                    Container(
+                      width: 128,
+                      height: 128,
+                      color: VedaColors.zinc900,
+                      child: Center(
+                        child: Text(
+                          initials,
+                          style: GoogleFonts.inter(
+                            fontSize: 36,
+                            fontWeight: FontWeight.w900,
+                            color: VedaColors.white,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
                   // Online indicator
                   Positioned(
                     top: 4,
@@ -279,32 +313,56 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             // Upload button
             Expanded(
               child: GestureDetector(
-                onTap: _handleAvatarUpload,
+                onTap: _isUploadingImage ? null : _handleAvatarUpload,
                 child: Container(
                   height: 128,
                   decoration: BoxDecoration(
                     border: Border.all(color: VedaColors.white, width: 2),
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.cloud_upload_outlined,
-                        color: VedaColors.white,
-                        size: 40,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'UPDATE_AVATAR',
-                        style: GoogleFonts.jetBrainsMono(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: VedaColors.white,
-                          letterSpacing: 2.0,
+                  child: _isUploadingImage
+                      ? Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const SizedBox(
+                              width: 28,
+                              height: 28,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: VedaColors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'UPLOADING...',
+                              style: GoogleFonts.jetBrainsMono(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: VedaColors.white,
+                                letterSpacing: 2.0,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.cloud_upload_outlined,
+                              color: VedaColors.white,
+                              size: 40,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              hasImage ? 'CHANGE_AVATAR' : 'UPLOAD_AVATAR',
+                              style: GoogleFonts.jetBrainsMono(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: VedaColors.white,
+                                letterSpacing: 2.0,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
             ),
@@ -487,21 +545,73 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   // ---------------------------------------------------------------------------
   // HANDLERS
   // ---------------------------------------------------------------------------
-  void _handleAvatarUpload() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'AVATAR UPLOAD COMING SOON',
-          style: GoogleFonts.jetBrainsMono(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.0,
+  Future<void> _handleAvatarUpload() async {
+    setState(() => _isUploadingImage = true);
+
+    try {
+      final result = await UploadService.instance.pickAndUploadProfileImage();
+
+      if (result == null) {
+        // User cancelled picker
+        if (mounted) setState(() => _isUploadingImage = false);
+        return;
+      }
+
+      if (!result.success) {
+        if (mounted) {
+          setState(() => _isUploadingImage = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'UPLOAD FAILED: ${result.error ?? 'Unknown error'}',
+                style: GoogleFonts.jetBrainsMono(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              backgroundColor: const Color(0xFFEF5350),
+            ),
+          );
+        }
+        return;
+      }
+
+      if (mounted) {
+        setState(() {
+          _profileImageUrl = result.publicUrl;
+          _isUploadingImage = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'AVATAR UPLOADED SUCCESSFULLY',
+              style: GoogleFonts.jetBrainsMono(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            backgroundColor: VedaColors.zinc900,
+            behavior: SnackBarBehavior.floating,
           ),
-        ),
-        backgroundColor: VedaColors.zinc900,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isUploadingImage = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'ERROR: ${e.toString()}',
+              style: GoogleFonts.jetBrainsMono(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            backgroundColor: const Color(0xFFEF5350),
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _handleSave() async {
@@ -536,6 +646,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             : _bioController.text.trim(),
         interests: _interests,
         learningGoal: _learningGoal,
+        profileImageUrl: _profileImageUrl,
       );
 
       if (mounted) {
