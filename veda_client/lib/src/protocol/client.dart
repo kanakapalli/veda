@@ -401,6 +401,15 @@ class EndpointLms extends _i2.EndpointRef {
         {},
       );
 
+  /// Lists all courses created by a specific creator.
+  /// Public endpoint - does not require authentication.
+  _i3.Future<List<_i10.Course>> getCoursesByCreator(_i2.UuidValue creatorId) =>
+      caller.callServerEndpoint<List<_i10.Course>>(
+        'lms',
+        'getCoursesByCreator',
+        {'creatorId': creatorId},
+      );
+
   /// Adds a knowledge file to a course
   /// Adds a knowledge file to a course and generates embedding
   _i3.Future<_i12.KnowledgeFile> addFileToCourse(_i12.KnowledgeFile file) =>
@@ -684,6 +693,33 @@ class EndpointVedaUserProfile extends _i2.EndpointRef {
         'getMyProfileWithEmail',
         {},
       );
+
+  /// Gets any user's profile with email by their authUserId.
+  /// Public endpoint - does not require the user to be the owner.
+  _i3.Future<_i19.VedaUserProfileWithEmail?> getUserProfileById(
+    _i2.UuidValue authUserId,
+  ) => caller.callServerEndpoint<_i19.VedaUserProfileWithEmail?>(
+    'vedaUserProfile',
+    'getUserProfileById',
+    {'authUserId': authUserId},
+  );
+
+  /// Lists all creator profiles with optional filters.
+  /// Filters:
+  /// - username: Filter by fullName (case-insensitive partial match)
+  /// - topic: Filter by expertise field (case-insensitive partial match)
+  /// Returns only profiles where userTypes contains UserType.creator.
+  _i3.Future<List<_i17.VedaUserProfile>> listCreators({
+    String? username,
+    String? topic,
+  }) => caller.callServerEndpoint<List<_i17.VedaUserProfile>>(
+    'vedaUserProfile',
+    'listCreators',
+    {
+      'username': username,
+      'topic': topic,
+    },
+  );
 }
 
 class Modules {

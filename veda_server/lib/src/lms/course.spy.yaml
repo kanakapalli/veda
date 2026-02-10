@@ -19,6 +19,8 @@ fields:
   visibility: CourseVisibility
   ### System prompt for AI course generation
   systemPrompt: String?
+  ### Course topics/tags for categorization and search
+  courseTopics: List<String>?
   ### Timestamp when the course was created
   createdAt: DateTime, default=now
   ### Timestamp when the course was last updated

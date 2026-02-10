@@ -23,6 +23,7 @@ lms:
   - getCourseById:
   - listCourses:
   - listMyCourses:
+  - getCoursesByCreator:
   - addFileToCourse:
   - processFileEmbedding:
   - processAllFileEmbeddings:
@@ -54,3 +55,5 @@ vedaUserProfile:
   - getMyProfile:
   - hasCompletedOnboarding:
   - getMyProfileWithEmail:
+  - getUserProfileById:
+  - listCreators:

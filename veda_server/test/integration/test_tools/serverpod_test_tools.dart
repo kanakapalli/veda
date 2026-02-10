@@ -903,6 +903,37 @@ class _LmsEndpoint {
     });
   }
 
+  _i3.Future<List<_i10.Course>> getCoursesByCreator(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i2.UuidValue creatorId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'lms',
+            method: 'getCoursesByCreator',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'lms',
+          methodName: 'getCoursesByCreator',
+          parameters: _i1.testObjectToJson({'creatorId': creatorId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i10.Course>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _i3.Future<_i12.KnowledgeFile> addFileToCourse(
     _i1.TestSessionBuilder sessionBuilder,
     _i12.KnowledgeFile file,
@@ -1861,6 +1892,72 @@ class _VedaUserProfileEndpoint {
                   _localCallContext.arguments,
                 )
                 as _i3.Future<_i19.VedaUserProfileWithEmail?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i19.VedaUserProfileWithEmail?> getUserProfileById(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i2.UuidValue authUserId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'vedaUserProfile',
+            method: 'getUserProfileById',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'vedaUserProfile',
+          methodName: 'getUserProfileById',
+          parameters: _i1.testObjectToJson({'authUserId': authUserId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i19.VedaUserProfileWithEmail?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i17.VedaUserProfile>> listCreators(
+    _i1.TestSessionBuilder sessionBuilder, {
+    String? username,
+    String? topic,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'vedaUserProfile',
+            method: 'listCreators',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'vedaUserProfile',
+          methodName: 'listCreators',
+          parameters: _i1.testObjectToJson({
+            'username': username,
+            'topic': topic,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i17.VedaUserProfile>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

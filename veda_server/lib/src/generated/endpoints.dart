@@ -543,6 +543,25 @@ class Endpoints extends _i1.EndpointDispatch {
               ) async =>
                   (endpoints['lms'] as _i6.LmsEndpoint).listMyCourses(session),
         ),
+        'getCoursesByCreator': _i1.MethodConnector(
+          name: 'getCoursesByCreator',
+          params: {
+            'creatorId': _i1.ParameterDescription(
+              name: 'creatorId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['lms'] as _i6.LmsEndpoint).getCoursesByCreator(
+                    session,
+                    params['creatorId'],
+                  ),
+        ),
         'addFileToCourse': _i1.MethodConnector(
           name: 'addFileToCourse',
           params: {
@@ -1134,6 +1153,52 @@ class Endpoints extends _i1.EndpointDispatch {
               ) async =>
                   (endpoints['vedaUserProfile'] as _i7.VedaUserProfileEndpoint)
                       .getMyProfileWithEmail(session),
+        ),
+        'getUserProfileById': _i1.MethodConnector(
+          name: 'getUserProfileById',
+          params: {
+            'authUserId': _i1.ParameterDescription(
+              name: 'authUserId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['vedaUserProfile'] as _i7.VedaUserProfileEndpoint)
+                      .getUserProfileById(
+                        session,
+                        params['authUserId'],
+                      ),
+        ),
+        'listCreators': _i1.MethodConnector(
+          name: 'listCreators',
+          params: {
+            'username': _i1.ParameterDescription(
+              name: 'username',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'topic': _i1.ParameterDescription(
+              name: 'topic',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['vedaUserProfile'] as _i7.VedaUserProfileEndpoint)
+                      .listCreators(
+                        session,
+                        username: params['username'],
+                        topic: params['topic'],
+                      ),
         ),
       },
     );

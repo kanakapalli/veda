@@ -143,4 +143,74 @@ class VedaUserProfileEndpoint extends Endpoint {
       email: email,
     );
   }
+
+  /// Gets any user's profile with email by their authUserId.
+  /// Public endpoint - does not require the user to be the owner.
+  Future<VedaUserProfileWithEmail?> getUserProfileById(
+    Session session,
+    UuidValue authUserId,
+  ) async {
+    // Get the profile
+    final profile = await VedaUserProfile.db.findFirstRow(
+      session,
+      where: (t) => t.authUserId.equals(authUserId),
+    );
+
+    // Get email from Serverpod's auth system using AuthServices
+    String? email;
+    try {
+      final userProfile = await AuthServices.instance.userProfiles
+          .findUserProfileByUserId(session, authUserId);
+      email = userProfile.email;
+    } catch (e) {
+      // Email not found or error - continue without it
+      session.log('Failed to fetch email from auth system: $e');
+    }
+
+    return VedaUserProfileWithEmail(
+      profile: profile,
+      email: email,
+    );
+  }
+
+  /// Lists all creator profiles with optional filters.
+  /// Filters:
+  /// - username: Filter by fullName (case-insensitive partial match)
+  /// - topic: Filter by expertise field (case-insensitive partial match)
+  /// Returns only profiles where userTypes contains UserType.creator.
+  Future<List<VedaUserProfile>> listCreators(
+    Session session, {
+    String? username,
+    String? topic,
+  }) async {
+    // Start with base query for creators
+    var profiles = await VedaUserProfile.db.find(
+      session,
+      orderBy: (t) => t.createdAt,
+      orderDescending: true,
+    );
+
+    // Filter to only creators
+    profiles = profiles.where((p) => p.userTypes.contains(UserType.creator)).toList();
+
+    // Apply username filter (case-insensitive)
+    if (username != null && username.isNotEmpty) {
+      final lowerUsername = username.toLowerCase();
+      profiles = profiles.where((p) {
+        final fullName = p.fullName?.toLowerCase() ?? '';
+        return fullName.contains(lowerUsername);
+      }).toList();
+    }
+
+    // Apply topic filter (searches expertise field, case-insensitive)
+    if (topic != null && topic.isNotEmpty) {
+      final lowerTopic = topic.toLowerCase();
+      profiles = profiles.where((p) {
+        final expertise = p.expertise ?? [];
+        return expertise.any((exp) => exp.toLowerCase().contains(lowerTopic));
+      }).toList();
+    }
+
+    return profiles;
+  }
 }

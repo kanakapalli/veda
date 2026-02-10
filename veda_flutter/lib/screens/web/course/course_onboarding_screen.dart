@@ -9,6 +9,7 @@ import '../../../design_system/veda_colors.dart';
 import '../../../main.dart';
 import '../../../services/upload_service.dart';
 import 'course_creation_screen.dart';
+import 'creator_browser_screen.dart';
 
 /// Course Onboarding Screen - Collects initial course details
 /// Follows Neo-Minimalist Line Art aesthetic with Swiss grid system
@@ -24,12 +25,14 @@ class _CourseOnboardingScreenState extends State<CourseOnboardingScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _topicController = TextEditingController();
+  final _topicFocusNode = FocusNode();
 
   Uint8List? _selectedImageBytes;
   String? _selectedImageName;
   bool _isSubmitting = false;
   bool _isLoadingCourses = true;
   List<Course> _courses = [];
+  List<String> _selectedTopics = [];
 
   @override
   void initState() {
@@ -58,7 +61,45 @@ class _CourseOnboardingScreenState extends State<CourseOnboardingScreen> {
     _titleController.dispose();
     _descriptionController.dispose();
     _topicController.dispose();
+    _topicFocusNode.dispose();
     super.dispose();
+  }
+
+  void _addTopic() {
+    final topic = _topicController.text.trim();
+    if (topic.isEmpty) return;
+
+    if (_selectedTopics.contains(topic)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'TOPIC ALREADY ADDED',
+            style: GoogleFonts.jetBrainsMono(
+              fontSize: 11,
+              fontWeight: FontWeight.w400,
+              color: VedaColors.white,
+              letterSpacing: 1.0,
+            ),
+          ),
+          backgroundColor: VedaColors.zinc800,
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _selectedTopics.add(topic);
+      _topicController.clear();
+    });
+  }
+
+  void _removeTopic(String topic) {
+    setState(() {
+      _selectedTopics.remove(topic);
+    });
   }
 
   Future<void> _pickImage() async {
@@ -110,6 +151,28 @@ class _CourseOnboardingScreenState extends State<CourseOnboardingScreen> {
       return;
     }
 
+    // Validate topics
+    if (_selectedTopics.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'PLEASE ADD AT LEAST ONE TOPIC',
+            style: GoogleFonts.jetBrainsMono(
+              fontSize: 11,
+              fontWeight: FontWeight.w400,
+              color: VedaColors.white,
+              letterSpacing: 1.0,
+            ),
+          ),
+          backgroundColor: VedaColors.error,
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+        ),
+      );
+      return;
+    }
+
     setState(() => _isSubmitting = true);
 
     try {
@@ -122,11 +185,12 @@ class _CourseOnboardingScreenState extends State<CourseOnboardingScreen> {
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
         visibility: CourseVisibility.draft,
-        systemPrompt: 'Topic: ${_topicController.text.trim()}',
+        courseTopics: _selectedTopics,
       );
 
       var createdCourse = await client.lms.createCourse(course);
       print('✅ [Onboarding] Course created with ID: ${createdCourse.id}');
+      print('📋 [Onboarding] Topics saved in courseTopics: ${_selectedTopics.join(', ')}');
 
       // Upload image if one was picked (needs courseId from creation)
       if (_selectedImageBytes != null && _selectedImageName != null) {
@@ -211,6 +275,25 @@ class _CourseOnboardingScreenState extends State<CourseOnboardingScreen> {
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>
             CourseCreationScreen(course: course),
+        transitionDuration: const Duration(milliseconds: 300),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOut,
+            ),
+            child: child,
+          );
+        },
+      ),
+    );
+  }
+
+  void _navigateToCreatorBrowser() {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const CreatorBrowserScreen(),
         transitionDuration: const Duration(milliseconds: 300),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(
@@ -378,9 +461,9 @@ class _CourseOnboardingScreenState extends State<CourseOnboardingScreen> {
                   ),
                   const SizedBox(height: 48),
 
-                  // Topic Field
+                  // Topics Section
                   Text(
-                    'PRIMARY TOPIC',
+                    'COURSE TOPICS',
                     style: GoogleFonts.jetBrainsMono(
                       fontSize: 11,
                       fontWeight: FontWeight.w400,
@@ -389,16 +472,7 @@ class _CourseOnboardingScreenState extends State<CourseOnboardingScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _MinimalistTextField(
-                    controller: _topicController,
-                    hintText: 'e.g. Web Development, AI, Design',
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'TOPIC IS REQUIRED';
-                      }
-                      return null;
-                    },
-                  ),
+                  _buildTopicsInput(),
                   const SizedBox(height: 96),
 
                   // Submit Button
@@ -407,7 +481,38 @@ class _CourseOnboardingScreenState extends State<CourseOnboardingScreen> {
                     onPressed: _isSubmitting ? null : _submitForm,
                     isLoading: _isSubmitting,
                   ),
-                  const SizedBox(height: 120),
+                  const SizedBox(height: 24),
+
+                  // Test API Button
+                  SizedBox(
+                    height: 48,
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: _navigateToCreatorBrowser,
+                      style: OutlinedButton.styleFrom(
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.zero,
+                        ),
+                        side: const BorderSide(color: VedaColors.zinc800, width: 1),
+                        backgroundColor: Colors.transparent,
+                      ),
+                      icon: const Icon(
+                        Icons.science_outlined,
+                        size: 16,
+                        color: VedaColors.zinc600,
+                      ),
+                      label: Text(
+                        'TEST CREATOR API',
+                        style: GoogleFonts.jetBrainsMono(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w400,
+                          color: VedaColors.zinc600,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 96),
 
                   // Footer
                   Text(
@@ -635,6 +740,128 @@ class _CourseOnboardingScreenState extends State<CourseOnboardingScreen> {
                 ],
               ),
             ),
+    );
+  }
+
+  Widget _buildTopicsInput() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Input field with add button
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _topicController,
+                focusNode: _topicFocusNode,
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w400,
+                  color: VedaColors.white,
+                  letterSpacing: 0.3,
+                ),
+                decoration: InputDecoration(
+                  filled: false,
+                  hintText: 'e.g. Web Development, AI, Design',
+                  hintStyle: GoogleFonts.inter(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w400,
+                    color: VedaColors.zinc700,
+                    letterSpacing: 0.3,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
+                  border: const OutlineInputBorder(
+                    borderRadius: BorderRadius.zero,
+                    borderSide: BorderSide(color: VedaColors.zinc800, width: 1),
+                  ),
+                  enabledBorder: const OutlineInputBorder(
+                    borderRadius: BorderRadius.zero,
+                    borderSide: BorderSide(color: VedaColors.zinc800, width: 1),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderRadius: BorderRadius.zero,
+                    borderSide: BorderSide(color: VedaColors.accent, width: 1),
+                  ),
+                ),
+                onSubmitted: (_) => _addTopic(),
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Add button
+            SizedBox(
+              width: 56,
+              height: 56,
+              child: OutlinedButton(
+                onPressed: _addTopic,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: VedaColors.white,
+                  side: const BorderSide(color: VedaColors.zinc800, width: 1),
+                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                  padding: EdgeInsets.zero,
+                ),
+                child: const Icon(Icons.add, size: 20),
+              ),
+            ),
+          ],
+        ),
+
+        // Topic chips
+        if (_selectedTopics.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _selectedTopics.map((topic) {
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  border: Border.all(color: VedaColors.accent, width: 1),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      topic,
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w400,
+                        color: VedaColors.white,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: () => _removeTopic(topic),
+                      child: const Icon(
+                        Icons.close,
+                        size: 14,
+                        color: VedaColors.accent,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+
+        // Helper text
+        const SizedBox(height: 12),
+        Text(
+          _selectedTopics.isEmpty
+              ? 'Add at least one topic. Press Enter or click + to add.'
+              : '${_selectedTopics.length} topic${_selectedTopics.length == 1 ? '' : 's'} added',
+          style: GoogleFonts.inter(
+            fontSize: 11,
+            fontWeight: FontWeight.w400,
+            color: _selectedTopics.isEmpty ? VedaColors.zinc700 : VedaColors.zinc600,
+            letterSpacing: 0.2,
+          ),
+        ),
+      ],
     );
   }
 }

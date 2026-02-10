@@ -101,6 +101,20 @@ class LmsEndpoint extends Endpoint {
     );
   }
 
+  /// Lists all courses created by a specific creator.
+  /// Public endpoint - does not require authentication.
+  Future<List<Course>> getCoursesByCreator(
+    Session session,
+    UuidValue creatorId,
+  ) async {
+    return await Course.db.find(
+      session,
+      where: (t) => t.creatorId.equals(creatorId),
+      orderBy: (t) => t.createdAt,
+      orderDescending: true,
+    );
+  }
+
   // ---------------------------------------------------------------------------
   // Knowledge File Management
   // ---------------------------------------------------------------------------
@@ -738,6 +752,14 @@ Required JSON Format:
   }
 ]
 
+CRITICAL JSON FORMATTING RULES:
+- All descriptions MUST be on a single line (no newlines or line breaks)
+- All quotes inside strings MUST be escaped with backslash: \\"
+- Do NOT include any text before or after the JSON array
+- Do NOT use markdown code fences
+- Ensure all strings are properly terminated with quotes
+- Keep descriptions concise but informative (max 200 characters each)
+
 Guidelines:
 - Generate 4-8 modules that form a logical learning progression
 - EACH module MUST have 3-6 topics (lessons)
@@ -780,10 +802,20 @@ Guidelines:
     try {
       // Extract JSON from the response (handle possible markdown wrapping)
       var jsonStr = response.trim();
+
+      // Remove markdown code fences if present
       if (jsonStr.startsWith('```')) {
         session.log('🔧 [TOC] Stripping markdown code fence', level: LogLevel.debug);
         jsonStr = jsonStr.replaceFirst(RegExp(r'^```\w*\n?'), '');
         jsonStr = jsonStr.replaceFirst(RegExp(r'\n?```$'), '');
+        jsonStr = jsonStr.trim();
+      }
+
+      // Find JSON array boundaries if there's extra text
+      final jsonMatch = RegExp(r'\[\s*\{.*\}\s*\]', dotAll: true).firstMatch(jsonStr);
+      if (jsonMatch != null && jsonMatch.start > 0) {
+        session.log('🔧 [TOC] Extracting JSON array from response', level: LogLevel.debug);
+        jsonStr = jsonMatch.group(0)!;
       }
 
       session.log(
@@ -965,10 +997,19 @@ Guidelines:
       }
 
       return modules;
-    } catch (e) {
-      session.log('Failed to parse TOC response: $e', level: LogLevel.error);
-      session.log('Raw response: $response', level: LogLevel.error);
-      throw Exception('Failed to generate course table of contents: $e');
+    } catch (e, stackTrace) {
+      session.log('❌ [TOC] Failed to parse TOC response: $e', level: LogLevel.error);
+      session.log('❌ [TOC] Stack trace: $stackTrace', level: LogLevel.error);
+
+      // Log the problematic response for debugging
+      if (response.length < 5000) {
+        session.log('❌ [TOC] Full response:\n$response', level: LogLevel.error);
+      } else {
+        session.log('❌ [TOC] Response preview (first 2000 chars):\n${response.substring(0, 2000)}', level: LogLevel.error);
+        session.log('❌ [TOC] Response preview (last 2000 chars):\n${response.substring(response.length - 2000)}', level: LogLevel.error);
+      }
+
+      throw Exception('Failed to generate course table of contents. The AI response contained invalid JSON. Please try again or contact support if the issue persists.');
     }
   }
 

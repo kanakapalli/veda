@@ -19,10 +19,12 @@ class CourseTocPanel extends StatefulWidget {
   final String? bannerImageUrl;
   final String? videoUrl;
   final String? systemPrompt;
+  final List<String>? courseTopics;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final List<KnowledgeFile> knowledgeFiles;
   final bool isPublic;
+  final int? courseId;
   final void Function(String) onTabChanged;
   final void Function(String) onModuleToggle;
   final void Function(String) onTopicToggle;
@@ -30,12 +32,13 @@ class CourseTocPanel extends StatefulWidget {
   final VoidCallback? onAddModule;
   final VoidCallback? onDeleteCourse;
   final VoidCallback? onGenerateToc;
-  final VoidCallback? onEditCourseImage;
-  final VoidCallback? onEditBannerImage;
+  final void Function(String)? onCourseImageUploaded;
+  final void Function(String)? onBannerImageUploaded;
+  final void Function(String)? onVideoUploaded;
   final void Function(String)? onTitleChanged;
   final void Function(String)? onDescriptionChanged;
-  final void Function(String)? onVideoUrlChanged;
   final void Function(String)? onSystemPromptChanged;
+  final void Function(List<String>)? onCourseTopicsChanged;
   final VoidCallback? onSaveSettings;
   final Future<void> Function(veda.Module)? onUpdateModule;
   final Future<void> Function(veda.Topic)? onUpdateTopic;
@@ -53,10 +56,12 @@ class CourseTocPanel extends StatefulWidget {
     this.bannerImageUrl,
     this.videoUrl,
     this.systemPrompt,
+    this.courseTopics,
     this.createdAt,
     this.updatedAt,
     this.knowledgeFiles = const [],
     required this.isPublic,
+    this.courseId,
     required this.onTabChanged,
     required this.onModuleToggle,
     required this.onTopicToggle,
@@ -64,12 +69,13 @@ class CourseTocPanel extends StatefulWidget {
     this.onAddModule,
     this.onDeleteCourse,
     this.onGenerateToc,
-    this.onEditCourseImage,
-    this.onEditBannerImage,
+    this.onCourseImageUploaded,
+    this.onBannerImageUploaded,
+    this.onVideoUploaded,
     this.onTitleChanged,
     this.onDescriptionChanged,
-    this.onVideoUrlChanged,
     this.onSystemPromptChanged,
+    this.onCourseTopicsChanged,
     this.onSaveSettings,
     this.onUpdateModule,
     this.onUpdateTopic,
@@ -82,11 +88,20 @@ class CourseTocPanel extends StatefulWidget {
 class _CourseTocPanelState extends State<CourseTocPanel> {
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
-  late final TextEditingController _videoUrlController;
   late final TextEditingController _systemPromptController;
+  late final TextEditingController _topicController;
 
   // Detail view state
   veda.Module? _selectedModuleForDetail;
+
+  // Topics management
+  List<String> _selectedTopics = [];
+  final _topicFocusNode = FocusNode();
+
+  // Upload progress tracking
+  bool _isUploadingCourseImage = false;
+  bool _isUploadingBanner = false;
+  bool _isUploadingVideo = false;
 
   @override
   void initState() {
@@ -94,9 +109,12 @@ class _CourseTocPanelState extends State<CourseTocPanel> {
     _titleController = TextEditingController(text: widget.courseTitle);
     _descriptionController =
         TextEditingController(text: widget.courseDescription ?? '');
-    _videoUrlController = TextEditingController(text: widget.videoUrl ?? '');
     _systemPromptController =
         TextEditingController(text: widget.systemPrompt ?? '');
+    _topicController = TextEditingController();
+
+    // Initialize topics from courseTopics field
+    _selectedTopics = widget.courseTopics ?? [];
   }
 
   @override
@@ -110,13 +128,14 @@ class _CourseTocPanelState extends State<CourseTocPanel> {
         (widget.courseDescription ?? '') != _descriptionController.text) {
       _descriptionController.text = widget.courseDescription ?? '';
     }
-    if (widget.videoUrl != oldWidget.videoUrl &&
-        (widget.videoUrl ?? '') != _videoUrlController.text) {
-      _videoUrlController.text = widget.videoUrl ?? '';
-    }
     if (widget.systemPrompt != oldWidget.systemPrompt &&
         (widget.systemPrompt ?? '') != _systemPromptController.text) {
       _systemPromptController.text = widget.systemPrompt ?? '';
+    }
+    if (widget.courseTopics != oldWidget.courseTopics) {
+      setState(() {
+        _selectedTopics = widget.courseTopics ?? [];
+      });
     }
   }
 
@@ -124,9 +143,100 @@ class _CourseTocPanelState extends State<CourseTocPanel> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
-    _videoUrlController.dispose();
     _systemPromptController.dispose();
+    _topicController.dispose();
+    _topicFocusNode.dispose();
     super.dispose();
+  }
+
+  // Topic management methods
+  void _addTopic() {
+    final topic = _topicController.text.trim();
+    if (topic.isEmpty || _selectedTopics.contains(topic)) return;
+
+    setState(() {
+      _selectedTopics.add(topic);
+      _topicController.clear();
+    });
+    _updateSystemPromptWithTopics();
+  }
+
+  void _removeTopic(String topic) {
+    setState(() {
+      _selectedTopics.remove(topic);
+    });
+    _updateSystemPromptWithTopics();
+  }
+
+  void _updateSystemPromptWithTopics() {
+    widget.onCourseTopicsChanged?.call(_selectedTopics);
+  }
+
+  // Upload methods
+  Future<void> _uploadCourseImage() async {
+    if (widget.courseId == null || _isUploadingCourseImage) return;
+
+    setState(() => _isUploadingCourseImage = true);
+
+    try {
+      final result = await UploadService.instance.pickAndUploadCourseImage(
+        widget.courseId!,
+      );
+
+      if (!mounted) return;
+
+      if (result != null && result.success && result.publicUrl != null) {
+        widget.onCourseImageUploaded?.call(result.publicUrl!);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isUploadingCourseImage = false);
+      }
+    }
+  }
+
+  Future<void> _uploadBannerImage() async {
+    if (widget.courseId == null || _isUploadingBanner) return;
+
+    setState(() => _isUploadingBanner = true);
+
+    try {
+      final result = await UploadService.instance.pickAndUploadBannerImage(
+        widget.courseId!,
+      );
+
+      if (!mounted) return;
+
+      if (result != null && result.success && result.publicUrl != null) {
+        widget.onBannerImageUploaded?.call(result.publicUrl!);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isUploadingBanner = false);
+      }
+    }
+  }
+
+  Future<void> _uploadVideo() async {
+    if (widget.courseId == null || _isUploadingVideo) return;
+
+    setState(() => _isUploadingVideo = true);
+
+    try {
+      final result = await UploadService.instance.pickAndUploadCourseVideo(
+        widget.courseId!,
+      );
+
+      if (!mounted) return;
+
+      if (result != null && result.success && result.publicUrl != null) {
+        widget.onVideoUploaded?.call(result.publicUrl!);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isUploadingVideo = false);
+      }
+    }
   }
 
   @override
@@ -363,7 +473,7 @@ class _CourseTocPanelState extends State<CourseTocPanel> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           InkWell(
-            onTap: widget.onEditCourseImage,
+            onTap: _uploadCourseImage,
             child: Container(
               height: 120,
               width: double.infinity,
@@ -628,6 +738,18 @@ class _CourseTocPanelState extends State<CourseTocPanel> {
           onChanged: widget.onDescriptionChanged,
         ),
         const SizedBox(height: 24),
+        _buildSettingsLabel('TOPICS'),
+        const SizedBox(height: 4),
+        Text(
+          'Add topics to help AI understand course focus',
+          style: GoogleFonts.inter(
+            fontSize: 10,
+            color: VedaColors.zinc700,
+          ),
+        ),
+        const SizedBox(height: 8),
+        _buildTopicsInput(),
+        const SizedBox(height: 24),
         _buildSettingsLabel('SYSTEM PROMPT'),
         const SizedBox(height: 4),
         Text(
@@ -640,7 +762,7 @@ class _CourseTocPanelState extends State<CourseTocPanel> {
         const SizedBox(height: 8),
         _buildTextField(
           controller: _systemPromptController,
-          hint: 'e.g., Topic: Web Development, Focus on practical examples...',
+          hint: 'e.g., Focus on practical examples, beginner-friendly...',
           maxLines: 4,
           onChanged: widget.onSystemPromptChanged,
         ),
@@ -649,24 +771,27 @@ class _CourseTocPanelState extends State<CourseTocPanel> {
         const SizedBox(height: 8),
         _buildImageField(
           imageUrl: widget.courseImageUrl,
-          onTap: widget.onEditCourseImage,
+          onTap: _uploadCourseImage,
           placeholder: 'Thumbnail image',
+          isUploading: _isUploadingCourseImage,
         ),
         const SizedBox(height: 24),
         _buildSettingsLabel('BANNER IMAGE'),
         const SizedBox(height: 8),
         _buildImageField(
           imageUrl: widget.bannerImageUrl,
-          onTap: widget.onEditBannerImage,
+          onTap: _uploadBannerImage,
           placeholder: 'Banner image',
+          isUploading: _isUploadingBanner,
         ),
         const SizedBox(height: 24),
-        _buildSettingsLabel('VIDEO URL'),
+        _buildSettingsLabel('VIDEO'),
         const SizedBox(height: 8),
-        _buildTextField(
-          controller: _videoUrlController,
-          hint: 'https://...',
-          onChanged: widget.onVideoUrlChanged,
+        _buildVideoField(
+          videoUrl: widget.videoUrl,
+          onTap: _uploadVideo,
+          placeholder: 'Course intro video',
+          isUploading: _isUploadingVideo,
         ),
         const SizedBox(height: 24),
         _buildSettingsLabel('VISIBILITY'),
@@ -914,60 +1039,272 @@ class _CourseTocPanelState extends State<CourseTocPanel> {
     );
   }
 
+  Widget _buildTopicsInput() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Input row
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: VedaColors.zinc800, width: 1),
+                ),
+                child: TextField(
+                  controller: _topicController,
+                  focusNode: _topicFocusNode,
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: VedaColors.white,
+                    letterSpacing: 0.2,
+                  ),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: 'e.g., Web Development, Python, AI...',
+                    hintStyle: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: VedaColors.zinc700,
+                      letterSpacing: 0.2,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                  ),
+                  onSubmitted: (_) => _addTopic(),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            SizedBox(
+              width: 56,
+              height: 40,
+              child: OutlinedButton(
+                onPressed: _addTopic,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: VedaColors.white,
+                  side: const BorderSide(color: VedaColors.zinc800, width: 1),
+                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                  padding: EdgeInsets.zero,
+                ),
+                child: const Icon(Icons.add, size: 20, color: VedaColors.white),
+              ),
+            ),
+          ],
+        ),
+
+        // Topics chips
+        if (_selectedTopics.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _selectedTopics.map((topic) {
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  border: Border.all(color: VedaColors.accent, width: 1),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      topic,
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        color: VedaColors.white,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    GestureDetector(
+                      onTap: () => _removeTopic(topic),
+                      child: const Icon(
+                        Icons.close,
+                        size: 14,
+                        color: VedaColors.accent,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ],
+    );
+  }
+
   Widget _buildImageField({
     String? imageUrl,
     VoidCallback? onTap,
     required String placeholder,
+    bool isUploading = false,
   }) {
     final hasImage = imageUrl != null && imageUrl.isNotEmpty;
 
     return InkWell(
-      onTap: onTap,
+      onTap: isUploading ? null : onTap,
       child: Container(
         height: 80,
         decoration: BoxDecoration(
           border: Border.all(color: VedaColors.zinc800, width: 1),
         ),
-        child: hasImage
-            ? Row(
-                children: [
-                  SizedBox(
-                    width: 80,
-                    child: Image.network(
-                      imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        color: VedaColors.zinc900,
-                        child: const Icon(Icons.broken_image_outlined, color: VedaColors.zinc700),
-                      ),
-                    ),
-                  ),
-                  Container(width: 1, color: VedaColors.zinc800),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text('Image uploaded', style: GoogleFonts.inter(fontSize: 12, color: VedaColors.zinc500)),
+        child: Stack(
+          children: [
+            // Main content
+            hasImage
+                ? Row(
+                    children: [
+                      SizedBox(
+                        width: 80,
+                        child: Image.network(
+                          imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            color: VedaColors.zinc900,
+                            child: const Icon(Icons.broken_image_outlined, color: VedaColors.zinc700),
                           ),
-                          const Icon(Icons.edit_outlined, size: 16, color: VedaColors.zinc700),
-                        ],
+                        ),
                       ),
+                      Container(width: 1, color: VedaColors.zinc800),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text('Image uploaded', style: GoogleFonts.inter(fontSize: 12, color: VedaColors.zinc500)),
+                              ),
+                              const Icon(Icons.edit_outlined, size: 16, color: VedaColors.zinc700),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.add_photo_alternate_outlined, size: 20, color: VedaColors.zinc700),
+                        const SizedBox(width: 8),
+                        Text(placeholder, style: GoogleFonts.inter(fontSize: 12, color: VedaColors.zinc700)),
+                      ],
                     ),
                   ),
-                ],
-              )
-            : Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.add_photo_alternate_outlined, size: 20, color: VedaColors.zinc700),
-                    const SizedBox(width: 8),
-                    Text(placeholder, style: GoogleFonts.inter(fontSize: 12, color: VedaColors.zinc700)),
-                  ],
+
+            // Upload overlay
+            if (isUploading)
+              Container(
+                color: VedaColors.black.withValues(alpha: 0.8),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: VedaColors.white,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'UPLOADING...',
+                        style: GoogleFonts.jetBrainsMono(
+                          fontSize: 9,
+                          color: VedaColors.white,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVideoField({
+    String? videoUrl,
+    VoidCallback? onTap,
+    required String placeholder,
+    bool isUploading = false,
+  }) {
+    final hasVideo = videoUrl != null && videoUrl.isNotEmpty;
+
+    return InkWell(
+      onTap: isUploading ? null : onTap,
+      child: Container(
+        height: 80,
+        decoration: BoxDecoration(
+          border: Border.all(color: VedaColors.zinc800, width: 1),
+        ),
+        child: Stack(
+          children: [
+            // Main content
+            hasVideo
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.videocam_outlined, size: 20, color: VedaColors.zinc500),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Video uploaded',
+                            style: GoogleFonts.inter(fontSize: 12, color: VedaColors.zinc500),
+                          ),
+                        ),
+                        const Icon(Icons.edit_outlined, size: 16, color: VedaColors.zinc700),
+                      ],
+                    ),
+                  )
+                : Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.videocam_outlined, size: 20, color: VedaColors.zinc700),
+                        const SizedBox(width: 8),
+                        Text(placeholder, style: GoogleFonts.inter(fontSize: 12, color: VedaColors.zinc700)),
+                      ],
+                    ),
+                  ),
+
+            // Upload overlay
+            if (isUploading)
+              Container(
+                color: VedaColors.black.withValues(alpha: 0.8),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: VedaColors.white,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'UPLOADING...',
+                        style: GoogleFonts.jetBrainsMono(
+                          fontSize: 9,
+                          color: VedaColors.white,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

@@ -462,6 +462,32 @@ Reference specific files when making suggestions based on their content.
     }
   }
 
+  Future<void> _updateCourseImageUrl(String imageUrl) async {
+    try {
+      final updated = _course.copyWith(courseImageUrl: imageUrl);
+      await client.lms.updateCourse(updated);
+      if (!mounted) return;
+      setState(() => _course = updated);
+      _showSuccessSnackBar('COURSE IMAGE UPDATED');
+    } catch (_) {
+      if (!mounted) return;
+      _showErrorSnackBar('FAILED TO UPDATE COURSE IMAGE');
+    }
+  }
+
+  Future<void> _updateBannerImageUrl(String imageUrl) async {
+    try {
+      final updated = _course.copyWith(bannerImageUrl: imageUrl);
+      await client.lms.updateCourse(updated);
+      if (!mounted) return;
+      setState(() => _course = updated);
+      _showSuccessSnackBar('BANNER IMAGE UPDATED');
+    } catch (_) {
+      if (!mounted) return;
+      _showErrorSnackBar('FAILED TO UPDATE BANNER IMAGE');
+    }
+  }
+
   Future<void> _editCourseImage() async {
     if (_course.id == null) return;
 
@@ -476,42 +502,7 @@ Reference specific files when making suggestions based on their content.
       return;
     }
 
-    try {
-      final updated = _course.copyWith(courseImageUrl: result.publicUrl);
-      await client.lms.updateCourse(updated);
-      if (!mounted) return;
-      setState(() => _course = updated);
-      _showSuccessSnackBar('COURSE IMAGE UPDATED');
-    } catch (_) {
-      if (!mounted) return;
-      _showErrorSnackBar('FAILED TO UPDATE COURSE IMAGE');
-    }
-  }
-
-  Future<void> _editBannerImage() async {
-    if (_course.id == null) return;
-
-    final result = await UploadService.instance.pickAndUploadBannerImage(
-      _course.id!,
-    );
-    if (result == null) return;
-
-    if (!result.success) {
-      if (!mounted) return;
-      _showErrorSnackBar(result.error ?? 'UPLOAD FAILED');
-      return;
-    }
-
-    try {
-      final updated = _course.copyWith(bannerImageUrl: result.publicUrl);
-      await client.lms.updateCourse(updated);
-      if (!mounted) return;
-      setState(() => _course = updated);
-      _showSuccessSnackBar('BANNER IMAGE UPDATED');
-    } catch (_) {
-      if (!mounted) return;
-      _showErrorSnackBar('FAILED TO UPDATE BANNER IMAGE');
-    }
+    await _updateCourseImageUrl(result.publicUrl!);
   }
 
   Future<void> _updateTitle(String title) async {
@@ -564,6 +555,19 @@ Reference specific files when making suggestions based on their content.
     } catch (e) {
       if (!mounted) return;
       _showErrorSnackBar('FAILED TO UPDATE SYSTEM PROMPT');
+    }
+  }
+
+  Future<void> _updateCourseTopics(List<String> topics) async {
+    try {
+      final updatedCourse = _course.copyWith(courseTopics: topics);
+      await client.lms.updateCourse(updatedCourse);
+      setState(() {
+        _course = updatedCourse;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      _showErrorSnackBar('FAILED TO UPDATE COURSE TOPICS');
     }
   }
 
@@ -787,21 +791,24 @@ Reference specific files when making suggestions based on their content.
               bannerImageUrl: _course.bannerImageUrl,
               videoUrl: _course.videoUrl,
               systemPrompt: _course.systemPrompt,
+              courseTopics: _course.courseTopics,
               createdAt: _course.createdAt,
               updatedAt: _course.updatedAt,
               knowledgeFiles: _files,
               isPublic: _isPublic,
+              courseId: _course.id,
               onTabChanged: (tab) => setState(() => _activeTab = tab),
               onModuleToggle: _toggleModule,
               onTopicToggle: _toggleTopic,
               onVisibilityChanged: _updateVisibility,
               onGenerateToc: _generateToc,
-              onEditCourseImage: _editCourseImage,
-              onEditBannerImage: _editBannerImage,
+              onCourseImageUploaded: _updateCourseImageUrl,
+              onBannerImageUploaded: _updateBannerImageUrl,
+              onVideoUploaded: _updateVideoUrl,
               onTitleChanged: _updateTitle,
               onDescriptionChanged: _updateDescription,
-              onVideoUrlChanged: _updateVideoUrl,
               onSystemPromptChanged: _updateSystemPrompt,
+              onCourseTopicsChanged: _updateCourseTopics,
               onDeleteCourse: _deleteCourse,
               onSaveSettings: _saveAllSettings,
               onUpdateModule: _updateModule,

@@ -37,6 +37,7 @@ import 'package:veda_server/src/generated/lms/course.dart' as _i22;
 import 'package:veda_server/src/generated/lms/knowledge_file.dart' as _i23;
 import 'package:veda_server/src/generated/lms/file_creation_draft.dart' as _i24;
 import 'package:veda_server/src/generated/lms/module.dart' as _i25;
+import 'package:veda_server/src/generated/profiles/user_profile.dart' as _i26;
 export 'gemini/chat_message.dart';
 export 'gemini/chat_request.dart';
 export 'gemini/chat_response.dart';
@@ -250,6 +251,12 @@ class Protocol extends _i1.SerializationManagerServer {
           columnType: _i2.ColumnType.text,
           isNullable: true,
           dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'courseTopics',
+          columnType: _i2.ColumnType.json,
+          isNullable: true,
+          dartType: 'List<String>?',
         ),
         _i2.ColumnDefinition(
           name: 'createdAt',
@@ -1335,6 +1342,12 @@ class Protocol extends _i1.SerializationManagerServer {
       return (data != null
               ? (data as List).map((e) => deserialize<String>(e)).toList()
               : null)
+          as T;
+    }
+    if (t == List<_i26.VedaUserProfile>) {
+      return (data as List)
+              .map((e) => deserialize<_i26.VedaUserProfile>(e))
+              .toList()
           as T;
     }
     try {

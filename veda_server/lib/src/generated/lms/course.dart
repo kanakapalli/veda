@@ -33,6 +33,7 @@ abstract class Course implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
     this.videoUrl,
     required this.visibility,
     this.systemPrompt,
+    this.courseTopics,
     DateTime? createdAt,
     DateTime? updatedAt,
     this.modules,
@@ -52,6 +53,7 @@ abstract class Course implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
     String? videoUrl,
     required _i3.CourseVisibility visibility,
     String? systemPrompt,
+    List<String>? courseTopics,
     DateTime? createdAt,
     DateTime? updatedAt,
     List<_i4.Module>? modules,
@@ -79,6 +81,11 @@ abstract class Course implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
         (jsonSerialization['visibility'] as String),
       ),
       systemPrompt: jsonSerialization['systemPrompt'] as String?,
+      courseTopics: jsonSerialization['courseTopics'] == null
+          ? null
+          : _i7.Protocol().deserialize<List<String>>(
+              jsonSerialization['courseTopics'],
+            ),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -136,6 +143,9 @@ abstract class Course implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
   /// System prompt for AI course generation
   String? systemPrompt;
 
+  /// Course topics/tags for categorization and search
+  List<String>? courseTopics;
+
   /// Timestamp when the course was created
   DateTime createdAt;
 
@@ -168,6 +178,7 @@ abstract class Course implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
     String? videoUrl,
     _i3.CourseVisibility? visibility,
     String? systemPrompt,
+    List<String>? courseTopics,
     DateTime? createdAt,
     DateTime? updatedAt,
     List<_i4.Module>? modules,
@@ -188,6 +199,7 @@ abstract class Course implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
       if (videoUrl != null) 'videoUrl': videoUrl,
       'visibility': visibility.toJson(),
       if (systemPrompt != null) 'systemPrompt': systemPrompt,
+      if (courseTopics != null) 'courseTopics': courseTopics?.toJson(),
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
       if (modules != null)
@@ -215,6 +227,7 @@ abstract class Course implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
       if (videoUrl != null) 'videoUrl': videoUrl,
       'visibility': visibility.toJson(),
       if (systemPrompt != null) 'systemPrompt': systemPrompt,
+      if (courseTopics != null) 'courseTopics': courseTopics?.toJson(),
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
       if (modules != null)
@@ -284,6 +297,7 @@ class _CourseImpl extends Course {
     String? videoUrl,
     required _i3.CourseVisibility visibility,
     String? systemPrompt,
+    List<String>? courseTopics,
     DateTime? createdAt,
     DateTime? updatedAt,
     List<_i4.Module>? modules,
@@ -300,6 +314,7 @@ class _CourseImpl extends Course {
          videoUrl: videoUrl,
          visibility: visibility,
          systemPrompt: systemPrompt,
+         courseTopics: courseTopics,
          createdAt: createdAt,
          updatedAt: updatedAt,
          modules: modules,
@@ -322,6 +337,7 @@ class _CourseImpl extends Course {
     Object? videoUrl = _Undefined,
     _i3.CourseVisibility? visibility,
     Object? systemPrompt = _Undefined,
+    Object? courseTopics = _Undefined,
     DateTime? createdAt,
     DateTime? updatedAt,
     Object? modules = _Undefined,
@@ -343,6 +359,9 @@ class _CourseImpl extends Course {
       videoUrl: videoUrl is String? ? videoUrl : this.videoUrl,
       visibility: visibility ?? this.visibility,
       systemPrompt: systemPrompt is String? ? systemPrompt : this.systemPrompt,
+      courseTopics: courseTopics is List<String>?
+          ? courseTopics
+          : this.courseTopics?.map((e0) => e0).toList(),
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       modules: modules is List<_i4.Module>?
@@ -408,6 +427,13 @@ class CourseUpdateTable extends _i1.UpdateTable<CourseTable> {
         value,
       );
 
+  _i1.ColumnValue<List<String>, List<String>> courseTopics(
+    List<String>? value,
+  ) => _i1.ColumnValue(
+    table.courseTopics,
+    value,
+  );
+
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
       _i1.ColumnValue(
         table.createdAt,
@@ -457,6 +483,10 @@ class CourseTable extends _i1.Table<int?> {
       'systemPrompt',
       this,
     );
+    courseTopics = _i1.ColumnSerializable<List<String>>(
+      'courseTopics',
+      this,
+    );
     createdAt = _i1.ColumnDateTime(
       'createdAt',
       this,
@@ -496,6 +526,9 @@ class CourseTable extends _i1.Table<int?> {
 
   /// System prompt for AI course generation
   late final _i1.ColumnString systemPrompt;
+
+  /// Course topics/tags for categorization and search
+  late final _i1.ColumnSerializable<List<String>> courseTopics;
 
   /// Timestamp when the course was created
   late final _i1.ColumnDateTime createdAt;
@@ -641,6 +674,7 @@ class CourseTable extends _i1.Table<int?> {
     videoUrl,
     visibility,
     systemPrompt,
+    courseTopics,
     createdAt,
     updatedAt,
   ];
