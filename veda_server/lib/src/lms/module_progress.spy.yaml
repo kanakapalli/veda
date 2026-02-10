@@ -1,0 +1,32 @@
+### ModuleProgress - tracks user progress through course modules
+class: ModuleProgress
+table: module_progress
+
+fields:
+  ### Link to the authenticated user
+  user: module:serverpod_auth_core:AuthUser?, relation(onDelete=Cascade)
+  ### Foreign key to the module
+  moduleId: int, relation(parent=modules, onDelete=Cascade)
+  ### Parent module reference
+  module: Module?
+  ### Foreign key to the course (denormalized for quick lookups)
+  courseId: int, relation(parent=courses, onDelete=Cascade)
+  ### Parent course reference
+  course: Course?
+  ### Whether the module has been completed
+  completed: bool, default=false
+  ### Timestamp when the module was completed
+  completedAt: DateTime?
+  ### Timestamp when the user started this module
+  startedAt: DateTime, default=now
+
+indexes:
+  module_progress_user_id_idx:
+    fields: userId
+  module_progress_module_id_idx:
+    fields: moduleId
+  module_progress_course_id_idx:
+    fields: courseId
+  module_progress_user_module_idx:
+    fields: userId, moduleId
+    unique: true

@@ -24,6 +24,11 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
   VedaUserProfile? _creator;
   String? _error;
 
+  // Enrollment state
+  bool _isEnrolled = false;
+  bool _isEnrolling = false;
+  int _enrollmentCount = 0;
+
   // Track expanded state for modules and topics
   final Set<int> _expandedModuleIds = {};
   final Set<int> _expandedTopicIds = {};
@@ -41,18 +46,24 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         _error = null;
       });
 
-      // Fetch modules and creator info in parallel
+      // Fetch modules, creator info, and enrollment status in parallel
       final results = await Future.wait([
         client.lms.getModules(widget.course.id!),
         client.vedaUserProfile.getUserProfileById(widget.course.creatorId),
+        client.lms.isEnrolled(widget.course.id!),
+        client.lms.getEnrollmentCount(widget.course.id!),
       ]);
 
       final modules = results[0] as List<Module>;
       final creatorProfile = results[1] as VedaUserProfileWithEmail?;
+      final isEnrolled = results[2] as bool;
+      final enrollmentCount = results[3] as int;
 
       setState(() {
         _modules = modules;
         _creator = creatorProfile?.profile;
+        _isEnrolled = isEnrolled;
+        _enrollmentCount = enrollmentCount;
         _isLoading = false;
       });
     } catch (e) {
@@ -60,6 +71,60 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         _error = e.toString();
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _handleEnroll() async {
+    if (_isEnrolling) return;
+
+    setState(() => _isEnrolling = true);
+
+    try {
+      if (_isEnrolled) {
+        // Unenroll
+        await client.lms.unenrollFromCourse(widget.course.id!);
+        setState(() {
+          _isEnrolled = false;
+          _enrollmentCount = (_enrollmentCount - 1).clamp(0, 999999);
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Unenrolled from course'),
+              backgroundColor: VedaColors.zinc900,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } else {
+        // Enroll
+        await client.lms.enrollInCourse(widget.course.id!);
+        setState(() {
+          _isEnrolled = true;
+          _enrollmentCount += 1;
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Successfully enrolled!'),
+              backgroundColor: VedaColors.zinc900,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: VedaColors.error,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isEnrolling = false);
     }
   }
 
@@ -746,36 +811,65 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
   }
 
   Widget _buildEnrollButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 56,
-      child: ElevatedButton(
-        onPressed: () {
-          // TODO: Implement enrollment
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Enrollment feature coming soon'),
-              backgroundColor: VedaColors.zinc900,
-              duration: Duration(seconds: 2),
+    return Column(
+      children: [
+        // Enrollment count
+        if (_enrollmentCount > 0)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text(
+              '$_enrollmentCount ${_enrollmentCount == 1 ? 'STUDENT' : 'STUDENTS'} ENROLLED',
+              style: GoogleFonts.jetBrainsMono(
+                fontSize: 9,
+                fontWeight: FontWeight.w400,
+                color: VedaColors.zinc500,
+                letterSpacing: 1,
+              ),
             ),
-          );
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: VedaColors.white,
-          foregroundColor: VedaColors.black,
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-          elevation: 0,
-          padding: EdgeInsets.zero,
-        ),
-        child: Text(
-          'ENROLL_NOW',
-          style: GoogleFonts.jetBrainsMono(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 2,
+          ),
+
+        // Enroll / Unenroll button
+        SizedBox(
+          width: double.infinity,
+          height: 56,
+          child: ElevatedButton(
+            onPressed: _isEnrolling ? null : _handleEnroll,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _isEnrolled ? VedaColors.black : VedaColors.white,
+              foregroundColor: _isEnrolled ? VedaColors.white : VedaColors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero,
+                side: BorderSide(
+                  color: _isEnrolled ? VedaColors.white : Colors.transparent,
+                  width: 1,
+                ),
+              ),
+              elevation: 0,
+              padding: EdgeInsets.zero,
+              disabledBackgroundColor: _isEnrolled
+                  ? VedaColors.zinc900
+                  : VedaColors.zinc800,
+            ),
+            child: _isEnrolling
+                ? SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 1.5,
+                      color: _isEnrolled ? VedaColors.white : VedaColors.black,
+                    ),
+                  )
+                : Text(
+                    _isEnrolled ? 'ENROLLED ✓' : 'ENROLL_NOW',
+                    style: GoogleFonts.jetBrainsMono(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 2,
+                    ),
+                  ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

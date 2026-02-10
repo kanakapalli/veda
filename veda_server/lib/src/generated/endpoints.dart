@@ -936,6 +936,153 @@ class Endpoints extends _i1.EndpointDispatch {
                 params['moduleItemId'],
               ),
         ),
+        'enrollInCourse': _i1.MethodConnector(
+          name: 'enrollInCourse',
+          params: {
+            'courseId': _i1.ParameterDescription(
+              name: 'courseId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).enrollInCourse(
+                session,
+                params['courseId'],
+              ),
+        ),
+        'unenrollFromCourse': _i1.MethodConnector(
+          name: 'unenrollFromCourse',
+          params: {
+            'courseId': _i1.ParameterDescription(
+              name: 'courseId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['lms'] as _i6.LmsEndpoint).unenrollFromCourse(
+                    session,
+                    params['courseId'],
+                  ),
+        ),
+        'isEnrolled': _i1.MethodConnector(
+          name: 'isEnrolled',
+          params: {
+            'courseId': _i1.ParameterDescription(
+              name: 'courseId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).isEnrolled(
+                session,
+                params['courseId'],
+              ),
+        ),
+        'getMyEnrollments': _i1.MethodConnector(
+          name: 'getMyEnrollments',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).getMyEnrollments(
+                session,
+              ),
+        ),
+        'getEnrollmentCount': _i1.MethodConnector(
+          name: 'getEnrollmentCount',
+          params: {
+            'courseId': _i1.ParameterDescription(
+              name: 'courseId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['lms'] as _i6.LmsEndpoint).getEnrollmentCount(
+                    session,
+                    params['courseId'],
+                  ),
+        ),
+        'markModuleComplete': _i1.MethodConnector(
+          name: 'markModuleComplete',
+          params: {
+            'courseId': _i1.ParameterDescription(
+              name: 'courseId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'moduleId': _i1.ParameterDescription(
+              name: 'moduleId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['lms'] as _i6.LmsEndpoint).markModuleComplete(
+                    session,
+                    params['courseId'],
+                    params['moduleId'],
+                  ),
+        ),
+        'getMyProgress': _i1.MethodConnector(
+          name: 'getMyProgress',
+          params: {
+            'courseId': _i1.ParameterDescription(
+              name: 'courseId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['lms'] as _i6.LmsEndpoint).getMyProgress(
+                session,
+                params['courseId'],
+              ),
+        ),
+        'getCourseProgress': _i1.MethodConnector(
+          name: 'getCourseProgress',
+          params: {
+            'courseId': _i1.ParameterDescription(
+              name: 'courseId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['lms'] as _i6.LmsEndpoint).getCourseProgress(
+                    session,
+                    params['courseId'],
+                  ),
+        ),
         'generateCourseTableOfContents': _i1.MethodConnector(
           name: 'generateCourseTableOfContents',
           params: {

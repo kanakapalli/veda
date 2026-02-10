@@ -20,23 +20,27 @@ import 'greetings/greeting.dart' as _i7;
 import 'lms/course.dart' as _i8;
 import 'lms/course_index.dart' as _i9;
 import 'lms/course_visibility.dart' as _i10;
-import 'lms/file_creation_draft.dart' as _i11;
-import 'lms/knowledge_file.dart' as _i12;
-import 'lms/module.dart' as _i13;
-import 'lms/module_item.dart' as _i14;
-import 'lms/topic.dart' as _i15;
-import 'profiles/user_profile.dart' as _i16;
-import 'profiles/user_profile_with_email.dart' as _i17;
-import 'profiles/user_type.dart' as _i18;
-import 'package:veda_client/src/protocol/lms/course.dart' as _i19;
-import 'package:veda_client/src/protocol/lms/knowledge_file.dart' as _i20;
-import 'package:veda_client/src/protocol/lms/file_creation_draft.dart' as _i21;
-import 'package:veda_client/src/protocol/lms/module.dart' as _i22;
-import 'package:veda_client/src/protocol/profiles/user_profile.dart' as _i23;
+import 'lms/enrollment.dart' as _i11;
+import 'lms/file_creation_draft.dart' as _i12;
+import 'lms/knowledge_file.dart' as _i13;
+import 'lms/module.dart' as _i14;
+import 'lms/module_item.dart' as _i15;
+import 'lms/module_progress.dart' as _i16;
+import 'lms/topic.dart' as _i17;
+import 'profiles/user_profile.dart' as _i18;
+import 'profiles/user_profile_with_email.dart' as _i19;
+import 'profiles/user_type.dart' as _i20;
+import 'package:veda_client/src/protocol/lms/course.dart' as _i21;
+import 'package:veda_client/src/protocol/lms/knowledge_file.dart' as _i22;
+import 'package:veda_client/src/protocol/lms/file_creation_draft.dart' as _i23;
+import 'package:veda_client/src/protocol/lms/module.dart' as _i24;
+import 'package:veda_client/src/protocol/lms/enrollment.dart' as _i25;
+import 'package:veda_client/src/protocol/lms/module_progress.dart' as _i26;
+import 'package:veda_client/src/protocol/profiles/user_profile.dart' as _i27;
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
-    as _i24;
+    as _i28;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
-    as _i25;
+    as _i29;
 export 'gemini/chat_message.dart';
 export 'gemini/chat_request.dart';
 export 'gemini/chat_response.dart';
@@ -46,10 +50,12 @@ export 'greetings/greeting.dart';
 export 'lms/course.dart';
 export 'lms/course_index.dart';
 export 'lms/course_visibility.dart';
+export 'lms/enrollment.dart';
 export 'lms/file_creation_draft.dart';
 export 'lms/knowledge_file.dart';
 export 'lms/module.dart';
 export 'lms/module_item.dart';
+export 'lms/module_progress.dart';
 export 'lms/topic.dart';
 export 'profiles/user_profile.dart';
 export 'profiles/user_profile_with_email.dart';
@@ -117,29 +123,35 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i10.CourseVisibility) {
       return _i10.CourseVisibility.fromJson(data) as T;
     }
-    if (t == _i11.FileCreationDraft) {
-      return _i11.FileCreationDraft.fromJson(data) as T;
+    if (t == _i11.Enrollment) {
+      return _i11.Enrollment.fromJson(data) as T;
     }
-    if (t == _i12.KnowledgeFile) {
-      return _i12.KnowledgeFile.fromJson(data) as T;
+    if (t == _i12.FileCreationDraft) {
+      return _i12.FileCreationDraft.fromJson(data) as T;
     }
-    if (t == _i13.Module) {
-      return _i13.Module.fromJson(data) as T;
+    if (t == _i13.KnowledgeFile) {
+      return _i13.KnowledgeFile.fromJson(data) as T;
     }
-    if (t == _i14.ModuleItem) {
-      return _i14.ModuleItem.fromJson(data) as T;
+    if (t == _i14.Module) {
+      return _i14.Module.fromJson(data) as T;
     }
-    if (t == _i15.Topic) {
-      return _i15.Topic.fromJson(data) as T;
+    if (t == _i15.ModuleItem) {
+      return _i15.ModuleItem.fromJson(data) as T;
     }
-    if (t == _i16.VedaUserProfile) {
-      return _i16.VedaUserProfile.fromJson(data) as T;
+    if (t == _i16.ModuleProgress) {
+      return _i16.ModuleProgress.fromJson(data) as T;
     }
-    if (t == _i17.VedaUserProfileWithEmail) {
-      return _i17.VedaUserProfileWithEmail.fromJson(data) as T;
+    if (t == _i17.Topic) {
+      return _i17.Topic.fromJson(data) as T;
     }
-    if (t == _i18.UserType) {
-      return _i18.UserType.fromJson(data) as T;
+    if (t == _i18.VedaUserProfile) {
+      return _i18.VedaUserProfile.fromJson(data) as T;
+    }
+    if (t == _i19.VedaUserProfileWithEmail) {
+      return _i19.VedaUserProfileWithEmail.fromJson(data) as T;
+    }
+    if (t == _i20.UserType) {
+      return _i20.UserType.fromJson(data) as T;
     }
     if (t == _i1.getType<_i2.ChatMessage?>()) {
       return (data != null ? _i2.ChatMessage.fromJson(data) : null) as T;
@@ -168,32 +180,38 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i1.getType<_i10.CourseVisibility?>()) {
       return (data != null ? _i10.CourseVisibility.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i11.FileCreationDraft?>()) {
-      return (data != null ? _i11.FileCreationDraft.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i11.Enrollment?>()) {
+      return (data != null ? _i11.Enrollment.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i12.KnowledgeFile?>()) {
-      return (data != null ? _i12.KnowledgeFile.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i12.FileCreationDraft?>()) {
+      return (data != null ? _i12.FileCreationDraft.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i13.Module?>()) {
-      return (data != null ? _i13.Module.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i13.KnowledgeFile?>()) {
+      return (data != null ? _i13.KnowledgeFile.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i14.ModuleItem?>()) {
-      return (data != null ? _i14.ModuleItem.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i14.Module?>()) {
+      return (data != null ? _i14.Module.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i15.Topic?>()) {
-      return (data != null ? _i15.Topic.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i15.ModuleItem?>()) {
+      return (data != null ? _i15.ModuleItem.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i16.VedaUserProfile?>()) {
-      return (data != null ? _i16.VedaUserProfile.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i16.ModuleProgress?>()) {
+      return (data != null ? _i16.ModuleProgress.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i17.VedaUserProfileWithEmail?>()) {
+    if (t == _i1.getType<_i17.Topic?>()) {
+      return (data != null ? _i17.Topic.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i18.VedaUserProfile?>()) {
+      return (data != null ? _i18.VedaUserProfile.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i19.VedaUserProfileWithEmail?>()) {
       return (data != null
-              ? _i17.VedaUserProfileWithEmail.fromJson(data)
+              ? _i19.VedaUserProfileWithEmail.fromJson(data)
               : null)
           as T;
     }
-    if (t == _i1.getType<_i18.UserType?>()) {
-      return (data != null ? _i18.UserType.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i20.UserType?>()) {
+      return (data != null ? _i20.UserType.fromJson(data) : null) as T;
     }
     if (t == List<_i2.ChatMessage>) {
       return (data as List).map((e) => deserialize<_i2.ChatMessage>(e)).toList()
@@ -216,13 +234,13 @@ class Protocol extends _i1.SerializationManager {
               : null)
           as T;
     }
-    if (t == List<_i13.Module>) {
-      return (data as List).map((e) => deserialize<_i13.Module>(e)).toList()
+    if (t == List<_i14.Module>) {
+      return (data as List).map((e) => deserialize<_i14.Module>(e)).toList()
           as T;
     }
-    if (t == _i1.getType<List<_i13.Module>?>()) {
+    if (t == _i1.getType<List<_i14.Module>?>()) {
       return (data != null
-              ? (data as List).map((e) => deserialize<_i13.Module>(e)).toList()
+              ? (data as List).map((e) => deserialize<_i14.Module>(e)).toList()
               : null)
           as T;
     }
@@ -238,34 +256,34 @@ class Protocol extends _i1.SerializationManager {
               : null)
           as T;
     }
-    if (t == List<_i12.KnowledgeFile>) {
+    if (t == List<_i13.KnowledgeFile>) {
       return (data as List)
-              .map((e) => deserialize<_i12.KnowledgeFile>(e))
+              .map((e) => deserialize<_i13.KnowledgeFile>(e))
               .toList()
           as T;
     }
-    if (t == _i1.getType<List<_i12.KnowledgeFile>?>()) {
+    if (t == _i1.getType<List<_i13.KnowledgeFile>?>()) {
       return (data != null
               ? (data as List)
-                    .map((e) => deserialize<_i12.KnowledgeFile>(e))
+                    .map((e) => deserialize<_i13.KnowledgeFile>(e))
                     .toList()
               : null)
           as T;
     }
-    if (t == List<_i14.ModuleItem>) {
-      return (data as List).map((e) => deserialize<_i14.ModuleItem>(e)).toList()
+    if (t == List<_i15.ModuleItem>) {
+      return (data as List).map((e) => deserialize<_i15.ModuleItem>(e)).toList()
           as T;
     }
-    if (t == _i1.getType<List<_i14.ModuleItem>?>()) {
+    if (t == _i1.getType<List<_i15.ModuleItem>?>()) {
       return (data != null
               ? (data as List)
-                    .map((e) => deserialize<_i14.ModuleItem>(e))
+                    .map((e) => deserialize<_i15.ModuleItem>(e))
                     .toList()
               : null)
           as T;
     }
-    if (t == List<_i18.UserType>) {
-      return (data as List).map((e) => deserialize<_i18.UserType>(e)).toList()
+    if (t == List<_i20.UserType>) {
+      return (data as List).map((e) => deserialize<_i20.UserType>(e)).toList()
           as T;
     }
     if (t == List<Map<String, String>>) {
@@ -291,24 +309,34 @@ class Protocol extends _i1.SerializationManager {
     if (t == List<int>) {
       return (data as List).map((e) => deserialize<int>(e)).toList() as T;
     }
-    if (t == List<_i19.Course>) {
-      return (data as List).map((e) => deserialize<_i19.Course>(e)).toList()
+    if (t == List<_i21.Course>) {
+      return (data as List).map((e) => deserialize<_i21.Course>(e)).toList()
           as T;
     }
-    if (t == List<_i20.KnowledgeFile>) {
+    if (t == List<_i22.KnowledgeFile>) {
       return (data as List)
-              .map((e) => deserialize<_i20.KnowledgeFile>(e))
+              .map((e) => deserialize<_i22.KnowledgeFile>(e))
               .toList()
           as T;
     }
-    if (t == List<_i21.FileCreationDraft>) {
+    if (t == List<_i23.FileCreationDraft>) {
       return (data as List)
-              .map((e) => deserialize<_i21.FileCreationDraft>(e))
+              .map((e) => deserialize<_i23.FileCreationDraft>(e))
               .toList()
           as T;
     }
-    if (t == List<_i22.Module>) {
-      return (data as List).map((e) => deserialize<_i22.Module>(e)).toList()
+    if (t == List<_i24.Module>) {
+      return (data as List).map((e) => deserialize<_i24.Module>(e)).toList()
+          as T;
+    }
+    if (t == List<_i25.Enrollment>) {
+      return (data as List).map((e) => deserialize<_i25.Enrollment>(e)).toList()
+          as T;
+    }
+    if (t == List<_i26.ModuleProgress>) {
+      return (data as List)
+              .map((e) => deserialize<_i26.ModuleProgress>(e))
+              .toList()
           as T;
     }
     if (t == List<String>) {
@@ -320,17 +348,17 @@ class Protocol extends _i1.SerializationManager {
               : null)
           as T;
     }
-    if (t == List<_i23.VedaUserProfile>) {
+    if (t == List<_i27.VedaUserProfile>) {
       return (data as List)
-              .map((e) => deserialize<_i23.VedaUserProfile>(e))
+              .map((e) => deserialize<_i27.VedaUserProfile>(e))
               .toList()
           as T;
     }
     try {
-      return _i24.Protocol().deserialize<T>(data, t);
+      return _i28.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     try {
-      return _i25.Protocol().deserialize<T>(data, t);
+      return _i29.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     return super.deserialize<T>(data, t);
   }
@@ -346,14 +374,16 @@ class Protocol extends _i1.SerializationManager {
       _i8.Course => 'Course',
       _i9.CourseIndex => 'CourseIndex',
       _i10.CourseVisibility => 'CourseVisibility',
-      _i11.FileCreationDraft => 'FileCreationDraft',
-      _i12.KnowledgeFile => 'KnowledgeFile',
-      _i13.Module => 'Module',
-      _i14.ModuleItem => 'ModuleItem',
-      _i15.Topic => 'Topic',
-      _i16.VedaUserProfile => 'VedaUserProfile',
-      _i17.VedaUserProfileWithEmail => 'VedaUserProfileWithEmail',
-      _i18.UserType => 'UserType',
+      _i11.Enrollment => 'Enrollment',
+      _i12.FileCreationDraft => 'FileCreationDraft',
+      _i13.KnowledgeFile => 'KnowledgeFile',
+      _i14.Module => 'Module',
+      _i15.ModuleItem => 'ModuleItem',
+      _i16.ModuleProgress => 'ModuleProgress',
+      _i17.Topic => 'Topic',
+      _i18.VedaUserProfile => 'VedaUserProfile',
+      _i19.VedaUserProfileWithEmail => 'VedaUserProfileWithEmail',
+      _i20.UserType => 'UserType',
       _ => null,
     };
   }
@@ -386,28 +416,32 @@ class Protocol extends _i1.SerializationManager {
         return 'CourseIndex';
       case _i10.CourseVisibility():
         return 'CourseVisibility';
-      case _i11.FileCreationDraft():
+      case _i11.Enrollment():
+        return 'Enrollment';
+      case _i12.FileCreationDraft():
         return 'FileCreationDraft';
-      case _i12.KnowledgeFile():
+      case _i13.KnowledgeFile():
         return 'KnowledgeFile';
-      case _i13.Module():
+      case _i14.Module():
         return 'Module';
-      case _i14.ModuleItem():
+      case _i15.ModuleItem():
         return 'ModuleItem';
-      case _i15.Topic():
+      case _i16.ModuleProgress():
+        return 'ModuleProgress';
+      case _i17.Topic():
         return 'Topic';
-      case _i16.VedaUserProfile():
+      case _i18.VedaUserProfile():
         return 'VedaUserProfile';
-      case _i17.VedaUserProfileWithEmail():
+      case _i19.VedaUserProfileWithEmail():
         return 'VedaUserProfileWithEmail';
-      case _i18.UserType():
+      case _i20.UserType():
         return 'UserType';
     }
-    className = _i24.Protocol().getClassNameForObject(data);
+    className = _i28.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_idp.$className';
     }
-    className = _i25.Protocol().getClassNameForObject(data);
+    className = _i29.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_core.$className';
     }
@@ -447,37 +481,43 @@ class Protocol extends _i1.SerializationManager {
     if (dataClassName == 'CourseVisibility') {
       return deserialize<_i10.CourseVisibility>(data['data']);
     }
+    if (dataClassName == 'Enrollment') {
+      return deserialize<_i11.Enrollment>(data['data']);
+    }
     if (dataClassName == 'FileCreationDraft') {
-      return deserialize<_i11.FileCreationDraft>(data['data']);
+      return deserialize<_i12.FileCreationDraft>(data['data']);
     }
     if (dataClassName == 'KnowledgeFile') {
-      return deserialize<_i12.KnowledgeFile>(data['data']);
+      return deserialize<_i13.KnowledgeFile>(data['data']);
     }
     if (dataClassName == 'Module') {
-      return deserialize<_i13.Module>(data['data']);
+      return deserialize<_i14.Module>(data['data']);
     }
     if (dataClassName == 'ModuleItem') {
-      return deserialize<_i14.ModuleItem>(data['data']);
+      return deserialize<_i15.ModuleItem>(data['data']);
+    }
+    if (dataClassName == 'ModuleProgress') {
+      return deserialize<_i16.ModuleProgress>(data['data']);
     }
     if (dataClassName == 'Topic') {
-      return deserialize<_i15.Topic>(data['data']);
+      return deserialize<_i17.Topic>(data['data']);
     }
     if (dataClassName == 'VedaUserProfile') {
-      return deserialize<_i16.VedaUserProfile>(data['data']);
+      return deserialize<_i18.VedaUserProfile>(data['data']);
     }
     if (dataClassName == 'VedaUserProfileWithEmail') {
-      return deserialize<_i17.VedaUserProfileWithEmail>(data['data']);
+      return deserialize<_i19.VedaUserProfileWithEmail>(data['data']);
     }
     if (dataClassName == 'UserType') {
-      return deserialize<_i18.UserType>(data['data']);
+      return deserialize<_i20.UserType>(data['data']);
     }
     if (dataClassName.startsWith('serverpod_auth_idp.')) {
       data['className'] = dataClassName.substring(19);
-      return _i24.Protocol().deserializeByClassName(data);
+      return _i28.Protocol().deserializeByClassName(data);
     }
     if (dataClassName.startsWith('serverpod_auth_core.')) {
       data['className'] = dataClassName.substring(20);
-      return _i25.Protocol().deserializeByClassName(data);
+      return _i29.Protocol().deserializeByClassName(data);
     }
     return super.deserializeByClassName(data);
   }
@@ -492,10 +532,10 @@ class Protocol extends _i1.SerializationManager {
       return null;
     }
     try {
-      return _i24.Protocol().mapRecordToJson(record);
+      return _i28.Protocol().mapRecordToJson(record);
     } catch (_) {}
     try {
-      return _i25.Protocol().mapRecordToJson(record);
+      return _i29.Protocol().mapRecordToJson(record);
     } catch (_) {}
     throw Exception('Unsupported record type ${record.runtimeType}');
   }

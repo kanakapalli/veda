@@ -1,0 +1,22 @@
+### Enrollment - tracks which users have enrolled in which courses
+class: Enrollment
+table: enrollments
+
+fields:
+  ### Link to the authenticated user who enrolled
+  user: module:serverpod_auth_core:AuthUser?, relation(onDelete=Cascade)
+  ### Foreign key to the enrolled course
+  courseId: int, relation(parent=courses, onDelete=Cascade)
+  ### Parent course reference
+  course: Course?
+  ### Timestamp when the user enrolled
+  enrolledAt: DateTime, default=now
+
+indexes:
+  enrollments_user_id_idx:
+    fields: userId
+  enrollments_course_id_idx:
+    fields: courseId
+  enrollments_user_course_idx:
+    fields: userId, courseId
+    unique: true

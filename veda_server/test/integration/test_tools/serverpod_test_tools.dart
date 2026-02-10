@@ -30,10 +30,12 @@ import 'package:veda_server/src/generated/lms/file_creation_draft.dart' as _i13;
 import 'package:veda_server/src/generated/lms/module.dart' as _i14;
 import 'package:veda_server/src/generated/lms/topic.dart' as _i15;
 import 'package:veda_server/src/generated/lms/module_item.dart' as _i16;
-import 'package:veda_server/src/generated/profiles/user_profile.dart' as _i17;
-import 'package:veda_server/src/generated/profiles/user_type.dart' as _i18;
+import 'package:veda_server/src/generated/lms/enrollment.dart' as _i17;
+import 'package:veda_server/src/generated/lms/module_progress.dart' as _i18;
+import 'package:veda_server/src/generated/profiles/user_profile.dart' as _i19;
+import 'package:veda_server/src/generated/profiles/user_type.dart' as _i20;
 import 'package:veda_server/src/generated/profiles/user_profile_with_email.dart'
-    as _i19;
+    as _i21;
 import 'package:veda_server/src/generated/protocol.dart';
 import 'package:veda_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -1584,6 +1586,257 @@ class _LmsEndpoint {
     });
   }
 
+  _i3.Future<_i17.Enrollment> enrollInCourse(
+    _i1.TestSessionBuilder sessionBuilder,
+    int courseId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'lms',
+            method: 'enrollInCourse',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'lms',
+          methodName: 'enrollInCourse',
+          parameters: _i1.testObjectToJson({'courseId': courseId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i17.Enrollment>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<bool> unenrollFromCourse(
+    _i1.TestSessionBuilder sessionBuilder,
+    int courseId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'lms',
+            method: 'unenrollFromCourse',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'lms',
+          methodName: 'unenrollFromCourse',
+          parameters: _i1.testObjectToJson({'courseId': courseId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<bool> isEnrolled(
+    _i1.TestSessionBuilder sessionBuilder,
+    int courseId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'lms',
+            method: 'isEnrolled',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'lms',
+          methodName: 'isEnrolled',
+          parameters: _i1.testObjectToJson({'courseId': courseId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i17.Enrollment>> getMyEnrollments(
+    _i1.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'lms',
+            method: 'getMyEnrollments',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'lms',
+          methodName: 'getMyEnrollments',
+          parameters: _i1.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i17.Enrollment>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<int> getEnrollmentCount(
+    _i1.TestSessionBuilder sessionBuilder,
+    int courseId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'lms',
+            method: 'getEnrollmentCount',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'lms',
+          methodName: 'getEnrollmentCount',
+          parameters: _i1.testObjectToJson({'courseId': courseId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<int>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i18.ModuleProgress> markModuleComplete(
+    _i1.TestSessionBuilder sessionBuilder,
+    int courseId,
+    int moduleId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'lms',
+            method: 'markModuleComplete',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'lms',
+          methodName: 'markModuleComplete',
+          parameters: _i1.testObjectToJson({
+            'courseId': courseId,
+            'moduleId': moduleId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i18.ModuleProgress>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i18.ModuleProgress>> getMyProgress(
+    _i1.TestSessionBuilder sessionBuilder,
+    int courseId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'lms',
+            method: 'getMyProgress',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'lms',
+          methodName: 'getMyProgress',
+          parameters: _i1.testObjectToJson({'courseId': courseId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i18.ModuleProgress>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<double> getCourseProgress(
+    _i1.TestSessionBuilder sessionBuilder,
+    int courseId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'lms',
+            method: 'getCourseProgress',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'lms',
+          methodName: 'getCourseProgress',
+          parameters: _i1.testObjectToJson({'courseId': courseId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<double>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _i3.Future<List<_i14.Module>> generateCourseTableOfContents(
     _i1.TestSessionBuilder sessionBuilder,
     int courseId, {
@@ -1762,9 +2015,9 @@ class _VedaUserProfileEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i17.VedaUserProfile> upsertProfile(
+  _i3.Future<_i19.VedaUserProfile> upsertProfile(
     _i1.TestSessionBuilder sessionBuilder, {
-    required _i18.UserType userType,
+    required _i20.UserType userType,
     required String fullName,
     String? bio,
     List<String>? interests,
@@ -1801,7 +2054,7 @@ class _VedaUserProfileEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i17.VedaUserProfile>);
+                as _i3.Future<_i19.VedaUserProfile>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1809,7 +2062,7 @@ class _VedaUserProfileEndpoint {
     });
   }
 
-  _i3.Future<_i17.VedaUserProfile?> getMyProfile(
+  _i3.Future<_i19.VedaUserProfile?> getMyProfile(
     _i1.TestSessionBuilder sessionBuilder,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
@@ -1831,7 +2084,7 @@ class _VedaUserProfileEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i17.VedaUserProfile?>);
+                as _i3.Future<_i19.VedaUserProfile?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1869,7 +2122,7 @@ class _VedaUserProfileEndpoint {
     });
   }
 
-  _i3.Future<_i19.VedaUserProfileWithEmail?> getMyProfileWithEmail(
+  _i3.Future<_i21.VedaUserProfileWithEmail?> getMyProfileWithEmail(
     _i1.TestSessionBuilder sessionBuilder,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
@@ -1891,7 +2144,7 @@ class _VedaUserProfileEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i19.VedaUserProfileWithEmail?>);
+                as _i3.Future<_i21.VedaUserProfileWithEmail?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1899,7 +2152,7 @@ class _VedaUserProfileEndpoint {
     });
   }
 
-  _i3.Future<_i19.VedaUserProfileWithEmail?> getUserProfileById(
+  _i3.Future<_i21.VedaUserProfileWithEmail?> getUserProfileById(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue authUserId,
   ) async {
@@ -1922,7 +2175,7 @@ class _VedaUserProfileEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i19.VedaUserProfileWithEmail?>);
+                as _i3.Future<_i21.VedaUserProfileWithEmail?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1930,7 +2183,7 @@ class _VedaUserProfileEndpoint {
     });
   }
 
-  _i3.Future<List<_i17.VedaUserProfile>> listCreators(
+  _i3.Future<List<_i19.VedaUserProfile>> listCreators(
     _i1.TestSessionBuilder sessionBuilder, {
     String? username,
     String? topic,
@@ -1957,7 +2210,7 @@ class _VedaUserProfileEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i17.VedaUserProfile>>);
+                as _i3.Future<List<_i19.VedaUserProfile>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

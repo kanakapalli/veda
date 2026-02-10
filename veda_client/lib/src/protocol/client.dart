@@ -30,11 +30,13 @@ import 'package:veda_client/src/protocol/lms/file_creation_draft.dart' as _i13;
 import 'package:veda_client/src/protocol/lms/module.dart' as _i14;
 import 'package:veda_client/src/protocol/lms/topic.dart' as _i15;
 import 'package:veda_client/src/protocol/lms/module_item.dart' as _i16;
-import 'package:veda_client/src/protocol/profiles/user_profile.dart' as _i17;
-import 'package:veda_client/src/protocol/profiles/user_type.dart' as _i18;
+import 'package:veda_client/src/protocol/lms/enrollment.dart' as _i17;
+import 'package:veda_client/src/protocol/lms/module_progress.dart' as _i18;
+import 'package:veda_client/src/protocol/profiles/user_profile.dart' as _i19;
+import 'package:veda_client/src/protocol/profiles/user_type.dart' as _i20;
 import 'package:veda_client/src/protocol/profiles/user_profile_with_email.dart'
-    as _i19;
-import 'protocol.dart' as _i20;
+    as _i21;
+import 'protocol.dart' as _i22;
 
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
 /// are made available on the server and enable the corresponding sign-in widget
@@ -577,6 +579,78 @@ class EndpointLms extends _i2.EndpointRef {
         {'moduleItemId': moduleItemId},
       );
 
+  /// Enrolls the authenticated user in a course.
+  /// Returns the created Enrollment record.
+  /// Throws if the user is already enrolled.
+  _i3.Future<_i17.Enrollment> enrollInCourse(int courseId) =>
+      caller.callServerEndpoint<_i17.Enrollment>(
+        'lms',
+        'enrollInCourse',
+        {'courseId': courseId},
+      );
+
+  /// Unenrolls the authenticated user from a course.
+  _i3.Future<bool> unenrollFromCourse(int courseId) =>
+      caller.callServerEndpoint<bool>(
+        'lms',
+        'unenrollFromCourse',
+        {'courseId': courseId},
+      );
+
+  /// Checks if the authenticated user is enrolled in a specific course.
+  _i3.Future<bool> isEnrolled(int courseId) => caller.callServerEndpoint<bool>(
+    'lms',
+    'isEnrolled',
+    {'courseId': courseId},
+  );
+
+  /// Lists all courses the authenticated user is enrolled in.
+  /// Returns enrollments with course data included.
+  _i3.Future<List<_i17.Enrollment>> getMyEnrollments() =>
+      caller.callServerEndpoint<List<_i17.Enrollment>>(
+        'lms',
+        'getMyEnrollments',
+        {},
+      );
+
+  /// Gets the number of students enrolled in a course.
+  _i3.Future<int> getEnrollmentCount(int courseId) =>
+      caller.callServerEndpoint<int>(
+        'lms',
+        'getEnrollmentCount',
+        {'courseId': courseId},
+      );
+
+  /// Marks a module as completed for the authenticated user.
+  /// Creates progress record if it doesn't exist, or updates it.
+  _i3.Future<_i18.ModuleProgress> markModuleComplete(
+    int courseId,
+    int moduleId,
+  ) => caller.callServerEndpoint<_i18.ModuleProgress>(
+    'lms',
+    'markModuleComplete',
+    {
+      'courseId': courseId,
+      'moduleId': moduleId,
+    },
+  );
+
+  /// Gets all module progress records for a specific course.
+  _i3.Future<List<_i18.ModuleProgress>> getMyProgress(int courseId) =>
+      caller.callServerEndpoint<List<_i18.ModuleProgress>>(
+        'lms',
+        'getMyProgress',
+        {'courseId': courseId},
+      );
+
+  /// Gets the course progress percentage (completed modules / total modules).
+  _i3.Future<double> getCourseProgress(int courseId) =>
+      caller.callServerEndpoint<double>(
+        'lms',
+        'getCourseProgress',
+        {'courseId': courseId},
+      );
+
   /// Generates a full course table of contents using Gemini AI.
   /// Creates Modules with Topics (via ModuleItems) based on course info
   /// and uploaded knowledge files. Deletes existing modules first.
@@ -647,8 +721,8 @@ class EndpointVedaUserProfile extends _i2.EndpointRef {
   /// Creates or updates a user profile for the authenticated user.
   /// Adds the specified userType to the user's roles if not already present.
   /// This allows users to be both learners and creators by registering on both platforms.
-  _i3.Future<_i17.VedaUserProfile> upsertProfile({
-    required _i18.UserType userType,
+  _i3.Future<_i19.VedaUserProfile> upsertProfile({
+    required _i20.UserType userType,
     required String fullName,
     String? bio,
     List<String>? interests,
@@ -656,7 +730,7 @@ class EndpointVedaUserProfile extends _i2.EndpointRef {
     String? websiteUrl,
     String? profileImageUrl,
     List<String>? expertise,
-  }) => caller.callServerEndpoint<_i17.VedaUserProfile>(
+  }) => caller.callServerEndpoint<_i19.VedaUserProfile>(
     'vedaUserProfile',
     'upsertProfile',
     {
@@ -672,8 +746,8 @@ class EndpointVedaUserProfile extends _i2.EndpointRef {
   );
 
   /// Gets the profile for the authenticated user.
-  _i3.Future<_i17.VedaUserProfile?> getMyProfile() =>
-      caller.callServerEndpoint<_i17.VedaUserProfile?>(
+  _i3.Future<_i19.VedaUserProfile?> getMyProfile() =>
+      caller.callServerEndpoint<_i19.VedaUserProfile?>(
         'vedaUserProfile',
         'getMyProfile',
         {},
@@ -687,8 +761,8 @@ class EndpointVedaUserProfile extends _i2.EndpointRef {
   );
 
   /// Gets the user profile with email from Serverpod's auth system.
-  _i3.Future<_i19.VedaUserProfileWithEmail?> getMyProfileWithEmail() =>
-      caller.callServerEndpoint<_i19.VedaUserProfileWithEmail?>(
+  _i3.Future<_i21.VedaUserProfileWithEmail?> getMyProfileWithEmail() =>
+      caller.callServerEndpoint<_i21.VedaUserProfileWithEmail?>(
         'vedaUserProfile',
         'getMyProfileWithEmail',
         {},
@@ -696,9 +770,9 @@ class EndpointVedaUserProfile extends _i2.EndpointRef {
 
   /// Gets any user's profile with email by their authUserId.
   /// Public endpoint - does not require the user to be the owner.
-  _i3.Future<_i19.VedaUserProfileWithEmail?> getUserProfileById(
+  _i3.Future<_i21.VedaUserProfileWithEmail?> getUserProfileById(
     _i2.UuidValue authUserId,
-  ) => caller.callServerEndpoint<_i19.VedaUserProfileWithEmail?>(
+  ) => caller.callServerEndpoint<_i21.VedaUserProfileWithEmail?>(
     'vedaUserProfile',
     'getUserProfileById',
     {'authUserId': authUserId},
@@ -709,10 +783,10 @@ class EndpointVedaUserProfile extends _i2.EndpointRef {
   /// - username: Filter by fullName (case-insensitive partial match)
   /// - topic: Filter by expertise field (case-insensitive partial match)
   /// Returns only profiles where userTypes contains UserType.creator.
-  _i3.Future<List<_i17.VedaUserProfile>> listCreators({
+  _i3.Future<List<_i19.VedaUserProfile>> listCreators({
     String? username,
     String? topic,
-  }) => caller.callServerEndpoint<List<_i17.VedaUserProfile>>(
+  }) => caller.callServerEndpoint<List<_i19.VedaUserProfile>>(
     'vedaUserProfile',
     'listCreators',
     {
@@ -753,7 +827,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i20.Protocol(),
+         _i22.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,

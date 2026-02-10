@@ -486,6 +486,206 @@ class LmsEndpoint extends Endpoint {
   }
 
   // ---------------------------------------------------------------------------
+  // Enrollment Management
+  // ---------------------------------------------------------------------------
+
+  /// Enrolls the authenticated user in a course.
+  /// Returns the created Enrollment record.
+  /// Throws if the user is already enrolled.
+  Future<Enrollment> enrollInCourse(Session session, int courseId) async {
+    final authInfo = session.authenticated;
+    if (authInfo == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final userId = authInfo.authUserId;
+
+    // Check if already enrolled
+    final existing = await Enrollment.db.findFirstRow(
+      session,
+      where: (t) => t.userId.equals(userId) & t.courseId.equals(courseId),
+    );
+    if (existing != null) {
+      throw Exception('Already enrolled in this course');
+    }
+
+    // Verify course exists
+    final course = await Course.db.findById(session, courseId);
+    if (course == null) {
+      throw Exception('Course not found');
+    }
+
+    final enrollment = Enrollment(
+      userId: userId,
+      courseId: courseId,
+      enrolledAt: DateTime.now(),
+    );
+
+    return await Enrollment.db.insertRow(session, enrollment);
+  }
+
+  /// Unenrolls the authenticated user from a course.
+  Future<bool> unenrollFromCourse(Session session, int courseId) async {
+    final authInfo = session.authenticated;
+    if (authInfo == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final userId = authInfo.authUserId;
+
+    final result = await Enrollment.db.deleteWhere(
+      session,
+      where: (t) => t.userId.equals(userId) & t.courseId.equals(courseId),
+    );
+
+    return result.isNotEmpty;
+  }
+
+  /// Checks if the authenticated user is enrolled in a specific course.
+  Future<bool> isEnrolled(Session session, int courseId) async {
+    final authInfo = session.authenticated;
+    if (authInfo == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final userId = authInfo.authUserId;
+
+    final enrollment = await Enrollment.db.findFirstRow(
+      session,
+      where: (t) => t.userId.equals(userId) & t.courseId.equals(courseId),
+    );
+
+    return enrollment != null;
+  }
+
+  /// Lists all courses the authenticated user is enrolled in.
+  /// Returns enrollments with course data included.
+  Future<List<Enrollment>> getMyEnrollments(Session session) async {
+    final authInfo = session.authenticated;
+    if (authInfo == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final userId = authInfo.authUserId;
+
+    final enrollments = await Enrollment.db.find(
+      session,
+      where: (t) => t.userId.equals(userId),
+      orderBy: (t) => t.enrolledAt,
+      orderDescending: true,
+    );
+
+    // Manually load course for each enrollment
+    for (final enrollment in enrollments) {
+      enrollment.course = await Course.db.findById(session, enrollment.courseId);
+    }
+
+    return enrollments;
+  }
+
+  /// Gets the number of students enrolled in a course.
+  Future<int> getEnrollmentCount(Session session, int courseId) async {
+    final enrollments = await Enrollment.db.find(
+      session,
+      where: (t) => t.courseId.equals(courseId),
+    );
+    return enrollments.length;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Module Progress Tracking
+  // ---------------------------------------------------------------------------
+
+  /// Marks a module as completed for the authenticated user.
+  /// Creates progress record if it doesn't exist, or updates it.
+  Future<ModuleProgress> markModuleComplete(
+    Session session,
+    int courseId,
+    int moduleId,
+  ) async {
+    final authInfo = session.authenticated;
+    if (authInfo == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final userId = authInfo.authUserId;
+
+    // Check if progress record already exists
+    final existing = await ModuleProgress.db.findFirstRow(
+      session,
+      where: (t) => t.userId.equals(userId) & t.moduleId.equals(moduleId),
+    );
+
+    if (existing != null) {
+      existing.completed = true;
+      existing.completedAt = DateTime.now();
+      return await ModuleProgress.db.updateRow(session, existing);
+    }
+
+    // Create new progress record
+    final progress = ModuleProgress(
+      userId: userId,
+      moduleId: moduleId,
+      courseId: courseId,
+      completed: true,
+      completedAt: DateTime.now(),
+      startedAt: DateTime.now(),
+    );
+
+    return await ModuleProgress.db.insertRow(session, progress);
+  }
+
+  /// Gets all module progress records for a specific course.
+  Future<List<ModuleProgress>> getMyProgress(
+    Session session,
+    int courseId,
+  ) async {
+    final authInfo = session.authenticated;
+    if (authInfo == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final userId = authInfo.authUserId;
+
+    return await ModuleProgress.db.find(
+      session,
+      where: (t) => t.userId.equals(userId) & t.courseId.equals(courseId),
+    );
+  }
+
+  /// Gets the course progress percentage (completed modules / total modules).
+  Future<double> getCourseProgress(
+    Session session,
+    int courseId,
+  ) async {
+    final authInfo = session.authenticated;
+    if (authInfo == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final userId = authInfo.authUserId;
+
+    // Count total modules in the course
+    final totalModules = await Module.db.count(
+      session,
+      where: (t) => t.courseId.equals(courseId),
+    );
+
+    if (totalModules == 0) return 0.0;
+
+    // Count completed modules
+    final completedModules = await ModuleProgress.db.count(
+      session,
+      where: (t) =>
+          t.userId.equals(userId) &
+          t.courseId.equals(courseId) &
+          t.completed.equals(true),
+    );
+
+    return completedModules / totalModules;
+  }
+
+  // ---------------------------------------------------------------------------
   // File Content Reading
   // ---------------------------------------------------------------------------
 

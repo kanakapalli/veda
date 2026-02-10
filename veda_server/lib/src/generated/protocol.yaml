@@ -45,6 +45,14 @@ lms:
   - createModuleItem:
   - updateModuleItem:
   - deleteModuleItem:
+  - enrollInCourse:
+  - unenrollFromCourse:
+  - isEnrolled:
+  - getMyEnrollments:
+  - getEnrollmentCount:
+  - markModuleComplete:
+  - getMyProgress:
+  - getCourseProgress:
   - generateCourseTableOfContents:
   - getUploadDescription:
   - verifyUpload:
