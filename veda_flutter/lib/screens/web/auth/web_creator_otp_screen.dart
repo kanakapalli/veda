@@ -11,6 +11,7 @@ import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
 import 'package:veda_client/veda_client.dart';
 import '../../../design_system/veda_colors.dart';
 import '../../../main.dart';
+import '../../../services/upload_service.dart';
 import 'web_creator_register_screen.dart';
 
 /// Web Creator OTP Verification Screen
@@ -143,6 +144,25 @@ class _WebCreatorOtpScreenState extends State<WebCreatorOtpScreen> {
       await client.auth.updateSignedInUser(authSuccess);
 
       // Create creator profile
+      String? profileImageUrl;
+
+      // Upload profile image if one was selected during registration
+      if (widget.registrationData.profileImageBytes != null &&
+          widget.registrationData.profileImageName != null) {
+        try {
+          final uploadResult =
+              await UploadService.instance.uploadProfileImageBytes(
+            widget.registrationData.profileImageBytes!,
+            widget.registrationData.profileImageName!,
+          );
+          if (uploadResult.success && uploadResult.publicUrl != null) {
+            profileImageUrl = uploadResult.publicUrl;
+          }
+        } catch (e) {
+          debugPrint('Failed to upload profile image: $e');
+        }
+      }
+
       try {
         await client.vedaUserProfile.upsertProfile(
           userType: UserType.creator,
@@ -153,6 +173,7 @@ class _WebCreatorOtpScreenState extends State<WebCreatorOtpScreen> {
           websiteUrl: widget.registrationData.websiteUrl.isEmpty
               ? null
               : widget.registrationData.websiteUrl,
+          profileImageUrl: profileImageUrl,
           expertise: widget.registrationData.expertise,
           interests: [],
           learningGoal: null,

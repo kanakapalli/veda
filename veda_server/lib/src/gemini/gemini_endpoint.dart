@@ -89,6 +89,31 @@ class GeminiEndpoint extends Endpoint {
             .toList();
       }
 
+      // Load knowledge files for this course to give AI context
+      final knowledgeFiles = await KnowledgeFile.db.find(
+        session,
+        where: (t) => t.courseId.equals(request.courseId),
+      );
+
+      // Build knowledge context from file contents
+      final knowledgeContext = StringBuffer();
+      if (knowledgeFiles.isNotEmpty) {
+        knowledgeContext.writeln('\nKNOWLEDGE FILES UPLOADED TO THIS COURSE:');
+        for (final file in knowledgeFiles) {
+          knowledgeContext.writeln('--- File: ${file.fileName} ---');
+          if (file.textContent != null && file.textContent!.isNotEmpty) {
+            // Limit each file to ~3000 chars to stay within token limits
+            final content = file.textContent!.length > 3000
+                ? '${file.textContent!.substring(0, 3000)}... [truncated]'
+                : file.textContent!;
+            knowledgeContext.writeln(content);
+          } else {
+            knowledgeContext.writeln('[File uploaded but text content not extracted]');
+          }
+          knowledgeContext.writeln();
+        }
+      }
+
       // Build system instruction with course context
       final courseContext = '''
 You are a Course Architect AI assistant. You are currently editing the course:
@@ -117,6 +142,8 @@ TOOL USAGE GUIDELINES:
 5. **Images**: Generate when user requests visual assets.
 
 Be helpful, confirm actions taken, and update the system prompt intelligently to capture course context.
+
+$knowledgeContext
 
 ${request.systemInstruction ?? ''}
 ''';

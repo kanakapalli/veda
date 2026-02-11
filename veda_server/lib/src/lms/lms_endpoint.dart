@@ -1017,6 +1017,8 @@ Guidelines:
     final response = await gemini.chat(
       message: prompt,
       enableTools: false,
+      maxOutputTokens: 8192,
+      responseMimeType: 'application/json',
     );
 
     session.log(
@@ -1033,6 +1035,11 @@ Guidelines:
       // Extract JSON from the response (handle possible markdown wrapping)
       var jsonStr = response.trim();
 
+      // Remove BOM if present
+      if (jsonStr.startsWith('\uFEFF')) {
+        jsonStr = jsonStr.substring(1);
+      }
+
       // Remove markdown code fences if present
       if (jsonStr.startsWith('```')) {
         session.log('🔧 [TOC] Stripping markdown code fence', level: LogLevel.debug);
@@ -1041,19 +1048,50 @@ Guidelines:
         jsonStr = jsonStr.trim();
       }
 
-      // Find JSON array boundaries if there's extra text
-      final jsonMatch = RegExp(r'\[\s*\{.*\}\s*\]', dotAll: true).firstMatch(jsonStr);
-      if (jsonMatch != null && jsonMatch.start > 0) {
-        session.log('🔧 [TOC] Extracting JSON array from response', level: LogLevel.debug);
-        jsonStr = jsonMatch.group(0)!;
+      // Remove trailing commas before closing brackets/braces (common LLM mistake)
+      jsonStr = jsonStr.replaceAll(RegExp(r',\s*([\]\}])'), r'$1');
+
+      // Remove control characters that can break JSON parsing
+      jsonStr = jsonStr.replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]'), '');
+
+      // Try to parse the JSON directly first
+      dynamic parsed;
+      try {
+        parsed = jsonDecode(jsonStr);
+        session.log(
+          '✅ [TOC] Successfully parsed JSON directly (${jsonStr.length} chars)',
+          level: LogLevel.debug,
+        );
+      } catch (e) {
+        // If direct parsing fails, try to extract JSON array boundaries
+        session.log(
+          '⚠️ [TOC] Direct JSON parsing failed: $e. Attempting to extract JSON boundaries...',
+          level: LogLevel.warning,
+        );
+
+        // Find the first '[' and last ']'
+        final firstBracket = jsonStr.indexOf('[');
+        final lastBracket = jsonStr.lastIndexOf(']');
+
+        if (firstBracket != -1 && lastBracket != -1 && lastBracket > firstBracket) {
+          final extracted = jsonStr.substring(firstBracket, lastBracket + 1);
+          session.log(
+            '🔧 [TOC] Extracted JSON array boundaries (${extracted.length} chars)',
+            level: LogLevel.debug,
+          );
+          parsed = jsonDecode(extracted);
+          session.log(
+            '✅ [TOC] Successfully parsed extracted JSON',
+            level: LogLevel.debug,
+          );
+        } else {
+          session.log(
+            '❌ [TOC] Could not find valid JSON array boundaries',
+            level: LogLevel.error,
+          );
+          rethrow;
+        }
       }
-
-      session.log(
-        '🔧 [TOC] Parsing JSON (${jsonStr.length} chars)',
-        level: LogLevel.debug,
-      );
-
-      final parsed = jsonDecode(jsonStr);
 
       // Validate it's a list
       if (parsed is! List) {

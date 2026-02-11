@@ -298,6 +298,8 @@ class GeminiService {
     List<Map<String, String>>? history,
     String? systemInstruction,
     bool enableTools = true,
+    int maxOutputTokens = 2048,
+    String? responseMimeType,
   }) async {
     final url = Uri.parse('$_baseUrl/$_model:generateContent?key=$apiKey');
 
@@ -342,12 +344,16 @@ class GeminiService {
     }
 
     // Add generation config
-    body['generationConfig'] = {
+    final generationConfig = <String, dynamic>{
       'temperature': 0.7,
       'topK': 40,
       'topP': 0.95,
-      'maxOutputTokens': 2048,
+      'maxOutputTokens': maxOutputTokens,
     };
+    if (responseMimeType != null) {
+      generationConfig['responseMimeType'] = responseMimeType;
+    }
+    body['generationConfig'] = generationConfig;
 
     final response = await http.post(
       url,

@@ -25,11 +25,23 @@ class _MainShellState extends State<MainShell> {
   void initState() {
     super.initState();
     _screens = [
-      const DashboardScreen(),
-      const SearchScreen(),
+      DashboardScreen(
+        onSearchTap: () => setState(() => _currentIndex = 1),
+        onSearchWithQuery: _navigateToSearchWithQuery,
+      ),
+      SearchScreen(key: SearchScreen.globalKey),
       const LearnScreen(),
       ProfileScreen(onSignOut: widget.onSignOut),
     ];
+  }
+
+  void _navigateToSearchWithQuery(String query, {SearchFilter? filter}) {
+    setState(() => _currentIndex = 1);
+    // Small delay to ensure the search tab is visible before triggering
+    Future.delayed(const Duration(milliseconds: 100), () {
+      SearchScreen.globalKey.currentState
+          ?.triggerSearch(query, filter: filter);
+    });
   }
 
   @override

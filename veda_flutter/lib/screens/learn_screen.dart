@@ -134,27 +134,14 @@ class _LearnScreenState extends State<LearnScreen> {
           const SizedBox(height: 32),
 
           // Most recent enrollment as "current session"
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'CURRENT_SESSION',
-                style: GoogleFonts.jetBrainsMono(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w900,
-                  color: VedaColors.zinc500,
-                  letterSpacing: 3.0,
-                ),
-              ),
-              Text(
-                'Last Sync: now',
-                style: GoogleFonts.jetBrainsMono(
-                  fontSize: 9,
-                  color: VedaColors.zinc700,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
+          Text(
+            'ACTIVE_COURSE',
+            style: GoogleFonts.jetBrainsMono(
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+              color: VedaColors.zinc500,
+              letterSpacing: 3.0,
+            ),
           ),
           const SizedBox(height: 16),
 
@@ -283,16 +270,6 @@ class _LearnHeader extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
-                      'VEDA_OS // MY_LEARNING',
-                      style: GoogleFonts.jetBrainsMono(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w400,
-                        color: VedaColors.zinc500,
-                        letterSpacing: 2.0,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
                       'ENROLLED_COURSES',
                       style: GoogleFonts.inter(
                         fontSize: 24,
@@ -304,42 +281,7 @@ class _LearnHeader extends StatelessWidget {
                     ),
                   ],
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(
-                      'STATUS:',
-                      style: GoogleFonts.jetBrainsMono(
-                        fontSize: 8,
-                        color: VedaColors.zinc700,
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Container(
-                          width: 6,
-                          height: 6,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF22C55E),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'SYNCING',
-                          style: GoogleFonts.jetBrainsMono(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xFF22C55E),
-                            letterSpacing: 1.0,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                const SizedBox.shrink(),
               ],
             ),
           ),

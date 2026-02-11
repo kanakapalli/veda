@@ -62,62 +62,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return CustomScrollView(
       slivers: [
         // Header
-        SliverAppBar(
-          pinned: true,
-          toolbarHeight: 72,
-          backgroundColor: VedaColors.black,
-          surfaceTintColor: Colors.transparent,
-          automaticallyImplyLeading: false,
-          flexibleSpace: Container(
-            decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: VedaColors.white, width: 2),
-              ),
-            ),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 16, 24, 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      'VEDA OS // V.1',
-                      style: GoogleFonts.jetBrainsMono(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w400,
-                        color: VedaColors.zinc500,
-                        letterSpacing: 2.0,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const ProfileEditScreen(),
-                          ),
-                        ).then((_) => _loadProfile());
-                      },
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          border:
-                              Border.all(color: VedaColors.white, width: 2),
-                        ),
-                        child: const Icon(
-                          Icons.settings_outlined,
-                          color: VedaColors.white,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
+        // SliverAppBar(
+        //   pinned: true,
+        //   toolbarHeight: 72,
+        //   backgroundColor: VedaColors.black,
+        //   surfaceTintColor: Colors.transparent,
+        //   automaticallyImplyLeading: false,
+        //   flexibleSpace: Container(
+        //     decoration: const BoxDecoration(
+        //       border: Border(
+        //         bottom: BorderSide(color: VedaColors.white, width: 2),
+        //       ),
+        //     ),
+        //     child: SafeArea(
+        //       child: Padding(
+        //         padding: const EdgeInsets.fromLTRB(24, 16, 24, 12),
+        //         child: Row(
+        //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //           crossAxisAlignment: CrossAxisAlignment.end,
+        //           children: [
+        //             const SizedBox.shrink(),
+        //             GestureDetector(
+        //               onTap: () {
+        //                 Navigator.of(context).push(
+        //                   MaterialPageRoute(
+        //                     builder: (context) => const ProfileEditScreen(),
+        //                   ),
+        //                 ).then((_) => _loadProfile());
+        //               },
+        //               child: Container(
+        //                 width: 40,
+        //                 height: 40,
+        //                 decoration: BoxDecoration(
+        //                   border:
+        //                       Border.all(color: VedaColors.white, width: 2),
+        //                 ),
+        //                 child: const Icon(
+        //                   Icons.settings_outlined,
+        //                   color: VedaColors.white,
+        //                   size: 20,
+        //                 ),
+        //               ),
+        //             ),
+        //           ],
+        //         ),
+        //       ),
+        //     ),
+        //   ),
+        // ),
         // Body
         SliverToBoxAdapter(
           child: Padding(
@@ -125,7 +117,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 32),
+                SizedBox(height: 100),
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const ProfileEditScreen(),
+                            ),
+                          ).then((_) => _loadProfile());
+                        },
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            border:
+                                Border.all(color: VedaColors.white, width: 2),
+                          ),
+                          child: const Icon(
+                            Icons.settings_outlined,
+                            color: VedaColors.white,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+                
                 // Avatar section
                 _buildAvatarSection(),
                 const SizedBox(height: 40),

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 import 'package:veda_client/veda_client.dart';
 
 import '../../../design_system/veda_colors.dart';
@@ -308,6 +309,31 @@ class _CourseOnboardingScreenState extends State<CourseOnboardingScreen> {
     );
   }
 
+  Future<void> _handleSignOut() async {
+    try {
+      await client.auth.signOutDevice();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'SIGN OUT FAILED: ${e.toString()}',
+            style: GoogleFonts.jetBrainsMono(
+              fontSize: 11,
+              fontWeight: FontWeight.w400,
+              color: VedaColors.white,
+              letterSpacing: 1.0,
+            ),
+          ),
+          backgroundColor: VedaColors.error,
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+        ),
+      );
+    }
+  }
+
   String _getVisibilityLabel(CourseVisibility visibility) {
     switch (visibility) {
       case CourseVisibility.draft:
@@ -333,19 +359,29 @@ class _CourseOnboardingScreenState extends State<CourseOnboardingScreen> {
     return Scaffold(
       backgroundColor: VedaColors.black,
       body: SafeArea(
-        child: Row(
+        child: Stack(
           children: [
-            // Left panel: Form
-            Expanded(
-              flex: 3,
-              child: _buildFormPanel(),
+            Row(
+              children: [
+                // Left panel: Form
+                Expanded(
+                  flex: 3,
+                  child: _buildFormPanel(),
+                ),
+                // Divider
+                Container(width: 1, color: VedaColors.zinc800),
+                // Right panel: Courses list
+                Expanded(
+                  flex: 2,
+                  child: _buildCoursesPanel(),
+                ),
+              ],
             ),
-            // Divider
-            Container(width: 1, color: VedaColors.zinc800),
-            // Right panel: Courses list
-            Expanded(
-              flex: 2,
-              child: _buildCoursesPanel(),
+            // Profile icon - bottom left
+            Positioned(
+              left: 24,
+              bottom: 24,
+              child: _buildProfileMenu(),
             ),
           ],
         ),
@@ -357,9 +393,110 @@ class _CourseOnboardingScreenState extends State<CourseOnboardingScreen> {
     return Scaffold(
       backgroundColor: VedaColors.black,
       body: SafeArea(
-        child: CustomPaint(
-          painter: _GridPainter(),
-          child: _buildFormPanel(),
+        child: Stack(
+          children: [
+            CustomPaint(
+              painter: _GridPainter(),
+              child: _buildFormPanel(),
+            ),
+            // Profile icon - bottom left
+            Positioned(
+              left: 24,
+              bottom: 24,
+              child: _buildProfileMenu(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileMenu() {
+    return PopupMenuButton<String>(
+      onSelected: (value) {
+        switch (value) {
+          case 'profile':
+            // TODO: Navigate to profile screen
+            break;
+          case 'settings':
+            // TODO: Navigate to settings
+            break;
+          case 'logout':
+            _handleSignOut();
+            break;
+        }
+      },
+      offset: const Offset(0, -160),
+      color: VedaColors.zinc900,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+      itemBuilder: (context) => [
+        PopupMenuItem<String>(
+          value: 'profile',
+          child: Row(
+            children: [
+              const Icon(Icons.person_outline, size: 18, color: VedaColors.zinc500),
+              const SizedBox(width: 12),
+              Text(
+                'PROFILE',
+                style: GoogleFonts.jetBrainsMono(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w400,
+                  color: VedaColors.white,
+                  letterSpacing: 1.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+        PopupMenuItem<String>(
+          value: 'settings',
+          child: Row(
+            children: [
+              const Icon(Icons.settings_outlined, size: 18, color: VedaColors.zinc500),
+              const SizedBox(width: 12),
+              Text(
+                'SETTINGS',
+                style: GoogleFonts.jetBrainsMono(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w400,
+                  color: VedaColors.white,
+                  letterSpacing: 1.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const PopupMenuDivider(height: 1),
+        PopupMenuItem<String>(
+          value: 'logout',
+          child: Row(
+            children: [
+              const Icon(Icons.logout, size: 18, color: VedaColors.error),
+              const SizedBox(width: 12),
+              Text(
+                'LOG OUT',
+                style: GoogleFonts.jetBrainsMono(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w400,
+                  color: VedaColors.error,
+                  letterSpacing: 1.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: VedaColors.zinc900,
+          border: Border.all(color: VedaColors.zinc800, width: 1),
+        ),
+        child: const Icon(
+          Icons.person_outline,
+          size: 22,
+          color: VedaColors.zinc500,
         ),
       ),
     );

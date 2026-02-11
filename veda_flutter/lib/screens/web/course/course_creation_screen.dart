@@ -30,6 +30,7 @@ class _CourseCreationScreenState extends State<CourseCreationScreen> {
   ChatMode _chatMode = ChatMode.create;
   String _activeTab = 'toc';
   bool _isLoading = false;
+  bool _isUploadingFile = false;
 
   // Knowledge files loaded from server
   final List<KnowledgeFile> _files = [];
@@ -304,14 +305,18 @@ Reference specific files when making suggestions based on their content.
   Future<void> _addFile() async {
     if (_course.id == null) return;
 
-    // Pick and upload the file
+    // Pick and upload the file — shimmer shows as soon as file is selected
     final result = await UploadService.instance.pickAndUploadKnowledgeFile(
       _course.id!,
+      onFilePicked: () {
+        if (mounted) setState(() => _isUploadingFile = true);
+      },
     );
     if (result == null) return; // user cancelled picker
 
     if (!result.success) {
       if (!mounted) return;
+      setState(() => _isUploadingFile = false);
       _showErrorSnackBar(result.error ?? 'UPLOAD FAILED');
       return;
     }
@@ -330,6 +335,7 @@ Reference specific files when making suggestions based on their content.
 
       if (!mounted) return;
       setState(() {
+        _isUploadingFile = false;
         _files.add(
           KnowledgeFile(
             id: serverFile.id.toString(),
@@ -351,6 +357,7 @@ Reference specific files when making suggestions based on their content.
       _showSuccessSnackBar('FILE UPLOADED');
     } catch (e) {
       if (!mounted) return;
+      setState(() => _isUploadingFile = false);
       _showErrorSnackBar('FAILED TO SAVE FILE RECORD');
     }
   }
@@ -686,6 +693,11 @@ Reference specific files when making suggestions based on their content.
         appBar: AppBar(
           backgroundColor: VedaColors.black,
           elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, size: 20, color: VedaColors.zinc500),
+            onPressed: () => Navigator.of(context).pop(),
+            tooltip: 'Back',
+          ),
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -741,13 +753,14 @@ Reference specific files when making suggestions based on their content.
     // Desktop: Three-panel layout
     return Scaffold(
       backgroundColor: VedaColors.black,
-      body: Row(
-        children: [
-          // Left panel: Knowledge Base
-          SizedBox(
-            width: 288,
-            child: KnowledgeBasePanel(
+      body:         Row(
+            children: [
+              // Left panel: Knowledge Base
+              SizedBox(
+                width: 288,
+                child: KnowledgeBasePanel(
               files: _files,
+              isUploadingFile: _isUploadingFile,
               onAddFile: _addFile,
               onCreateFile: _navigateToFileCreation,
               onRemoveFile: _removeFile,
@@ -817,6 +830,8 @@ Reference specific files when making suggestions based on their content.
           ),
         ],
       ),
-    );
+     
+      );
+    
   }
 }

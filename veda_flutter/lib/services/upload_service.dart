@@ -98,9 +98,12 @@ class UploadService {
   }
 
   /// Picks a file with [allowedExtensions], then uploads to [pathBuilder].
+  /// If [onFilePicked] is provided, it is called after the user selects a file
+  /// but before the upload begins — useful for showing loading UI.
   Future<UploadResult?> _pickAndUpload({
     required List<String> allowedExtensions,
     required String Function(String fileName, String ext) pathBuilder,
+    void Function()? onFilePicked,
   }) async {
     print('📁 [UploadService] Opening file picker...');
     print('📁 [UploadService] Allowed extensions: $allowedExtensions');
@@ -115,6 +118,9 @@ class UploadService {
       print('📁 [UploadService] User cancelled file picker');
       return null;
     }
+
+    // Notify caller that a file was picked (before upload starts)
+    onFilePicked?.call();
 
     final file = result.files.first;
     print('📁 [UploadService] File picked: ${file.name}');
@@ -266,13 +272,16 @@ class UploadService {
     );
   }
 
-  Future<UploadResult?> pickAndUploadKnowledgeFile(int courseId) {
+  Future<UploadResult?> pickAndUploadKnowledgeFile(int courseId, {
+    void Function()? onFilePicked,
+  }) {
     return _pickAndUpload(
       allowedExtensions: _knowledgeExtensions,
       pathBuilder: (name, _) {
         final ts = DateTime.now().millisecondsSinceEpoch;
         return 'courses/$courseId/files/$ts-$name';
       },
+      onFilePicked: onFilePicked,
     );
   }
 
@@ -363,6 +372,20 @@ class UploadService {
         final ts = DateTime.now().millisecondsSinceEpoch;
         return 'profiles/$ts/avatar.$ext';
       },
+    );
+  }
+
+  /// Upload pre-picked profile image bytes (used during registration).
+  Future<UploadResult> uploadProfileImageBytes(
+    Uint8List bytes,
+    String fileName,
+  ) {
+    final ext = fileName.split('.').last.toLowerCase();
+    final ts = DateTime.now().millisecondsSinceEpoch;
+    return _uploadBytes(
+      path: 'profiles/$ts/avatar.$ext',
+      bytes: bytes,
+      fileName: fileName,
     );
   }
 }

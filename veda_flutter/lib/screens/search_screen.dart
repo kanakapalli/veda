@@ -18,6 +18,10 @@ class SearchScreen extends StatefulWidget {
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
+
+  /// Global key to access search screen state from outside (e.g. MainShell).
+  static final GlobalKey<_SearchScreenState> globalKey =
+      GlobalKey<_SearchScreenState>();
 }
 
 class _SearchScreenState extends State<SearchScreen> {
@@ -331,98 +335,65 @@ class _SearchScreenState extends State<SearchScreen> {
     _performSearch(query);
   }
 
+  /// Called externally (e.g. from MainShell/Dashboard) to pre-fill a query
+  /// and optionally select a filter tab.
+  void triggerSearch(String query, {SearchFilter? filter}) {
+    if (filter != null) {
+      _activeFilter = filter;
+    }
+    _searchController.text = query;
+    _performSearch(query);
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Column(
         children: [
-          // Top bar
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.arrow_back, color: VedaColors.white, size: 18),
-                    const SizedBox(width: 8),
-                    Text(
-                      'RETURN',
-                      style: GoogleFonts.jetBrainsMono(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w400,
-                        color: VedaColors.white,
-                        letterSpacing: 2.0,
-                      ),
-                    ),
-                  ],
-                ),
-                Text(
-                  'SEARCH_MODE: ACTIVE',
-                  style: GoogleFonts.jetBrainsMono(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w400,
-                    color: VedaColors.zinc500,
-                    letterSpacing: 1.0,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          const SizedBox(height: 16),
 
           // Search input
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Container(
-              height: 64,
-              decoration: BoxDecoration(
-                border: Border.all(color: VedaColors.white, width: 2),
+            child: TextField(
+              controller: _searchController,
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: VedaColors.white,
+                letterSpacing: -0.3,
               ),
-              child: Row(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(left: 20),
-                    child: Icon(Icons.search, color: VedaColors.white, size: 24),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: TextField(
-                        controller: _searchController,
-                        style: GoogleFonts.inter(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: VedaColors.white,
-                          letterSpacing: -0.3,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: 'NEURAL NET',
-                          hintStyle: GoogleFonts.inter(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: VedaColors.zinc700,
-                            letterSpacing: -0.3,
-                          ),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.zero,
-                          isDense: true,
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (_isSearching)
-                    const Padding(
-                      padding: EdgeInsets.only(right: 20),
-                      child: SizedBox(
+              decoration: InputDecoration(
+                hintText: 'NEURAL NET',
+                hintStyle: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: VedaColors.zinc700,
+                  letterSpacing: -0.3,
+                ),
+                prefixIcon: const Icon(Icons.search, color: VedaColors.white, size: 20),
+                prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 0),
+                suffixIcon: _isSearching
+                    ? const SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation(VedaColors.accent),
                         ),
-                      ),
-                    ),
-                ],
+                      )
+                    : null,
+                suffixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 0),
+                contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                isDense: true,
+                enabledBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: VedaColors.white, width: 2),
+                  borderRadius: BorderRadius.zero,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: VedaColors.white, width: 2),
+                  borderRadius: BorderRadius.zero,
+                ),
               ),
             ),
           ),

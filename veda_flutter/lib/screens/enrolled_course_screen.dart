@@ -203,18 +203,6 @@ class _EnrolledCourseScreenState extends State<EnrolledCourseScreen> {
                 ),
                 const SizedBox(height: 12),
 
-                // Breadcrumb
-                Text(
-                  'VEDA_OS / LEARNING_PATH',
-                  style: GoogleFonts.jetBrainsMono(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w700,
-                    color: VedaColors.white.withValues(alpha: 0.6),
-                    letterSpacing: 3.0,
-                  ),
-                ),
-                const SizedBox(height: 6),
-
                 // Course title with icon
                 Row(
                   children: [

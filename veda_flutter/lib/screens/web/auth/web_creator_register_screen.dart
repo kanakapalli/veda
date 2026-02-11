@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
@@ -21,6 +24,8 @@ class CreatorRegistrationData {
   String websiteUrl = '';
   List<String> expertise = [];
   UuidValue? accountRequestId;
+  Uint8List? profileImageBytes;
+  String? profileImageName;
 }
 
 /// Web Creator Registration Screen
@@ -61,6 +66,9 @@ class _WebCreatorRegisterScreenState extends State<WebCreatorRegisterScreen> {
     'Mobile Development',
   ];
 
+  Uint8List? _selectedImageBytes;
+  String? _selectedImageName;
+
   bool _isLoading = false;
   bool _obscurePassword = true;
   String? _nameError;
@@ -76,6 +84,8 @@ class _WebCreatorRegisterScreenState extends State<WebCreatorRegisterScreen> {
     _bioController.text = widget.registrationData.bio;
     _websiteController.text = widget.registrationData.websiteUrl;
     _selectedExpertise.addAll(widget.registrationData.expertise);
+    _selectedImageBytes = widget.registrationData.profileImageBytes;
+    _selectedImageName = widget.registrationData.profileImageName;
   }
 
   @override
@@ -149,6 +159,8 @@ class _WebCreatorRegisterScreenState extends State<WebCreatorRegisterScreen> {
       widget.registrationData.bio = _bioController.text.trim();
       widget.registrationData.websiteUrl = _websiteController.text.trim();
       widget.registrationData.expertise = _selectedExpertise.toList();
+      widget.registrationData.profileImageBytes = _selectedImageBytes;
+      widget.registrationData.profileImageName = _selectedImageName;
       widget.registrationData.accountRequestId = requestId;
 
       widget.onOtpSent();
@@ -244,6 +256,12 @@ class _WebCreatorRegisterScreenState extends State<WebCreatorRegisterScreen> {
                         ),
                       ),
                     ),
+
+                  // Profile Image
+                  _buildLabel('PROFILE IMAGE (OPTIONAL)'),
+                  const SizedBox(height: 12),
+                  _buildProfileImageUpload(),
+                  const SizedBox(height: 32),
 
                   // Name Field
                   _buildLabel('FULL NAME'),
@@ -359,6 +377,105 @@ class _WebCreatorRegisterScreenState extends State<WebCreatorRegisterScreen> {
                 ],
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickProfileImage() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['jpg', 'jpeg', 'png', 'webp'],
+      withData: true,
+    );
+
+    if (result == null || result.files.isEmpty) return;
+    final file = result.files.first;
+    if (file.bytes == null) return;
+
+    setState(() {
+      _selectedImageBytes = file.bytes;
+      _selectedImageName = file.name;
+    });
+  }
+
+  void _removeProfileImage() {
+    setState(() {
+      _selectedImageBytes = null;
+      _selectedImageName = null;
+    });
+  }
+
+  Widget _buildProfileImageUpload() {
+    final hasImage = _selectedImageBytes != null;
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: _pickProfileImage,
+        child: Center(
+          child: Column(
+            children: [
+              // Avatar circle with hover overlay
+              _ProfileAvatar(
+                imageBytes: _selectedImageBytes,
+                hasImage: hasImage,
+                onTap: _pickProfileImage,
+              ),
+              const SizedBox(height: 16),
+              // Action text
+              Text(
+                hasImage
+                    ? _selectedImageName ?? 'IMAGE SELECTED'
+                    : 'TAP TO UPLOAD',
+                style: GoogleFonts.jetBrainsMono(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w400,
+                  color: hasImage ? VedaColors.zinc500 : VedaColors.zinc700,
+                  letterSpacing: 1.0,
+                ),
+              ),
+              if (!hasImage) ...[
+                const SizedBox(height: 4),
+                Text(
+                  'JPG, PNG, WEBP — MAX 10MB',
+                  style: GoogleFonts.jetBrainsMono(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w400,
+                    color: VedaColors.zinc800,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+              if (hasImage) ...[
+                const SizedBox(height: 12),
+                GestureDetector(
+                  onTap: _removeProfileImage,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: VedaColors.zinc800,
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      'REMOVE',
+                      style: GoogleFonts.jetBrainsMono(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w400,
+                        color: VedaColors.error,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
       ),
@@ -609,6 +726,102 @@ class _ExpertiseTagState extends State<_ExpertiseTag> {
                   widget.isSelected ? VedaColors.accent : VedaColors.white,
               letterSpacing: 0.2,
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// PROFILE AVATAR (with hover overlay)
+// ---------------------------------------------------------------------------
+
+class _ProfileAvatar extends StatefulWidget {
+  final Uint8List? imageBytes;
+  final bool hasImage;
+  final VoidCallback onTap;
+
+  const _ProfileAvatar({
+    required this.imageBytes,
+    required this.hasImage,
+    required this.onTap,
+  });
+
+  @override
+  State<_ProfileAvatar> createState() => _ProfileAvatarState();
+}
+
+class _ProfileAvatarState extends State<_ProfileAvatar> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: SizedBox(
+          width: 120,
+          height: 120,
+          child: Stack(
+            children: [
+              // Circle border + image/placeholder
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: _isHovered
+                        ? VedaColors.white
+                        : widget.hasImage
+                            ? VedaColors.accent
+                            : VedaColors.zinc800,
+                    width: 1,
+                  ),
+                ),
+                child: widget.hasImage
+                    ? ClipOval(
+                        child: Image.memory(
+                          widget.imageBytes!,
+                          fit: BoxFit.cover,
+                          width: 120,
+                          height: 120,
+                        ),
+                      )
+                    : Center(
+                        child: Icon(
+                          Icons.person_outline,
+                          size: 40,
+                          color: _isHovered
+                              ? VedaColors.zinc500
+                              : VedaColors.zinc700,
+                        ),
+                      ),
+              ),
+              // Hover overlay
+              if (_isHovered)
+                Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: VedaColors.black.withValues(alpha: 0.6),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      widget.hasImage
+                          ? Icons.edit_outlined
+                          : Icons.add_photo_alternate_outlined,
+                      size: 24,
+                      color: VedaColors.white,
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
       ),

@@ -7,6 +7,7 @@ import 'file_item.dart';
 
 class KnowledgeBasePanel extends StatelessWidget {
   final List<KnowledgeFile> files;
+  final bool isUploadingFile;
   final VoidCallback onAddFile;
   final VoidCallback onCreateFile;
   final void Function(String id) onRemoveFile;
@@ -14,6 +15,7 @@ class KnowledgeBasePanel extends StatelessWidget {
   const KnowledgeBasePanel({
     super.key,
     required this.files,
+    this.isUploadingFile = false,
     required this.onAddFile,
     required this.onCreateFile,
     required this.onRemoveFile,
@@ -25,14 +27,14 @@ class KnowledgeBasePanel extends StatelessWidget {
       color: VedaColors.black,
       child: Column(
         children: [
-          _buildHeader(),
+          _buildHeader(context),
           Expanded(child: _buildFilesList()),
         ],
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
@@ -42,7 +44,30 @@ class KnowledgeBasePanel extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.folder_outlined, size: 20, color: VedaColors.white),
+                Positioned(
+        top: 12,
+        left: 12,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: VedaColors.zinc900,
+                border: Border.all(color: VedaColors.zinc800, width: 1),
+              ),
+              child: const Icon(
+                Icons.arrow_back,
+                size: 18,
+                color: VedaColors.zinc500,
+              ),
+            ),
+          ),
+        ),
+      ),
+      
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -90,6 +115,11 @@ class KnowledgeBasePanel extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
+        if (isUploadingFile)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _UploadingShimmerItem(),
+          ),
         ...files.map((file) => Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: FileItem(
@@ -183,6 +213,96 @@ class KnowledgeBasePanel extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Shimmer placeholder shown while a file is being uploaded to S3
+class _UploadingShimmerItem extends StatefulWidget {
+  @override
+  State<_UploadingShimmerItem> createState() => _UploadingShimmerItemState();
+}
+
+class _UploadingShimmerItemState extends State<_UploadingShimmerItem>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _animation = Tween<double>(begin: 0.3, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, _) {
+        final opacity = _animation.value;
+        return Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: VedaColors.zinc800.withValues(alpha: opacity),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 1,
+                  valueColor:
+                      AlwaysStoppedAnimation(VedaColors.accent.withValues(alpha: opacity)),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // File name shimmer bar
+                    Container(
+                      height: 10,
+                      width: 120,
+                      decoration: BoxDecoration(
+                        color: VedaColors.zinc800.withValues(alpha: opacity * 0.6),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    // "UPLOADING..." label
+                    Text(
+                      'UPLOADING...',
+                      style: GoogleFonts.jetBrainsMono(
+                        fontSize: 9,
+                        color: VedaColors.zinc700.withValues(alpha: opacity),
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

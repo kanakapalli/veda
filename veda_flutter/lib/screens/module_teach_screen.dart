@@ -595,15 +595,6 @@ IMPORTANT:
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'VEDA_OS // TEACHING',
-                      style: GoogleFonts.jetBrainsMono(
-                        fontSize: 8,
-                        color: VedaColors.zinc500,
-                        letterSpacing: 2.0,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
                       widget.module.title.toUpperCase(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
