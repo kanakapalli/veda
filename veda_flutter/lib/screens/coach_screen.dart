@@ -3,6 +3,7 @@ import 'package:veda_client/veda_client.dart';
 
 import '../design_system/veda_colors.dart';
 import '../main.dart';
+import 'course_detail_screen.dart';
 
 /// Coach/Creator profile screen showing their details and courses
 class CoachScreen extends StatefulWidget {
@@ -363,12 +364,9 @@ class _CoachScreenState extends State<CoachScreen> {
 
     return GestureDetector(
       onTap: () {
-        // TODO: Navigate to course detail screen
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Navigate to: ${course.title}'),
-            backgroundColor: VedaColors.zinc900,
-            duration: const Duration(seconds: 1),
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => CourseDetailScreen(course: course),
           ),
         );
       },

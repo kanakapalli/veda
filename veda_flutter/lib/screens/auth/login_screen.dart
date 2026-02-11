@@ -154,17 +154,6 @@ class _LoginScreenState extends State<LoginScreen>
       body: SafeArea(
         child: Stack(
           children: [
-            // Top-left branding
-            Positioned(
-              top: 32,
-              left: 32,
-              child: _buildFadeSlide(
-                interval:
-                    const Interval(0.0, 0.3, curve: Curves.easeOut),
-                child: const StarkBranding(),
-              ),
-            ),
-
             // Main content
             Center(
               child: SingleChildScrollView(
@@ -318,18 +307,6 @@ class _LoginScreenState extends State<LoginScreen>
                     ],
                   ),
                 ),
-              ),
-            ),
-
-            // Footer
-            Positioned(
-              left: 32,
-              right: 32,
-              bottom: 32,
-              child: _buildFadeSlide(
-                interval:
-                    const Interval(0.5, 0.8, curve: Curves.easeOut),
-                child: const StarkFooter(),
               ),
             ),
           ],

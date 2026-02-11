@@ -369,7 +369,7 @@ class _DashboardHeader extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'VEDA_DASHBOARD',
+                            'VEDA',
                             style: GoogleFonts.inter(
                               fontSize: 28,
                               fontWeight: FontWeight.w900,

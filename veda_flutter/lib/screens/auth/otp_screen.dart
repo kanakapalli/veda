@@ -12,6 +12,7 @@ import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
         EmailAccountPasswordResetExceptionReason;
 import 'package:veda_client/veda_client.dart';
 import '../../main.dart';
+import '../../services/upload_service.dart';
 import 'auth_flow_screen.dart';
 import 'stark_widgets.dart';
 
@@ -179,6 +180,24 @@ class _OtpScreenState extends State<OtpScreen>
       );
       await client.auth.updateSignedInUser(authSuccess);
 
+      // Upload profile image if provided (now user is authenticated)
+      String? profileImageUrl;
+      if (widget.registrationData!.profileImageBytes != null &&
+          widget.registrationData!.profileImageName != null) {
+        try {
+          final uploadResult =
+              await UploadService.instance.uploadProfileImageBytes(
+            widget.registrationData!.profileImageBytes!,
+            widget.registrationData!.profileImageName!,
+          );
+          if (uploadResult.success) {
+            profileImageUrl = uploadResult.publicUrl;
+          }
+        } catch (e) {
+          debugPrint('Failed to upload profile image: $e');
+        }
+      }
+
       // Save profile data (email is already in auth system)
       try {
         await client.vedaUserProfile.upsertProfile(
@@ -189,6 +208,7 @@ class _OtpScreenState extends State<OtpScreen>
               : widget.registrationData!.bio,
           interests: widget.registrationData!.interests,
           learningGoal: widget.registrationData!.learningGoal,
+          profileImageUrl: profileImageUrl,
         );
       } catch (e) {
         debugPrint('Failed to save profile: $e');
@@ -361,85 +381,16 @@ class _OtpScreenState extends State<OtpScreen>
               // Grid lines
               Positioned.fill(child: _GridLines()),
 
-              // Header
+              // Back button
               Positioned(
-                top: 24,
-                left: 24,
-                right: 24,
-                child: _buildFadeSlide(
-                interval:
-                    const Interval(0.0, 0.3, curve: Curves.easeOut),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'VEDA PROTOCOL',
-                          style: GoogleFonts.jetBrainsMono(
-                            fontSize: 9,
-                            color: StarkColors.zinc500,
-                            letterSpacing: 2.0,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Container(
-                                width: 8,
-                                height: 8,
-                                color: StarkColors.white),
-                            const SizedBox(width: 8),
-                            Text(
-                              'SYSTEM ACTIVE',
-                              style: GoogleFonts.jetBrainsMono(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                color: StarkColors.white,
-                                letterSpacing: 1.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          'ID: 8829_X',
-                          style: GoogleFonts.jetBrainsMono(
-                            fontSize: 9,
-                            color: StarkColors.white,
-                            letterSpacing: 1.5,
-                          ),
-                        ),
-                        Text(
-                          'NODE: LOCAL',
-                          style: GoogleFonts.jetBrainsMono(
-                            fontSize: 9,
-                            color: StarkColors.zinc500,
-                            letterSpacing: 1.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                top: 32,
+                left: 32,
+                child: IconButton(
+                  onPressed: widget.onBack,
+                  icon: const Icon(Icons.arrow_back,
+                      color: StarkColors.white, size: 20),
                 ),
               ),
-            ),
-
-            // Back button
-            Positioned(
-              top: 80,
-              left: 24,
-              child: GestureDetector(
-                onTap: widget.onBack,
-                child: const Icon(Icons.arrow_back,
-                    color: StarkColors.white, size: 20),
-              ),
-            ),
 
             // Main content
             Center(
@@ -619,57 +570,6 @@ class _OtpScreenState extends State<OtpScreen>
                       ),
                     ],
                   ),
-                ),
-              ),
-            ),
-
-            // Footer
-            Positioned(
-              left: 24,
-              right: 24,
-              bottom: 24,
-              child: _buildFadeSlide(
-                interval:
-                    const Interval(0.5, 0.8, curve: Curves.easeOut),
-                child: Column(
-                  children: [
-                    Container(
-                        height: 1, color: StarkColors.zinc800),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'ENCRYPTED // AES-256',
-                          style: GoogleFonts.jetBrainsMono(
-                            fontSize: 8,
-                            color: StarkColors.zinc600,
-                            letterSpacing: 2.0,
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            Text('HELP',
-                                style:
-                                    GoogleFonts.jetBrainsMono(
-                                        fontSize: 8,
-                                        color:
-                                            StarkColors.zinc600,
-                                        letterSpacing: 2.0)),
-                            const SizedBox(width: 16),
-                            Text('TERMS',
-                                style:
-                                    GoogleFonts.jetBrainsMono(
-                                        fontSize: 8,
-                                        color:
-                                            StarkColors.zinc600,
-                                        letterSpacing: 2.0)),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
                 ),
               ),
             ),

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 import '../../main.dart';
@@ -17,6 +19,9 @@ class RegistrationData {
   String? learningGoal;
   UuidValue? accountRequestId;
   String? registrationToken;
+  String? profileImageUrl;
+  Uint8List? profileImageBytes;
+  String? profileImageName;
 }
 
 /// Data collected during password reset

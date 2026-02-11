@@ -4,6 +4,8 @@ import 'package:veda_client/veda_client.dart';
 
 import '../design_system/veda_colors.dart';
 import '../main.dart';
+import 'coach_screen.dart';
+import 'enrolled_course_screen.dart';
 
 /// Course detail screen showing course information and table of contents
 class CourseDetailScreen extends StatefulWidget {
@@ -178,10 +180,10 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
 
                                   const SizedBox(height: 24),
 
-                                  // Course Info Box
-                                  _buildCourseInfo(),
-
-                                  const SizedBox(height: 36),
+                                  // Coach Section
+                                  if (_creator != null) ...[                                    _buildCoachSection(),
+                                    const SizedBox(height: 36),
+                                  ],
 
                                   // Course Topics
                                   if (_getCourseTopics().isNotEmpty) ...[
@@ -359,49 +361,103 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     );
   }
 
-  Widget _buildCourseInfo() {
-    final creatorName = _creator?.fullName?.toUpperCase() ?? 'UNKNOWN';
+  Widget _buildCoachSection() {
+    final coach = _creator!;
+    final name = coach.fullName?.toUpperCase() ?? 'UNKNOWN';
+    final expertise = coach.interests?.isNotEmpty == true
+        ? coach.interests!.first.toUpperCase()
+        : null;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border.all(color: VedaColors.white, width: 1),
-      ),
-      child: Column(
-        children: [
-          _buildInfoRow('DURATION:', '12H_00M'),
-          const SizedBox(height: 12),
-          _buildInfoRow('RAG_STRENGTH:', 'HIGH_DENSITY'),
-          const SizedBox(height: 12),
-          _buildInfoRow('CREATOR:', creatorName),
-        ],
-      ),
-    );
-  }
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => CoachScreen(coach: coach),
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: VedaColors.white, width: 1),
+        ),
+        child: Row(
+          children: [
+            // Coach avatar
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                border: Border.all(color: VedaColors.zinc700, width: 0.5),
+                color: VedaColors.zinc900,
+              ),
+              child: coach.profileImageUrl != null
+                  ? Image.network(
+                      coach.profileImageUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => const Icon(
+                        Icons.person_outline,
+                        color: VedaColors.zinc600,
+                        size: 24,
+                      ),
+                    )
+                  : const Icon(
+                      Icons.person_outline,
+                      color: VedaColors.zinc600,
+                      size: 24,
+                    ),
+            ),
 
-  Widget _buildInfoRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.jetBrainsMono(
-            fontSize: 10,
-            fontWeight: FontWeight.w400,
-            color: VedaColors.zinc500,
-            letterSpacing: 0.5,
-          ),
+            const SizedBox(width: 16),
+
+            // Coach info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'COACH',
+                    style: GoogleFonts.jetBrainsMono(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w400,
+                      color: VedaColors.zinc500,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    name,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: VedaColors.white,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                  if (expertise != null) ...[                    const SizedBox(height: 2),
+                    Text(
+                      expertise,
+                      style: GoogleFonts.jetBrainsMono(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w400,
+                        color: VedaColors.zinc500,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+
+            // Arrow
+            const Icon(
+              Icons.arrow_forward,
+              color: VedaColors.white,
+              size: 16,
+            ),
+          ],
         ),
-        Text(
-          value,
-          style: GoogleFonts.jetBrainsMono(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            color: VedaColors.white,
-            letterSpacing: 0.5,
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -828,47 +884,112 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
             ),
           ),
 
-        // Enroll / Unenroll button
-        SizedBox(
-          width: double.infinity,
-          height: 56,
-          child: ElevatedButton(
-            onPressed: _isEnrolling ? null : _handleEnroll,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _isEnrolled ? VedaColors.black : VedaColors.white,
-              foregroundColor: _isEnrolled ? VedaColors.white : VedaColors.black,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.zero,
-                side: BorderSide(
-                  color: _isEnrolled ? VedaColors.white : Colors.transparent,
-                  width: 1,
+        if (_isEnrolled) ...[
+          // Go to enrolled course button
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        EnrolledCourseScreen(course: widget.course),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: VedaColors.white,
+                foregroundColor: VedaColors.black,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.zero,
+                ),
+                elevation: 0,
+                padding: EdgeInsets.zero,
+              ),
+              child: Text(
+                'GO_TO_COURSE',
+                style: GoogleFonts.jetBrainsMono(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 2,
                 ),
               ),
-              elevation: 0,
-              padding: EdgeInsets.zero,
-              disabledBackgroundColor: _isEnrolled
-                  ? VedaColors.zinc900
-                  : VedaColors.zinc800,
             ),
-            child: _isEnrolling
-                ? SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 1.5,
-                      color: _isEnrolled ? VedaColors.white : VedaColors.black,
-                    ),
-                  )
-                : Text(
-                    _isEnrolled ? 'ENROLLED ✓' : 'ENROLL_NOW',
-                    style: GoogleFonts.jetBrainsMono(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 2,
-                    ),
-                  ),
           ),
-        ),
+
+          const SizedBox(height: 12),
+
+          // Unenroll button
+          SizedBox(
+            width: double.infinity,
+            height: 44,
+            child: OutlinedButton(
+              onPressed: _isEnrolling ? null : _handleEnroll,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: VedaColors.zinc500,
+                side: const BorderSide(color: VedaColors.zinc700, width: 0.5),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.zero,
+                ),
+                padding: EdgeInsets.zero,
+              ),
+              child: _isEnrolling
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 1,
+                        color: VedaColors.zinc500,
+                      ),
+                    )
+                  : Text(
+                      'UNENROLL',
+                      style: GoogleFonts.jetBrainsMono(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w400,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+            ),
+          ),
+        ] else ...[
+          // Enroll button
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton(
+              onPressed: _isEnrolling ? null : _handleEnroll,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: VedaColors.white,
+                foregroundColor: VedaColors.black,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.zero,
+                ),
+                elevation: 0,
+                padding: EdgeInsets.zero,
+                disabledBackgroundColor: VedaColors.zinc800,
+              ),
+              child: _isEnrolling
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 1.5,
+                        color: VedaColors.black,
+                      ),
+                    )
+                  : Text(
+                      'ENROLL_NOW',
+                      style: GoogleFonts.jetBrainsMono(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 2,
+                      ),
+                    ),
+            ),
+          ),
+        ],
       ],
     );
   }

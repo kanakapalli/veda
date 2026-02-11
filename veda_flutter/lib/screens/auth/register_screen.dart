@@ -1,9 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
-// ignore: depend_on_referenced_packages
-import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
-    show EmailAccountLoginException, EmailAccountLoginExceptionReason;
+import 'package:file_picker/file_picker.dart';
 import '../../main.dart';
 import 'auth_flow_screen.dart';
 import 'stark_widgets.dart';
@@ -53,6 +53,10 @@ class _RegisterScreenState extends State<RegisterScreen>
   bool _isLoading = false;
   bool _obscurePassword = true;
 
+  // Profile image
+  Uint8List? _profileImageBytes;
+  String? _profileImageName;
+
   // Field-level errors
   String? _nameError;
   String? _emailError;
@@ -92,6 +96,23 @@ class _RegisterScreenState extends State<RegisterScreen>
       _passwordError = null;
     });
     widget.setError(null);
+  }
+
+  Future<void> _pickProfileImage() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      withData: true,
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      final file = result.files.first;
+      if (file.bytes != null) {
+        setState(() {
+          _profileImageBytes = file.bytes;
+          _profileImageName = file.name;
+        });
+      }
+    }
   }
 
   bool _validateFields() {
@@ -145,7 +166,7 @@ class _RegisterScreenState extends State<RegisterScreen>
       final requestId =
           await client.emailIdp.startRegistration(email: email);
 
-      // Store data for after OTP verification
+      // Store data for after OTP verification (including image bytes)
       widget.registrationData.fullName = name;
       widget.registrationData.email = email;
       widget.registrationData.password = password;
@@ -153,6 +174,8 @@ class _RegisterScreenState extends State<RegisterScreen>
       widget.registrationData.interests = _selectedInterests.toList();
       widget.registrationData.learningGoal = _selectedGoal;
       widget.registrationData.accountRequestId = requestId;
+      widget.registrationData.profileImageBytes = _profileImageBytes;
+      widget.registrationData.profileImageName = _profileImageName;
 
       widget.onOtpSent();
     } catch (e) {
@@ -184,6 +207,47 @@ class _RegisterScreenState extends State<RegisterScreen>
     );
   }
 
+  Widget _buildProfileImagePicker() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        GestureDetector(
+          onTap: _pickProfileImage,
+          child: Container(
+            width: 96,
+            height: 96,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: StarkColors.white, width: 2),
+              color: StarkColors.black,
+            ),
+            child: _profileImageBytes != null
+                ? ClipOval(
+                    child: Image.memory(
+                      _profileImageBytes!,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                : Icon(
+                    Icons.add_a_photo_outlined,
+                    color: StarkColors.zinc500,
+                    size: 32,
+                  ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          _profileImageBytes != null ? 'TAP TO CHANGE' : 'ADD PROFILE IMAGE',
+          style: GoogleFonts.jetBrainsMono(
+            fontSize: 8,
+            color: StarkColors.zinc500,
+            letterSpacing: 1.5,
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -196,24 +260,13 @@ class _RegisterScreenState extends State<RegisterScreen>
         body: SafeArea(
           child: Stack(
           children: [
-            // Top-left branding
-            Positioned(
-              top: 32,
-              left: 32,
-              child: _buildFadeSlide(
-                interval:
-                    const Interval(0.0, 0.3, curve: Curves.easeOut),
-                child: const StarkBranding(label: 'VEDA SYSTEM // INIT'),
-              ),
-            ),
-
             // Back button
             Positioned(
               top: 32,
               right: 32,
-              child: GestureDetector(
-                onTap: widget.onBack,
-                child: const Icon(Icons.close,
+              child: IconButton(
+                onPressed: widget.onBack,
+                icon: const Icon(Icons.close,
                     color: StarkColors.white, size: 20),
               ),
             ),
@@ -221,7 +274,7 @@ class _RegisterScreenState extends State<RegisterScreen>
             // Main content
             Positioned.fill(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(32, 80, 32, 120),
+                padding: const EdgeInsets.fromLTRB(32, 60, 32, 120),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 380),
                   child: Column(
@@ -271,6 +324,9 @@ class _RegisterScreenState extends State<RegisterScreen>
                             curve: Curves.easeOut),
                         child: Column(
                           children: [
+                            // Profile image picker
+                            _buildProfileImagePicker(),
+                            const SizedBox(height: 20),
                             StarkTextField(
                               controller: _nameController,
                               label: 'Identity // Full Name',
@@ -465,7 +521,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                         interval: const Interval(0.25, 0.55,
                             curve: Curves.easeOut),
                         child: StarkPrimaryButton(
-                          label: 'Commence_Stark_Learning',
+                          label: 'Veda Learning',
                           onPressed: _handleSubmit,
                           isLoading: _isLoading,
                           showArrow: false,
@@ -474,18 +530,6 @@ class _RegisterScreenState extends State<RegisterScreen>
                     ],
                   ),
                 ),
-              ),
-            ),
-
-            // Footer
-            Positioned(
-              left: 32,
-              right: 32,
-              bottom: 32,
-              child: _buildFadeSlide(
-                interval:
-                    const Interval(0.5, 0.8, curve: Curves.easeOut),
-                child: const StarkFooter(),
               ),
             ),
           ],
