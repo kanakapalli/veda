@@ -10,6 +10,7 @@ import 'screens/main_shell.dart';
 import 'screens/sign_in_screen.dart';
 import 'screens/web/course/course_onboarding_screen.dart';
 import 'screens/web/auth/web_creator_auth_flow.dart';
+import 'services/revenue_cat_service.dart';
 
 /// Sets up a global client object that can be used to talk to the server from
 /// anywhere in our app. The client is generated from your server code
@@ -49,6 +50,9 @@ void main() async {
     ..authSessionManager = FlutterAuthSessionManager();
 
   client.auth.initialize();
+
+  // Initialize RevenueCat subscription management.
+  await RevenueCatService.instance.initialize();
 
   runApp(const MyApp());
 }

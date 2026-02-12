@@ -4,6 +4,7 @@ import 'package:veda_client/veda_client.dart';
 
 import '../design_system/veda_colors.dart';
 import '../main.dart';
+import '../services/revenue_cat_service.dart';
 import 'profile_edit_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -311,93 +312,178 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // SUBSCRIPTION
   // ---------------------------------------------------------------------------
   Widget _buildSubscriptionSection() {
+    final rc = RevenueCatService.instance;
+    final isPro = rc.isProUser;
+    final planName = rc.currentPlanName ?? 'FREE';
+    final expiry = rc.expirationDate;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _sectionLabel('SUBSCRIPTION_STATUS'),
         const SizedBox(height: 16),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            border: Border.all(color: VedaColors.white, width: 2),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
-                        color: VedaColors.white,
-                        child: Text(
-                          'ACTIVE PLAN',
-                          style: GoogleFonts.jetBrainsMono(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w700,
-                            color: VedaColors.black,
-                            letterSpacing: 1.0,
+        GestureDetector(
+          onTap: () {
+            if (isPro) {
+              // Pro users: open Customer Center to manage subscription.
+              rc.presentCustomerCenter();
+            } else {
+              // Free users: present the RevenueCat paywall.
+              rc.presentPaywallIfNeeded();
+            }
+          },
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: isPro ? VedaColors.white : VedaColors.zinc700,
+                width: isPro ? 2 : 1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
+                          color: isPro ? VedaColors.white : VedaColors.zinc800,
+                          child: Text(
+                            isPro ? 'ACTIVE PLAN' : 'CURRENT PLAN',
+                            style: GoogleFonts.jetBrainsMono(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                              color: isPro
+                                  ? VedaColors.black
+                                  : VedaColors.zinc500,
+                              letterSpacing: 1.0,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
+                        const SizedBox(height: 8),
+                        Text(
+                          isPro ? 'VEDA PRO — $planName' : 'FREE',
+                          style: GoogleFonts.inter(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: VedaColors.white,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Icon(
+                      isPro
+                          ? Icons.card_membership
+                          : Icons.arrow_forward,
+                      color: VedaColors.zinc500,
+                      size: 24,
+                    ),
+                  ],
+                ),
+                if (isPro && expiry != null) ...[
+                  const SizedBox(height: 20),
+                  Container(height: 1, color: VedaColors.zinc800),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
                       Text(
-                        'PRO LEARNER',
-                        style: GoogleFonts.inter(
-                          fontSize: 20,
+                        'RENEWS ON',
+                        style: GoogleFonts.jetBrainsMono(
+                          fontSize: 10,
+                          color: VedaColors.zinc500,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                      Text(
+                        _formatExpiryDate(expiry),
+                        style: GoogleFonts.jetBrainsMono(
+                          fontSize: 13,
                           fontWeight: FontWeight.w700,
                           color: VedaColors.white,
-                          letterSpacing: -0.3,
+                          letterSpacing: 0.5,
                         ),
                       ),
                     ],
                   ),
-                  Icon(
-                    Icons.card_membership,
-                    color: VedaColors.zinc500,
-                    size: 24,
-                  ),
                 ],
-              ),
-              const SizedBox(height: 20),
-              Container(
-                height: 1,
-                color: VedaColors.zinc800,
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
+                if (!isPro) ...[
+                  const SizedBox(height: 16),
+                  Container(height: 1, color: VedaColors.zinc800),
+                  const SizedBox(height: 12),
                   Text(
-                    'RENEWS ON',
+                    'TAP TO UPGRADE TO PRO',
                     style: GoogleFonts.jetBrainsMono(
                       fontSize: 10,
-                      color: VedaColors.zinc500,
+                      fontWeight: FontWeight.w700,
+                      color: VedaColors.accent,
                       letterSpacing: 1.0,
                     ),
                   ),
-                  Text(
-                    'OCT 24, 2024',
-                    style: GoogleFonts.jetBrainsMono(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: VedaColors.white,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
                 ],
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        GestureDetector(
+          onTap: () {
+            if (isPro) {
+              rc.presentCustomerCenter();
+            } else {
+              rc.presentPaywallIfNeeded();
+            }
+          },
+          child: Container(
+            width: double.infinity,
+            height: 56,
+            decoration: BoxDecoration(
+              color: isPro ? Colors.transparent : VedaColors.white,
+              border: Border.all(
+                color: isPro ? VedaColors.zinc700 : VedaColors.white,
+                width: isPro ? 1 : 2,
               ),
-            ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  isPro ? Icons.settings_outlined : Icons.bolt,
+                  size: 18,
+                  color: isPro ? VedaColors.zinc500 : VedaColors.black,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  isPro ? 'MANAGE SUBSCRIPTION' : 'UPGRADE TO PRO',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                    color: isPro ? VedaColors.zinc500 : VedaColors.black,
+                    letterSpacing: 3.0,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],
     );
+  }
+
+  String _formatExpiryDate(DateTime date) {
+    const months = [
+      'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+      'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC',
+    ];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 
   // ---------------------------------------------------------------------------
