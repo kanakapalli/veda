@@ -6,6 +6,7 @@ import '../../../../design_system/veda_colors.dart';
 import '../../../../services/upload_service.dart';
 import '../models/course_models.dart';
 import 'tab_button.dart';
+import 'web_video_player.dart';
 
 class CourseTocPanel extends StatefulWidget {
   final String activeTab;
@@ -102,6 +103,9 @@ class _CourseTocPanelState extends State<CourseTocPanel> {
   bool _isUploadingCourseImage = false;
   bool _isUploadingBanner = false;
   bool _isUploadingVideo = false;
+  double _courseImageProgress = 0.0;
+  double _bannerProgress = 0.0;
+  double _videoProgress = 0.0;
 
   @override
   void initState() {
@@ -176,11 +180,17 @@ class _CourseTocPanelState extends State<CourseTocPanel> {
   Future<void> _uploadCourseImage() async {
     if (widget.courseId == null || _isUploadingCourseImage) return;
 
-    setState(() => _isUploadingCourseImage = true);
+    setState(() {
+      _isUploadingCourseImage = true;
+      _courseImageProgress = 0.0;
+    });
 
     try {
       final result = await UploadService.instance.pickAndUploadCourseImage(
         widget.courseId!,
+        onProgress: (p) {
+          if (mounted) setState(() => _courseImageProgress = p);
+        },
       );
 
       if (!mounted) return;
@@ -198,11 +208,17 @@ class _CourseTocPanelState extends State<CourseTocPanel> {
   Future<void> _uploadBannerImage() async {
     if (widget.courseId == null || _isUploadingBanner) return;
 
-    setState(() => _isUploadingBanner = true);
+    setState(() {
+      _isUploadingBanner = true;
+      _bannerProgress = 0.0;
+    });
 
     try {
       final result = await UploadService.instance.pickAndUploadBannerImage(
         widget.courseId!,
+        onProgress: (p) {
+          if (mounted) setState(() => _bannerProgress = p);
+        },
       );
 
       if (!mounted) return;
@@ -220,11 +236,17 @@ class _CourseTocPanelState extends State<CourseTocPanel> {
   Future<void> _uploadVideo() async {
     if (widget.courseId == null || _isUploadingVideo) return;
 
-    setState(() => _isUploadingVideo = true);
+    setState(() {
+      _isUploadingVideo = true;
+      _videoProgress = 0.0;
+    });
 
     try {
       final result = await UploadService.instance.pickAndUploadCourseVideo(
         widget.courseId!,
+        onProgress: (p) {
+          if (mounted) setState(() => _videoProgress = p);
+        },
       );
 
       if (!mounted) return;
@@ -774,6 +796,7 @@ class _CourseTocPanelState extends State<CourseTocPanel> {
           onTap: _uploadCourseImage,
           placeholder: 'Thumbnail image',
           isUploading: _isUploadingCourseImage,
+          uploadProgress: _courseImageProgress,
         ),
         const SizedBox(height: 24),
         _buildSettingsLabel('BANNER IMAGE'),
@@ -783,6 +806,7 @@ class _CourseTocPanelState extends State<CourseTocPanel> {
           onTap: _uploadBannerImage,
           placeholder: 'Banner image',
           isUploading: _isUploadingBanner,
+          uploadProgress: _bannerProgress,
         ),
         const SizedBox(height: 24),
         _buildSettingsLabel('VIDEO'),
@@ -792,6 +816,7 @@ class _CourseTocPanelState extends State<CourseTocPanel> {
           onTap: _uploadVideo,
           placeholder: 'Course intro video',
           isUploading: _isUploadingVideo,
+          uploadProgress: _videoProgress,
         ),
         const SizedBox(height: 24),
         _buildSettingsLabel('VISIBILITY'),
@@ -1139,8 +1164,10 @@ class _CourseTocPanelState extends State<CourseTocPanel> {
     VoidCallback? onTap,
     required String placeholder,
     bool isUploading = false,
+    double uploadProgress = 0.0,
   }) {
     final hasImage = imageUrl != null && imageUrl.isNotEmpty;
+    final progressPercent = (uploadProgress * 100).toInt();
 
     return InkWell(
       onTap: isUploading ? null : onTap,
@@ -1193,33 +1220,54 @@ class _CourseTocPanelState extends State<CourseTocPanel> {
                     ),
                   ),
 
-            // Upload overlay
+            // Upload overlay with progress
             if (isUploading)
               Container(
                 color: VedaColors.black.withValues(alpha: 0.8),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.cloud_upload_outlined,
+                          size: 14,
                           color: VedaColors.white,
-                          strokeWidth: 2,
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'UPLOADING...',
-                        style: GoogleFonts.jetBrainsMono(
-                          fontSize: 9,
-                          color: VedaColors.white,
-                          letterSpacing: 1.0,
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'UPLOADING...',
+                            style: GoogleFonts.jetBrainsMono(
+                              fontSize: 9,
+                              color: VedaColors.white,
+                              letterSpacing: 1.0,
+                            ),
+                          ),
                         ),
+                        Text(
+                          '$progressPercent%',
+                          style: GoogleFonts.jetBrainsMono(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                            color: VedaColors.white,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(1),
+                      child: LinearProgressIndicator(
+                        value: uploadProgress,
+                        minHeight: 3,
+                        backgroundColor: VedaColors.zinc800,
+                        valueColor: const AlwaysStoppedAnimation(VedaColors.white),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
           ],
@@ -1233,77 +1281,128 @@ class _CourseTocPanelState extends State<CourseTocPanel> {
     VoidCallback? onTap,
     required String placeholder,
     bool isUploading = false,
+    double uploadProgress = 0.0,
   }) {
     final hasVideo = videoUrl != null && videoUrl.isNotEmpty;
+    final progressPercent = (uploadProgress * 100).toInt();
 
+    // When uploading, show progress
+    if (isUploading) {
+      return Container(
+        height: 80,
+        decoration: BoxDecoration(
+          border: Border.all(color: VedaColors.zinc800, width: 1),
+        ),
+        child: Container(
+          color: VedaColors.black.withValues(alpha: 0.8),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
+                children: [
+                  const Icon(
+                    Icons.cloud_upload_outlined,
+                    size: 14,
+                    color: VedaColors.white,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'UPLOADING...',
+                      style: GoogleFonts.jetBrainsMono(
+                        fontSize: 9,
+                        color: VedaColors.white,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '$progressPercent%',
+                    style: GoogleFonts.jetBrainsMono(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                      color: VedaColors.white,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(1),
+                child: LinearProgressIndicator(
+                  value: uploadProgress,
+                  minHeight: 3,
+                  backgroundColor: VedaColors.zinc800,
+                  valueColor: const AlwaysStoppedAnimation(VedaColors.white),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // When video is uploaded, show player + re-upload button
+    if (hasVideo) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          WebVideoPlayer(
+            videoUrl: videoUrl,
+            height: 200,
+          ),
+          const SizedBox(height: 8),
+          InkWell(
+            onTap: onTap,
+            child: Container(
+              height: 36,
+              decoration: BoxDecoration(
+                border: Border.all(color: VedaColors.zinc800, width: 1),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.upload_file,
+                    size: 14,
+                    color: VedaColors.zinc500,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'REPLACE VIDEO',
+                    style: GoogleFonts.jetBrainsMono(
+                      fontSize: 9,
+                      color: VedaColors.zinc500,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    // No video — show upload prompt
     return InkWell(
-      onTap: isUploading ? null : onTap,
+      onTap: onTap,
       child: Container(
         height: 80,
         decoration: BoxDecoration(
           border: Border.all(color: VedaColors.zinc800, width: 1),
         ),
-        child: Stack(
-          children: [
-            // Main content
-            hasVideo
-                ? Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.videocam_outlined, size: 20, color: VedaColors.zinc500),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            'Video uploaded',
-                            style: GoogleFonts.inter(fontSize: 12, color: VedaColors.zinc500),
-                          ),
-                        ),
-                        const Icon(Icons.edit_outlined, size: 16, color: VedaColors.zinc700),
-                      ],
-                    ),
-                  )
-                : Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.videocam_outlined, size: 20, color: VedaColors.zinc700),
-                        const SizedBox(width: 8),
-                        Text(placeholder, style: GoogleFonts.inter(fontSize: 12, color: VedaColors.zinc700)),
-                      ],
-                    ),
-                  ),
-
-            // Upload overlay
-            if (isUploading)
-              Container(
-                color: VedaColors.black.withValues(alpha: 0.8),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          color: VedaColors.white,
-                          strokeWidth: 2,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'UPLOADING...',
-                        style: GoogleFonts.jetBrainsMono(
-                          fontSize: 9,
-                          color: VedaColors.white,
-                          letterSpacing: 1.0,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-          ],
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.videocam_outlined, size: 20, color: VedaColors.zinc700),
+              const SizedBox(width: 8),
+              Text(placeholder, style: GoogleFonts.inter(fontSize: 12, color: VedaColors.zinc700)),
+            ],
+          ),
         ),
       ),
     );
@@ -1743,11 +1842,17 @@ class _ModuleDetailViewState extends State<_ModuleDetailView> {
   bool _isUploadingModuleImage = false;
   bool _isUploadingModuleBanner = false;
   bool _isUploadingModuleVideo = false;
+  double _moduleImageProgress = 0.0;
+  double _moduleBannerProgress = 0.0;
+  double _moduleVideoProgress = 0.0;
 
   // Upload states for topics (map of topicId -> upload states)
   final Map<int, bool> _isUploadingTopicImage = {};
   final Map<int, bool> _isUploadingTopicBanner = {};
   final Map<int, bool> _isUploadingTopicVideo = {};
+  final Map<int, double> _topicImageProgress = {};
+  final Map<int, double> _topicBannerProgress = {};
+  final Map<int, double> _topicVideoProgress = {};
 
   // Expanded topics
   final Set<int> _expandedTopicIds = {};
@@ -1924,12 +2029,18 @@ class _ModuleDetailViewState extends State<_ModuleDetailView> {
   Future<void> _uploadModuleImage() async {
     if (widget.module.id == null || widget.module.courseId == null) return;
 
-    setState(() => _isUploadingModuleImage = true);
+    setState(() {
+      _isUploadingModuleImage = true;
+      _moduleImageProgress = 0.0;
+    });
 
     try {
       final result = await UploadService.instance.pickAndUploadModuleImage(
         widget.module.courseId,
         widget.module.id!,
+        onProgress: (p) {
+          if (mounted) setState(() => _moduleImageProgress = p);
+        },
       );
 
       if (result != null && result.success && result.publicUrl != null) {
@@ -1972,12 +2083,18 @@ class _ModuleDetailViewState extends State<_ModuleDetailView> {
   Future<void> _uploadModuleBanner() async {
     if (widget.module.id == null || widget.module.courseId == null) return;
 
-    setState(() => _isUploadingModuleBanner = true);
+    setState(() {
+      _isUploadingModuleBanner = true;
+      _moduleBannerProgress = 0.0;
+    });
 
     try {
       final result = await UploadService.instance.pickAndUploadModuleBanner(
         widget.module.courseId,
         widget.module.id!,
+        onProgress: (p) {
+          if (mounted) setState(() => _moduleBannerProgress = p);
+        },
       );
 
       if (result != null && result.success && result.publicUrl != null) {
@@ -2020,12 +2137,18 @@ class _ModuleDetailViewState extends State<_ModuleDetailView> {
   Future<void> _uploadModuleVideo() async {
     if (widget.module.id == null || widget.module.courseId == null) return;
 
-    setState(() => _isUploadingModuleVideo = true);
+    setState(() {
+      _isUploadingModuleVideo = true;
+      _moduleVideoProgress = 0.0;
+    });
 
     try {
       final result = await UploadService.instance.pickAndUploadModuleVideo(
         widget.module.courseId,
         widget.module.id!,
+        onProgress: (p) {
+          if (mounted) setState(() => _moduleVideoProgress = p);
+        },
       );
 
       if (result != null && result.success && result.publicUrl != null) {
@@ -2067,10 +2190,18 @@ class _ModuleDetailViewState extends State<_ModuleDetailView> {
 
   // Upload methods for topic media
   Future<void> _uploadTopicImage(int topicId) async {
-    setState(() => _isUploadingTopicImage[topicId] = true);
+    setState(() {
+      _isUploadingTopicImage[topicId] = true;
+      _topicImageProgress[topicId] = 0.0;
+    });
 
     try {
-      final result = await UploadService.instance.pickAndUploadTopicImage(topicId);
+      final result = await UploadService.instance.pickAndUploadTopicImage(
+        topicId,
+        onProgress: (p) {
+          if (mounted) setState(() => _topicImageProgress[topicId] = p);
+        },
+      );
 
       if (result != null && result.success && result.publicUrl != null) {
         _topicImageControllers[topicId]!.text = result.publicUrl!;
@@ -2110,10 +2241,18 @@ class _ModuleDetailViewState extends State<_ModuleDetailView> {
   }
 
   Future<void> _uploadTopicBanner(int topicId) async {
-    setState(() => _isUploadingTopicBanner[topicId] = true);
+    setState(() {
+      _isUploadingTopicBanner[topicId] = true;
+      _topicBannerProgress[topicId] = 0.0;
+    });
 
     try {
-      final result = await UploadService.instance.pickAndUploadTopicBanner(topicId);
+      final result = await UploadService.instance.pickAndUploadTopicBanner(
+        topicId,
+        onProgress: (p) {
+          if (mounted) setState(() => _topicBannerProgress[topicId] = p);
+        },
+      );
 
       if (result != null && result.success && result.publicUrl != null) {
         _topicBannerControllers[topicId]!.text = result.publicUrl!;
@@ -2153,10 +2292,18 @@ class _ModuleDetailViewState extends State<_ModuleDetailView> {
   }
 
   Future<void> _uploadTopicVideo(int topicId) async {
-    setState(() => _isUploadingTopicVideo[topicId] = true);
+    setState(() {
+      _isUploadingTopicVideo[topicId] = true;
+      _topicVideoProgress[topicId] = 0.0;
+    });
 
     try {
-      final result = await UploadService.instance.pickAndUploadTopicVideo(topicId);
+      final result = await UploadService.instance.pickAndUploadTopicVideo(
+        topicId,
+        onProgress: (p) {
+          if (mounted) setState(() => _topicVideoProgress[topicId] = p);
+        },
+      );
 
       if (result != null && result.success && result.publicUrl != null) {
         _topicVideoControllers[topicId]!.text = result.publicUrl!;
@@ -2318,6 +2465,7 @@ class _ModuleDetailViewState extends State<_ModuleDetailView> {
           hint: 'https://...',
           onUpload: _uploadModuleImage,
           isUploading: _isUploadingModuleImage,
+          uploadProgress: _moduleImageProgress,
         ),
         const SizedBox(height: 16),
 
@@ -2327,6 +2475,7 @@ class _ModuleDetailViewState extends State<_ModuleDetailView> {
           hint: 'https://...',
           onUpload: _uploadModuleBanner,
           isUploading: _isUploadingModuleBanner,
+          uploadProgress: _moduleBannerProgress,
         ),
         const SizedBox(height: 16),
 
@@ -2336,6 +2485,7 @@ class _ModuleDetailViewState extends State<_ModuleDetailView> {
           hint: 'https://...',
           onUpload: _uploadModuleVideo,
           isUploading: _isUploadingModuleVideo,
+          uploadProgress: _moduleVideoProgress,
         ),
         const SizedBox(height: 20),
 
@@ -2457,6 +2607,9 @@ class _ModuleDetailViewState extends State<_ModuleDetailView> {
                   isUploadingImage: _isUploadingTopicImage[topicId] ?? false,
                   isUploadingBanner: _isUploadingTopicBanner[topicId] ?? false,
                   isUploadingVideo: _isUploadingTopicVideo[topicId] ?? false,
+                  imageUploadProgress: _topicImageProgress[topicId] ?? 0.0,
+                  bannerUploadProgress: _topicBannerProgress[topicId] ?? 0.0,
+                  videoUploadProgress: _topicVideoProgress[topicId] ?? 0.0,
                   buildEditField: _buildEditField,
                 );
               },
@@ -2498,6 +2651,7 @@ class _ModuleDetailViewState extends State<_ModuleDetailView> {
     int maxLines = 1,
     Future<void> Function()? onUpload,
     bool isUploading = false,
+    double uploadProgress = 0.0,
   }) {
     // If it's a file upload field, use custom UI
     if (onUpload != null) {
@@ -2506,6 +2660,7 @@ class _ModuleDetailViewState extends State<_ModuleDetailView> {
         controller: controller,
         onUpload: onUpload,
         isUploading: isUploading,
+        uploadProgress: uploadProgress,
       );
     }
 
@@ -2558,8 +2713,10 @@ class _ModuleDetailViewState extends State<_ModuleDetailView> {
     required TextEditingController controller,
     required Future<void> Function() onUpload,
     required bool isUploading,
+    double uploadProgress = 0.0,
   }) {
     final hasFile = controller.text.isNotEmpty;
+    final progressPercent = (uploadProgress * 100).toInt();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2593,22 +2750,64 @@ class _ModuleDetailViewState extends State<_ModuleDetailView> {
             child: Column(
               children: [
                 if (isUploading) ...[
-                  const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 1.5,
-                      valueColor: AlwaysStoppedAnimation(VedaColors.white),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'UPLOADING...',
-                    style: GoogleFonts.jetBrainsMono(
-                      fontSize: 9,
-                      color: VedaColors.zinc500,
-                      letterSpacing: 1.5,
-                    ),
+                  // Progress bar
+                  Column(
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.cloud_upload_outlined,
+                            size: 16,
+                            color: VedaColors.white,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'UPLOADING...',
+                              style: GoogleFonts.jetBrainsMono(
+                                fontSize: 9,
+                                color: VedaColors.zinc500,
+                                letterSpacing: 1.5,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            '$progressPercent%',
+                            style: GoogleFonts.jetBrainsMono(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                              color: VedaColors.white,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(1),
+                        child: LinearProgressIndicator(
+                          value: uploadProgress,
+                          minHeight: 3,
+                          backgroundColor: VedaColors.zinc800,
+                          valueColor: const AlwaysStoppedAnimation(VedaColors.white),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        uploadProgress < 0.05
+                            ? 'Preparing...'
+                            : uploadProgress < 0.90
+                                ? 'Sending data...'
+                                : uploadProgress < 1.0
+                                    ? 'Verifying...'
+                                    : 'Complete',
+                        style: GoogleFonts.inter(
+                          fontSize: 9,
+                          color: VedaColors.zinc600,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                    ],
                   ),
                 ] else if (hasFile) ...[
                   // Image preview for IMAGE fields
@@ -2668,33 +2867,11 @@ class _ModuleDetailViewState extends State<_ModuleDetailView> {
                     const SizedBox(height: 12),
                   ],
 
-                  // Video preview placeholder for VIDEO fields
+                  // Video player for VIDEO fields
                   if (label.contains('VIDEO') && controller.text.isNotEmpty) ...[
-                    Container(
-                      height: 120,
-                      width: double.infinity,
-                      color: VedaColors.black,
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.play_circle_outline,
-                              size: 40,
-                              color: VedaColors.zinc600,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'VIDEO FILE',
-                              style: GoogleFonts.jetBrainsMono(
-                                fontSize: 9,
-                                color: VedaColors.zinc600,
-                                letterSpacing: 1.0,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    WebVideoPlayer(
+                      videoUrl: controller.text,
+                      height: 180,
                     ),
                     const SizedBox(height: 12),
                   ],
@@ -2834,6 +3011,9 @@ class _TopicTimelineItem extends StatefulWidget {
   final bool isUploadingImage;
   final bool isUploadingBanner;
   final bool isUploadingVideo;
+  final double imageUploadProgress;
+  final double bannerUploadProgress;
+  final double videoUploadProgress;
   final Widget Function({
     required String label,
     required TextEditingController controller,
@@ -2841,6 +3021,7 @@ class _TopicTimelineItem extends StatefulWidget {
     int maxLines,
     Future<void> Function()? onUpload,
     bool isUploading,
+    double uploadProgress,
   }) buildEditField;
 
   const _TopicTimelineItem({
@@ -2863,6 +3044,9 @@ class _TopicTimelineItem extends StatefulWidget {
     required this.isUploadingImage,
     required this.isUploadingBanner,
     required this.isUploadingVideo,
+    this.imageUploadProgress = 0.0,
+    this.bannerUploadProgress = 0.0,
+    this.videoUploadProgress = 0.0,
     required this.buildEditField,
   });
 
@@ -3073,6 +3257,7 @@ class _TopicTimelineItemState extends State<_TopicTimelineItem> {
                                 hint: 'https://...',
                                 onUpload: widget.onUploadImage,
                                 isUploading: widget.isUploadingImage,
+                                uploadProgress: widget.imageUploadProgress,
                               ),
                               const SizedBox(height: 16),
 
@@ -3082,6 +3267,7 @@ class _TopicTimelineItemState extends State<_TopicTimelineItem> {
                                 hint: 'https://...',
                                 onUpload: widget.onUploadBanner,
                                 isUploading: widget.isUploadingBanner,
+                                uploadProgress: widget.bannerUploadProgress,
                               ),
                               const SizedBox(height: 16),
 
@@ -3091,6 +3277,7 @@ class _TopicTimelineItemState extends State<_TopicTimelineItem> {
                                 hint: 'https://...',
                                 onUpload: widget.onUploadVideo,
                                 isUploading: widget.isUploadingVideo,
+                                uploadProgress: widget.videoUploadProgress,
                               ),
                               const SizedBox(height: 20),
 

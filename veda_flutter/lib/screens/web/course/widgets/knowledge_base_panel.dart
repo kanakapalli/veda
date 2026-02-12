@@ -44,30 +44,25 @@ class KnowledgeBasePanel extends StatelessWidget {
       ),
       child: Row(
         children: [
-                Positioned(
-        top: 12,
-        left: 12,
-        child: MouseRegion(
-          cursor: SystemMouseCursors.click,
-          child: GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: VedaColors.zinc900,
-                border: Border.all(color: VedaColors.zinc800, width: 1),
-              ),
-              child: const Icon(
-                Icons.arrow_back,
-                size: 18,
-                color: VedaColors.zinc500,
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: VedaColors.zinc900,
+                  border: Border.all(color: VedaColors.zinc800, width: 1),
+                ),
+                child: const Icon(
+                  Icons.arrow_back,
+                  size: 18,
+                  color: VedaColors.zinc500,
+                ),
               ),
             ),
           ),
-        ),
-      ),
-      
           const SizedBox(width: 12),
           Expanded(
             child: Text(

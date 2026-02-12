@@ -1291,9 +1291,29 @@ Guidelines:
     session.log('📤 [LmsEndpoint] Path: $path');
 
     try {
-      final description = await session.storage.createDirectFileUploadDescription(
-        storageId: 'public',
+      // Determine max file size based on file type
+      // Videos get 100 MB, images get 10 MB (default)
+      final isVideo = path.endsWith('.mp4') ||
+          path.endsWith('.mov') ||
+          path.endsWith('.webm') ||
+          path.endsWith('.avi');
+      final maxFileSize = isVideo
+          ? 100 * 1024 * 1024 // 100 MB for videos
+          : 10 * 1024 * 1024; // 10 MB for images
+
+      session.log('📤 [LmsEndpoint] Max file size: $maxFileSize bytes (${isVideo ? "video" : "image/other"})');
+
+      // Bypass session.storage wrapper to pass custom maxFileSize
+      final storage = session.server.serverpod.storage['public'];
+      if (storage == null) {
+        session.log('❌ [LmsEndpoint] Storage "public" not found');
+        return null;
+      }
+
+      final description = await storage.createDirectFileUploadDescription(
+        session: session,
         path: path,
+        maxFileSize: maxFileSize,
       );
       session.log('✅ [LmsEndpoint] Got upload description: ${description != null ? "OK (${description.length} chars)" : "NULL"}');
       return description;

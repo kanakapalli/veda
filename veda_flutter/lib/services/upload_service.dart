@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -6,6 +7,9 @@ import 'package:http/http.dart' as http;
 import 'package:veda_client/veda_client.dart';
 
 import '../main.dart';
+
+/// Callback for upload progress: value between 0.0 and 1.0
+typedef UploadProgressCallback = void Function(double progress);
 
 /// Result of an upload operation.
 class UploadResult {
@@ -40,12 +44,15 @@ class UploadService {
     required String path,
     required Uint8List bytes,
     required String fileName,
+    UploadProgressCallback? onProgress,
   }) async {
     print('📤 [UploadService] Starting upload for: $fileName');
     print('📤 [UploadService] Path: $path');
     print('📤 [UploadService] Size: ${bytes.length} bytes');
 
     try {
+      onProgress?.call(0.0);
+
       print('📤 [UploadService] Step 1: Getting upload description...');
       final description = await client.lms.getUploadDescription(path);
       if (description == null) {
@@ -53,6 +60,7 @@ class UploadService {
         return UploadResult(success: false, error: 'Failed to get upload URL');
       }
       print('✅ [UploadService] Got upload description (${description.length} chars)');
+      onProgress?.call(0.05);
 
       print('📤 [UploadService] Step 2: Uploading to S3...');
       // Parse the upload description to get more debug info
@@ -60,12 +68,13 @@ class UploadService {
       print('📤 [UploadService] Upload type: ${descData['type']}');
       print('📤 [UploadService] Upload URL: ${descData['url']}');
 
-      final ok = await _performUpload(description, bytes);
+      final ok = await _performUpload(description, bytes, onProgress: onProgress);
       if (!ok) {
         print('❌ [UploadService] S3 upload returned false');
         return UploadResult(success: false, error: 'Upload to S3 failed');
       }
       print('✅ [UploadService] S3 upload successful');
+      onProgress?.call(0.90);
 
       print('📤 [UploadService] Step 3: Verifying upload...');
       final verified = await client.lms.verifyUpload(path);
@@ -77,10 +86,12 @@ class UploadService {
         );
       }
       print('✅ [UploadService] Upload verified');
+      onProgress?.call(0.95);
 
       print('📤 [UploadService] Step 4: Getting public URL...');
       final publicUrl = await client.lms.getPublicUrl(path);
       print('✅ [UploadService] Public URL: $publicUrl');
+      onProgress?.call(1.0);
 
       final ext = fileName.split('.').last.toLowerCase();
       return UploadResult(
@@ -100,10 +111,12 @@ class UploadService {
   /// Picks a file with [allowedExtensions], then uploads to [pathBuilder].
   /// If [onFilePicked] is provided, it is called after the user selects a file
   /// but before the upload begins — useful for showing loading UI.
+  /// If [onProgress] is provided, it is called with values between 0.0 and 1.0.
   Future<UploadResult?> _pickAndUpload({
     required List<String> allowedExtensions,
     required String Function(String fileName, String ext) pathBuilder,
     void Function()? onFilePicked,
+    UploadProgressCallback? onProgress,
   }) async {
     print('📁 [UploadService] Opening file picker...');
     print('📁 [UploadService] Allowed extensions: $allowedExtensions');
@@ -141,11 +154,14 @@ class UploadService {
       path: path,
       bytes: file.bytes!,
       fileName: file.name,
+      onProgress: onProgress,
     );
   }
 
   /// Custom upload with detailed logging
-  Future<bool> _performUpload(String description, Uint8List bytes) async {
+  Future<bool> _performUpload(String description, Uint8List bytes, {
+    UploadProgressCallback? onProgress,
+  }) async {
     try {
       final data = jsonDecode(description) as Map<String, dynamic>;
       final type = data['type'] as String;
@@ -153,10 +169,29 @@ class UploadService {
 
       if (type == 'binary') {
         print('📤 [UploadService] Using binary upload mode');
-        final request = http.Request('POST', url);
+        final totalBytes = bytes.length;
+        final request = http.StreamedRequest('POST', url);
         request.headers['Content-Type'] = 'application/octet-stream';
         request.headers['Accept'] = '*/*';
-        request.bodyBytes = bytes;
+        request.contentLength = totalBytes;
+
+        // Stream bytes in chunks with progress tracking
+        final chunkSize = 64 * 1024; // 64 KB chunks
+        var bytesSent = 0;
+
+        () async {
+          for (var offset = 0; offset < totalBytes; offset += chunkSize) {
+            final end = (offset + chunkSize < totalBytes)
+                ? offset + chunkSize
+                : totalBytes;
+            request.sink.add(bytes.sublist(offset, end));
+            bytesSent = end;
+            // Progress: 5% (description) + 85% for upload
+            final uploadFraction = bytesSent / totalBytes;
+            onProgress?.call(0.05 + uploadFraction * 0.85);
+          }
+          request.sink.close();
+        }();
 
         final streamedResponse = await request.send();
         final responseBody = await streamedResponse.stream.bytesToString();
@@ -184,7 +219,36 @@ class UploadService {
         ));
         request.fields.addAll(requestFields);
 
-        final streamedResponse = await request.send();
+        // Wrap the request to track progress
+        final totalBytes = request.contentLength;
+        final originalStream = request.finalize();
+        var bytesSent = 0;
+
+        final progressStream = originalStream.transform(
+          StreamTransformer<List<int>, List<int>>.fromHandlers(
+            handleData: (data, sink) {
+              sink.add(data);
+              bytesSent += data.length;
+              if (totalBytes > 0) {
+                final uploadFraction = bytesSent / totalBytes;
+                onProgress?.call(0.05 + uploadFraction * 0.85);
+              }
+            },
+          ),
+        );
+
+        final streamedRequest = http.StreamedRequest('POST', url);
+        streamedRequest.headers.addAll(request.headers);
+        streamedRequest.contentLength = totalBytes;
+
+        // Pipe the progress stream into the streamed request
+        progressStream.listen(
+          streamedRequest.sink.add,
+          onError: streamedRequest.sink.addError,
+          onDone: streamedRequest.sink.close,
+        );
+
+        final streamedResponse = await streamedRequest.send();
         final responseBody = await streamedResponse.stream.bytesToString();
 
         print('📤 [UploadService] Multipart response status: ${streamedResponse.statusCode}');
@@ -251,29 +315,33 @@ class UploadService {
   // Course uploads
   // ---------------------------------------------------------------------------
 
-  Future<UploadResult?> pickAndUploadCourseImage(int courseId) {
+  Future<UploadResult?> pickAndUploadCourseImage(int courseId, {UploadProgressCallback? onProgress}) {
     return _pickAndUpload(
       allowedExtensions: _imageExtensions,
       pathBuilder: (_, ext) => 'courses/$courseId/course-image.$ext',
+      onProgress: onProgress,
     );
   }
 
-  Future<UploadResult?> pickAndUploadBannerImage(int courseId) {
+  Future<UploadResult?> pickAndUploadBannerImage(int courseId, {UploadProgressCallback? onProgress}) {
     return _pickAndUpload(
       allowedExtensions: _imageExtensions,
       pathBuilder: (_, ext) => 'courses/$courseId/banner-image.$ext',
+      onProgress: onProgress,
     );
   }
 
-  Future<UploadResult?> pickAndUploadCourseVideo(int courseId) {
+  Future<UploadResult?> pickAndUploadCourseVideo(int courseId, {UploadProgressCallback? onProgress}) {
     return _pickAndUpload(
       allowedExtensions: _videoExtensions,
       pathBuilder: (_, ext) => 'courses/$courseId/video.$ext',
+      onProgress: onProgress,
     );
   }
 
   Future<UploadResult?> pickAndUploadKnowledgeFile(int courseId, {
     void Function()? onFilePicked,
+    UploadProgressCallback? onProgress,
   }) {
     return _pickAndUpload(
       allowedExtensions: _knowledgeExtensions,
@@ -282,6 +350,7 @@ class UploadService {
         return 'courses/$courseId/files/$ts-$name';
       },
       onFilePicked: onFilePicked,
+      onProgress: onProgress,
     );
   }
 
@@ -303,25 +372,28 @@ class UploadService {
   // Module uploads
   // ---------------------------------------------------------------------------
 
-  Future<UploadResult?> pickAndUploadModuleImage(int courseId, int moduleId) {
+  Future<UploadResult?> pickAndUploadModuleImage(int courseId, int moduleId, {UploadProgressCallback? onProgress}) {
     return _pickAndUpload(
       allowedExtensions: _imageExtensions,
       pathBuilder: (_, ext) => 'courses/$courseId/modules/$moduleId/image.$ext',
+      onProgress: onProgress,
     );
   }
 
-  Future<UploadResult?> pickAndUploadModuleBanner(int courseId, int moduleId) {
+  Future<UploadResult?> pickAndUploadModuleBanner(int courseId, int moduleId, {UploadProgressCallback? onProgress}) {
     return _pickAndUpload(
       allowedExtensions: _imageExtensions,
       pathBuilder: (_, ext) =>
           'courses/$courseId/modules/$moduleId/banner.$ext',
+      onProgress: onProgress,
     );
   }
 
-  Future<UploadResult?> pickAndUploadModuleVideo(int courseId, int moduleId) {
+  Future<UploadResult?> pickAndUploadModuleVideo(int courseId, int moduleId, {UploadProgressCallback? onProgress}) {
     return _pickAndUpload(
       allowedExtensions: _videoExtensions,
       pathBuilder: (_, ext) => 'courses/$courseId/modules/$moduleId/video.$ext',
+      onProgress: onProgress,
     );
   }
 
@@ -329,24 +401,27 @@ class UploadService {
   // Topic uploads
   // ---------------------------------------------------------------------------
 
-  Future<UploadResult?> pickAndUploadTopicImage(int topicId) {
+  Future<UploadResult?> pickAndUploadTopicImage(int topicId, {UploadProgressCallback? onProgress}) {
     return _pickAndUpload(
       allowedExtensions: _imageExtensions,
       pathBuilder: (_, ext) => 'topics/$topicId/image.$ext',
+      onProgress: onProgress,
     );
   }
 
-  Future<UploadResult?> pickAndUploadTopicBanner(int topicId) {
+  Future<UploadResult?> pickAndUploadTopicBanner(int topicId, {UploadProgressCallback? onProgress}) {
     return _pickAndUpload(
       allowedExtensions: _imageExtensions,
       pathBuilder: (_, ext) => 'topics/$topicId/banner.$ext',
+      onProgress: onProgress,
     );
   }
 
-  Future<UploadResult?> pickAndUploadTopicVideo(int topicId) {
+  Future<UploadResult?> pickAndUploadTopicVideo(int topicId, {UploadProgressCallback? onProgress}) {
     return _pickAndUpload(
       allowedExtensions: _videoExtensions,
       pathBuilder: (_, ext) => 'topics/$topicId/video.$ext',
+      onProgress: onProgress,
     );
   }
 
@@ -354,10 +429,11 @@ class UploadService {
   // CourseIndex uploads
   // ---------------------------------------------------------------------------
 
-  Future<UploadResult?> pickAndUploadIndexImage(int courseId, int indexId) {
+  Future<UploadResult?> pickAndUploadIndexImage(int courseId, int indexId, {UploadProgressCallback? onProgress}) {
     return _pickAndUpload(
       allowedExtensions: _imageExtensions,
       pathBuilder: (_, ext) => 'courses/$courseId/indices/$indexId/image.$ext',
+      onProgress: onProgress,
     );
   }
 
@@ -365,13 +441,14 @@ class UploadService {
   // Profile uploads
   // ---------------------------------------------------------------------------
 
-  Future<UploadResult?> pickAndUploadProfileImage() {
+  Future<UploadResult?> pickAndUploadProfileImage({UploadProgressCallback? onProgress}) {
     return _pickAndUpload(
       allowedExtensions: _imageExtensions,
       pathBuilder: (_, ext) {
         final ts = DateTime.now().millisecondsSinceEpoch;
         return 'profiles/$ts/avatar.$ext';
       },
+      onProgress: onProgress,
     );
   }
 

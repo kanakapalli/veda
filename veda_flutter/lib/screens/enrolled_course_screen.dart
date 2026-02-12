@@ -7,6 +7,7 @@ import 'package:veda_client/veda_client.dart';
 import '../design_system/veda_colors.dart';
 import '../main.dart';
 import 'module_teach_screen.dart';
+import 'module_video_teach_screen.dart';
 
 /// Screen displayed when a user taps on an enrolled course.
 /// Shows a timeline-based syllabus with per-module progress states.
@@ -105,19 +106,40 @@ class _EnrolledCourseScreenState extends State<EnrolledCourseScreen> {
     }
   }
 
+  /// Check if a module or any of its topics have video URLs.
+  bool _hasVideoContent(Module module) {
+    if (module.videoUrl != null && module.videoUrl!.trim().isNotEmpty) {
+      return true;
+    }
+    final items = module.items ?? [];
+    for (final item in items) {
+      if (item.topic?.videoUrl != null &&
+          item.topic!.videoUrl!.trim().isNotEmpty) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   void _openModule(Module module) {
+    final Widget screen;
+    if (_hasVideoContent(module)) {
+      screen = ModuleVideoTeachScreen(
+        course: widget.course,
+        module: module,
+      );
+    } else {
+      screen = ModuleTeachScreen(
+        course: widget.course,
+        module: module,
+        modules: _modules,
+        minWords: _minWords,
+        maxWords: _maxWords,
+      );
+    }
+
     Navigator.of(context)
-        .push(
-      MaterialPageRoute(
-        builder: (_) => ModuleTeachScreen(
-          course: widget.course,
-          module: module,
-          modules: _modules,
-          minWords: _minWords,
-          maxWords: _maxWords,
-        ),
-      ),
-    )
+        .push(MaterialPageRoute(builder: (_) => screen))
         .then((_) => _loadData()); // Refresh progress on return
   }
 
