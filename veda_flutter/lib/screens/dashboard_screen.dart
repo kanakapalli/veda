@@ -1,14 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:veda_client/veda_client.dart';
 
 import '../design_system/veda_colors.dart';
 import '../main.dart';
+import '../services/revenue_cat_service.dart';
+import 'auth/auth_flow_screen.dart';
 import 'coach_screen.dart';
 import 'coaches_list_screen.dart';
 import 'course_detail_screen.dart';
 import 'enrolled_course_screen.dart';
 import 'search_screen.dart';
+import 'subscription_screen.dart';
 
 // ---------------------------------------------------------------------------
 // Callback type for navigating to search with a pre-filled query + tab
@@ -39,10 +44,60 @@ class _DashboardScreenState extends State<DashboardScreen> {
   // Creator name cache for course cards
   final Map<String, String> _creatorNameCache = {};
 
+  // Subscription
+  bool _isProUser = false;
+  StreamSubscription<bool>? _subscriptionListener;
+
   @override
   void initState() {
     super.initState();
+    _isProUser = RevenueCatService.instance.isProUser;
     _loadDashboardData();
+
+    // Listen for live subscription changes.
+    _subscriptionListener =
+        RevenueCatService.instance.onSubscriptionStatusChanged.listen((isPro) {
+      if (mounted) setState(() => _isProUser = isPro);
+    });
+
+    // Only auto-open subscription screen on a fresh login/register.
+    if (AuthFlowScreen.justLoggedIn) {
+      AuthFlowScreen.justLoggedIn = false; // consume the flag
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _checkAndShowSubscription();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _subscriptionListener?.cancel();
+    super.dispose();
+  }
+
+  /// Auto-opens the subscription screen after a fresh login/register if the
+  /// user has no active subscription. Waits briefly for RevenueCat to finish
+  /// loading the user's entitlements.
+  Future<void> _checkAndShowSubscription() async {
+    // Give RevenueCat a moment to fetch entitlements after logIn().
+    await Future.delayed(const Duration(milliseconds: 1500));
+    if (!mounted) return;
+
+    // Refresh to get the latest state.
+    await RevenueCatService.instance.refreshCustomerInfo();
+    if (!mounted) return;
+
+    if (!RevenueCatService.instance.isProUser) {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const SubscriptionScreen()),
+      );
+    }
+  }
+
+  void _openSubscription() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const SubscriptionScreen()),
+    );
   }
 
   Future<void> _loadDashboardData() async {
@@ -221,6 +276,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 32),
+
+          // ── Subscribe card (only for free users) ─────────────────────────
+          if (!_isProUser) ...[
+            _SubscribeCard(onTap: _openSubscription),
+            const SizedBox(height: 24),
+          ],
 
           // ── Banner 1: Explore AI Courses ──────────────────────────────────
           _PromoBanner(
@@ -1179,6 +1240,122 @@ class _DiscoverCourseCard extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// SUBSCRIBE CARD (shown when user has no active subscription)
+// ---------------------------------------------------------------------------
+class _SubscribeCard extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _SubscribeCard({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: VedaColors.white,
+          border: Border.all(color: VedaColors.white, width: 2),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                // Badge
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: VedaColors.black, width: 2),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    'V',
+                    style: GoogleFonts.inter(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      color: VedaColors.black,
+                      height: 1.0,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'UPGRADE TO VEDA PRO',
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w900,
+                          color: VedaColors.black,
+                          letterSpacing: -0.3,
+                          height: 1.0,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        'UNLIMITED COURSES · EXPERT COACHES',
+                        style: GoogleFonts.jetBrainsMono(
+                          fontSize: 8,
+                          color: VedaColors.black.withValues(alpha: 0.5),
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.arrow_forward,
+                  size: 20,
+                  color: VedaColors.black,
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Container(height: 1, color: VedaColors.black.withValues(alpha: 0.15)),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                _featureChip('ALL COURSES'),
+                const SizedBox(width: 8),
+                _featureChip('OFFLINE'),
+                const SizedBox(width: 8),
+                _featureChip('PRIORITY SUPPORT'),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _featureChip(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: VedaColors.black.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.jetBrainsMono(
+          fontSize: 7,
+          fontWeight: FontWeight.w700,
+          color: VedaColors.black.withValues(alpha: 0.6),
+          letterSpacing: 0.5,
         ),
       ),
     );

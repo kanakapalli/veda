@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 import '../../main.dart';
+import '../../services/revenue_cat_service.dart';
 import 'login_screen.dart';
 import 'register_screen.dart';
 import 'otp_screen.dart';
@@ -35,6 +36,11 @@ class AuthFlowScreen extends StatefulWidget {
   final Widget child;
   const AuthFlowScreen({super.key, required this.child});
 
+  /// Flag set to true only when a fresh login/register transition happens.
+  /// DashboardScreen reads and clears this to decide whether to auto-open
+  /// the subscription screen.
+  static bool justLoggedIn = false;
+
   @override
   State<AuthFlowScreen> createState() => _AuthFlowScreenState();
 }
@@ -59,9 +65,23 @@ class _AuthFlowScreenState extends State<AuthFlowScreen> {
   }
 
   void _updateSignedInState() {
+    final wasSignedIn = _isSignedIn;
+    final isNowSignedIn = client.auth.isAuthenticated;
     setState(() {
-      _isSignedIn = client.auth.isAuthenticated;
+      _isSignedIn = isNowSignedIn;
     });
+
+    // Identify or reset the RevenueCat user when auth state changes.
+    if (isNowSignedIn) {
+      // Mark as fresh login only on a real transition (not on init).
+      if (!wasSignedIn) {
+        AuthFlowScreen.justLoggedIn = true;
+      }
+      final authInfo = client.auth.authInfo;
+      if (authInfo != null) {
+        RevenueCatService.instance.logIn(authInfo.authUserId.toString());
+      }
+    }
   }
 
   void _pushScreen(Widget screen) {

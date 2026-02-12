@@ -211,4 +211,47 @@ class VedaUserProfileEndpoint extends Endpoint {
 
     return profiles;
   }
+
+  /// Updates the subscription fields on the authenticated user's profile.
+  /// Called from the Flutter client after a RevenueCat subscription change.
+  Future<VedaUserProfile?> updateSubscriptionStatus(
+    Session session, {
+    required SubscriptionStatus status,
+    String? plan,
+    DateTime? expiryDate,
+    String? productId,
+  }) async {
+    final authInfo = session.authenticated;
+    if (authInfo == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final authUserId = authInfo.authUserId;
+
+    final existing = await VedaUserProfile.db.findFirstRow(
+      session,
+      where: (t) => t.authUserId.equals(authUserId),
+    );
+
+    if (existing == null) {
+      session.log('No profile found for user $authUserId — cannot update subscription.');
+      return null;
+    }
+
+    final updated = existing.copyWith(
+      subscriptionStatus: status,
+      subscriptionPlan: plan,
+      subscriptionExpiryDate: expiryDate,
+      subscriptionProductId: productId,
+      updatedAt: DateTime.now(),
+    );
+
+    return await VedaUserProfile.db.updateRow(session, updated);
+  }
+
+  /// Returns the subscription status for the authenticated user.
+  Future<SubscriptionStatus> getSubscriptionStatus(Session session) async {
+    final profile = await getMyProfile(session);
+    return profile?.subscriptionStatus ?? SubscriptionStatus.none;
+  }
 }

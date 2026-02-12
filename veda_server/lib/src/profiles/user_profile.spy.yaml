@@ -25,6 +25,14 @@ fields:
   profileImageUrl: String?
   ### Areas of expertise or teaching topics (creators only).
   expertise: List<String>?
+  ### Current subscription status (none, active, cancelling, expired).
+  subscriptionStatus: SubscriptionStatus?
+  ### Name of the current subscription plan (e.g. 'Monthly', 'Yearly', 'Six Month').
+  subscriptionPlan: String?
+  ### Subscription expiry or next renewal date.
+  subscriptionExpiryDate: DateTime?
+  ### RevenueCat product identifier for the active subscription.
+  subscriptionProductId: String?
   ### Timestamp when the profile was created.
   createdAt: DateTime
   ### Timestamp when the profile was last updated.

@@ -36,6 +36,8 @@ import 'package:veda_server/src/generated/profiles/user_profile.dart' as _i19;
 import 'package:veda_server/src/generated/profiles/user_type.dart' as _i20;
 import 'package:veda_server/src/generated/profiles/user_profile_with_email.dart'
     as _i21;
+import 'package:veda_server/src/generated/profiles/subscription_status.dart'
+    as _i22;
 import 'package:veda_server/src/generated/protocol.dart';
 import 'package:veda_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -2273,6 +2275,75 @@ class _VedaUserProfileEndpoint {
                   _localCallContext.arguments,
                 )
                 as _i3.Future<List<_i19.VedaUserProfile>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i19.VedaUserProfile?> updateSubscriptionStatus(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required _i22.SubscriptionStatus status,
+    String? plan,
+    DateTime? expiryDate,
+    String? productId,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'vedaUserProfile',
+            method: 'updateSubscriptionStatus',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'vedaUserProfile',
+          methodName: 'updateSubscriptionStatus',
+          parameters: _i1.testObjectToJson({
+            'status': status,
+            'plan': plan,
+            'expiryDate': expiryDate,
+            'productId': productId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i19.VedaUserProfile?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i22.SubscriptionStatus> getSubscriptionStatus(
+    _i1.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'vedaUserProfile',
+            method: 'getSubscriptionStatus',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'vedaUserProfile',
+          methodName: 'getSubscriptionStatus',
+          parameters: _i1.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i22.SubscriptionStatus>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

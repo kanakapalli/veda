@@ -15,7 +15,8 @@ import 'package:serverpod/serverpod.dart' as _i1;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _i2;
 import '../profiles/user_type.dart' as _i3;
-import 'package:veda_server/src/generated/protocol.dart' as _i4;
+import '../profiles/subscription_status.dart' as _i4;
+import 'package:veda_server/src/generated/protocol.dart' as _i5;
 
 /// Veda user profile data linked to authenticated user.
 /// Uses relation to AuthUser as per Serverpod recommended pattern.
@@ -33,6 +34,10 @@ abstract class VedaUserProfile
     this.websiteUrl,
     this.profileImageUrl,
     this.expertise,
+    this.subscriptionStatus,
+    this.subscriptionPlan,
+    this.subscriptionExpiryDate,
+    this.subscriptionProductId,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -49,6 +54,10 @@ abstract class VedaUserProfile
     String? websiteUrl,
     String? profileImageUrl,
     List<String>? expertise,
+    _i4.SubscriptionStatus? subscriptionStatus,
+    String? subscriptionPlan,
+    DateTime? subscriptionExpiryDate,
+    String? subscriptionProductId,
     required DateTime createdAt,
     required DateTime updatedAt,
   }) = _VedaUserProfileImpl;
@@ -61,17 +70,17 @@ abstract class VedaUserProfile
       ),
       authUser: jsonSerialization['authUser'] == null
           ? null
-          : _i4.Protocol().deserialize<_i2.AuthUser>(
+          : _i5.Protocol().deserialize<_i2.AuthUser>(
               jsonSerialization['authUser'],
             ),
-      userTypes: _i4.Protocol().deserialize<List<_i3.UserType>>(
+      userTypes: _i5.Protocol().deserialize<List<_i3.UserType>>(
         jsonSerialization['userTypes'],
       ),
       fullName: jsonSerialization['fullName'] as String?,
       bio: jsonSerialization['bio'] as String?,
       interests: jsonSerialization['interests'] == null
           ? null
-          : _i4.Protocol().deserialize<List<String>>(
+          : _i5.Protocol().deserialize<List<String>>(
               jsonSerialization['interests'],
             ),
       learningGoal: jsonSerialization['learningGoal'] as String?,
@@ -79,9 +88,23 @@ abstract class VedaUserProfile
       profileImageUrl: jsonSerialization['profileImageUrl'] as String?,
       expertise: jsonSerialization['expertise'] == null
           ? null
-          : _i4.Protocol().deserialize<List<String>>(
+          : _i5.Protocol().deserialize<List<String>>(
               jsonSerialization['expertise'],
             ),
+      subscriptionStatus: jsonSerialization['subscriptionStatus'] == null
+          ? null
+          : _i4.SubscriptionStatus.fromJson(
+              (jsonSerialization['subscriptionStatus'] as String),
+            ),
+      subscriptionPlan: jsonSerialization['subscriptionPlan'] as String?,
+      subscriptionExpiryDate:
+          jsonSerialization['subscriptionExpiryDate'] == null
+          ? null
+          : _i1.DateTimeJsonExtension.fromJson(
+              jsonSerialization['subscriptionExpiryDate'],
+            ),
+      subscriptionProductId:
+          jsonSerialization['subscriptionProductId'] as String?,
       createdAt: _i1.DateTimeJsonExtension.fromJson(
         jsonSerialization['createdAt'],
       ),
@@ -128,6 +151,18 @@ abstract class VedaUserProfile
   /// Areas of expertise or teaching topics (creators only).
   List<String>? expertise;
 
+  /// Current subscription status (none, active, cancelling, expired).
+  _i4.SubscriptionStatus? subscriptionStatus;
+
+  /// Name of the current subscription plan (e.g. 'Monthly', 'Yearly', 'Six Month').
+  String? subscriptionPlan;
+
+  /// Subscription expiry or next renewal date.
+  DateTime? subscriptionExpiryDate;
+
+  /// RevenueCat product identifier for the active subscription.
+  String? subscriptionProductId;
+
   /// Timestamp when the profile was created.
   DateTime createdAt;
 
@@ -152,6 +187,10 @@ abstract class VedaUserProfile
     String? websiteUrl,
     String? profileImageUrl,
     List<String>? expertise,
+    _i4.SubscriptionStatus? subscriptionStatus,
+    String? subscriptionPlan,
+    DateTime? subscriptionExpiryDate,
+    String? subscriptionProductId,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -170,6 +209,13 @@ abstract class VedaUserProfile
       if (websiteUrl != null) 'websiteUrl': websiteUrl,
       if (profileImageUrl != null) 'profileImageUrl': profileImageUrl,
       if (expertise != null) 'expertise': expertise?.toJson(),
+      if (subscriptionStatus != null)
+        'subscriptionStatus': subscriptionStatus?.toJson(),
+      if (subscriptionPlan != null) 'subscriptionPlan': subscriptionPlan,
+      if (subscriptionExpiryDate != null)
+        'subscriptionExpiryDate': subscriptionExpiryDate?.toJson(),
+      if (subscriptionProductId != null)
+        'subscriptionProductId': subscriptionProductId,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -190,6 +236,13 @@ abstract class VedaUserProfile
       if (websiteUrl != null) 'websiteUrl': websiteUrl,
       if (profileImageUrl != null) 'profileImageUrl': profileImageUrl,
       if (expertise != null) 'expertise': expertise?.toJson(),
+      if (subscriptionStatus != null)
+        'subscriptionStatus': subscriptionStatus?.toJson(),
+      if (subscriptionPlan != null) 'subscriptionPlan': subscriptionPlan,
+      if (subscriptionExpiryDate != null)
+        'subscriptionExpiryDate': subscriptionExpiryDate?.toJson(),
+      if (subscriptionProductId != null)
+        'subscriptionProductId': subscriptionProductId,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -240,6 +293,10 @@ class _VedaUserProfileImpl extends VedaUserProfile {
     String? websiteUrl,
     String? profileImageUrl,
     List<String>? expertise,
+    _i4.SubscriptionStatus? subscriptionStatus,
+    String? subscriptionPlan,
+    DateTime? subscriptionExpiryDate,
+    String? subscriptionProductId,
     required DateTime createdAt,
     required DateTime updatedAt,
   }) : super._(
@@ -254,6 +311,10 @@ class _VedaUserProfileImpl extends VedaUserProfile {
          websiteUrl: websiteUrl,
          profileImageUrl: profileImageUrl,
          expertise: expertise,
+         subscriptionStatus: subscriptionStatus,
+         subscriptionPlan: subscriptionPlan,
+         subscriptionExpiryDate: subscriptionExpiryDate,
+         subscriptionProductId: subscriptionProductId,
          createdAt: createdAt,
          updatedAt: updatedAt,
        );
@@ -274,6 +335,10 @@ class _VedaUserProfileImpl extends VedaUserProfile {
     Object? websiteUrl = _Undefined,
     Object? profileImageUrl = _Undefined,
     Object? expertise = _Undefined,
+    Object? subscriptionStatus = _Undefined,
+    Object? subscriptionPlan = _Undefined,
+    Object? subscriptionExpiryDate = _Undefined,
+    Object? subscriptionProductId = _Undefined,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -297,6 +362,18 @@ class _VedaUserProfileImpl extends VedaUserProfile {
       expertise: expertise is List<String>?
           ? expertise
           : this.expertise?.map((e0) => e0).toList(),
+      subscriptionStatus: subscriptionStatus is _i4.SubscriptionStatus?
+          ? subscriptionStatus
+          : this.subscriptionStatus,
+      subscriptionPlan: subscriptionPlan is String?
+          ? subscriptionPlan
+          : this.subscriptionPlan,
+      subscriptionExpiryDate: subscriptionExpiryDate is DateTime?
+          ? subscriptionExpiryDate
+          : this.subscriptionExpiryDate,
+      subscriptionProductId: subscriptionProductId is String?
+          ? subscriptionProductId
+          : this.subscriptionProductId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -359,6 +436,30 @@ class VedaUserProfileUpdateTable extends _i1.UpdateTable<VedaUserProfileTable> {
         value,
       );
 
+  _i1.ColumnValue<_i4.SubscriptionStatus, _i4.SubscriptionStatus>
+  subscriptionStatus(_i4.SubscriptionStatus? value) => _i1.ColumnValue(
+    table.subscriptionStatus,
+    value,
+  );
+
+  _i1.ColumnValue<String, String> subscriptionPlan(String? value) =>
+      _i1.ColumnValue(
+        table.subscriptionPlan,
+        value,
+      );
+
+  _i1.ColumnValue<DateTime, DateTime> subscriptionExpiryDate(DateTime? value) =>
+      _i1.ColumnValue(
+        table.subscriptionExpiryDate,
+        value,
+      );
+
+  _i1.ColumnValue<String, String> subscriptionProductId(String? value) =>
+      _i1.ColumnValue(
+        table.subscriptionProductId,
+        value,
+      );
+
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
       _i1.ColumnValue(
         table.createdAt,
@@ -412,6 +513,23 @@ class VedaUserProfileTable extends _i1.Table<int?> {
       'expertise',
       this,
     );
+    subscriptionStatus = _i1.ColumnEnum(
+      'subscriptionStatus',
+      this,
+      _i1.EnumSerialization.byName,
+    );
+    subscriptionPlan = _i1.ColumnString(
+      'subscriptionPlan',
+      this,
+    );
+    subscriptionExpiryDate = _i1.ColumnDateTime(
+      'subscriptionExpiryDate',
+      this,
+    );
+    subscriptionProductId = _i1.ColumnString(
+      'subscriptionProductId',
+      this,
+    );
     createdAt = _i1.ColumnDateTime(
       'createdAt',
       this,
@@ -454,6 +572,18 @@ class VedaUserProfileTable extends _i1.Table<int?> {
   /// Areas of expertise or teaching topics (creators only).
   late final _i1.ColumnSerializable<List<String>> expertise;
 
+  /// Current subscription status (none, active, cancelling, expired).
+  late final _i1.ColumnEnum<_i4.SubscriptionStatus> subscriptionStatus;
+
+  /// Name of the current subscription plan (e.g. 'Monthly', 'Yearly', 'Six Month').
+  late final _i1.ColumnString subscriptionPlan;
+
+  /// Subscription expiry or next renewal date.
+  late final _i1.ColumnDateTime subscriptionExpiryDate;
+
+  /// RevenueCat product identifier for the active subscription.
+  late final _i1.ColumnString subscriptionProductId;
+
   /// Timestamp when the profile was created.
   late final _i1.ColumnDateTime createdAt;
 
@@ -485,6 +615,10 @@ class VedaUserProfileTable extends _i1.Table<int?> {
     websiteUrl,
     profileImageUrl,
     expertise,
+    subscriptionStatus,
+    subscriptionPlan,
+    subscriptionExpiryDate,
+    subscriptionProductId,
     createdAt,
     updatedAt,
   ];

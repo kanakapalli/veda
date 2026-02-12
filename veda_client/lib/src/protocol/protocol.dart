@@ -27,21 +27,22 @@ import 'lms/module.dart' as _i14;
 import 'lms/module_item.dart' as _i15;
 import 'lms/module_progress.dart' as _i16;
 import 'lms/topic.dart' as _i17;
-import 'profiles/user_profile.dart' as _i18;
-import 'profiles/user_profile_with_email.dart' as _i19;
-import 'profiles/user_type.dart' as _i20;
-import 'package:veda_client/src/protocol/lms/course.dart' as _i21;
-import 'package:veda_client/src/protocol/lms/knowledge_file.dart' as _i22;
-import 'package:veda_client/src/protocol/lms/file_creation_draft.dart' as _i23;
-import 'package:veda_client/src/protocol/lms/module.dart' as _i24;
-import 'package:veda_client/src/protocol/lms/topic.dart' as _i25;
-import 'package:veda_client/src/protocol/lms/enrollment.dart' as _i26;
-import 'package:veda_client/src/protocol/lms/module_progress.dart' as _i27;
-import 'package:veda_client/src/protocol/profiles/user_profile.dart' as _i28;
+import 'profiles/subscription_status.dart' as _i18;
+import 'profiles/user_profile.dart' as _i19;
+import 'profiles/user_profile_with_email.dart' as _i20;
+import 'profiles/user_type.dart' as _i21;
+import 'package:veda_client/src/protocol/lms/course.dart' as _i22;
+import 'package:veda_client/src/protocol/lms/knowledge_file.dart' as _i23;
+import 'package:veda_client/src/protocol/lms/file_creation_draft.dart' as _i24;
+import 'package:veda_client/src/protocol/lms/module.dart' as _i25;
+import 'package:veda_client/src/protocol/lms/topic.dart' as _i26;
+import 'package:veda_client/src/protocol/lms/enrollment.dart' as _i27;
+import 'package:veda_client/src/protocol/lms/module_progress.dart' as _i28;
+import 'package:veda_client/src/protocol/profiles/user_profile.dart' as _i29;
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
-    as _i29;
-import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i30;
+import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
+    as _i31;
 export 'gemini/chat_message.dart';
 export 'gemini/chat_request.dart';
 export 'gemini/chat_response.dart';
@@ -58,6 +59,7 @@ export 'lms/module.dart';
 export 'lms/module_item.dart';
 export 'lms/module_progress.dart';
 export 'lms/topic.dart';
+export 'profiles/subscription_status.dart';
 export 'profiles/user_profile.dart';
 export 'profiles/user_profile_with_email.dart';
 export 'profiles/user_type.dart';
@@ -145,14 +147,17 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i17.Topic) {
       return _i17.Topic.fromJson(data) as T;
     }
-    if (t == _i18.VedaUserProfile) {
-      return _i18.VedaUserProfile.fromJson(data) as T;
+    if (t == _i18.SubscriptionStatus) {
+      return _i18.SubscriptionStatus.fromJson(data) as T;
     }
-    if (t == _i19.VedaUserProfileWithEmail) {
-      return _i19.VedaUserProfileWithEmail.fromJson(data) as T;
+    if (t == _i19.VedaUserProfile) {
+      return _i19.VedaUserProfile.fromJson(data) as T;
     }
-    if (t == _i20.UserType) {
-      return _i20.UserType.fromJson(data) as T;
+    if (t == _i20.VedaUserProfileWithEmail) {
+      return _i20.VedaUserProfileWithEmail.fromJson(data) as T;
+    }
+    if (t == _i21.UserType) {
+      return _i21.UserType.fromJson(data) as T;
     }
     if (t == _i1.getType<_i2.ChatMessage?>()) {
       return (data != null ? _i2.ChatMessage.fromJson(data) : null) as T;
@@ -202,17 +207,21 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i1.getType<_i17.Topic?>()) {
       return (data != null ? _i17.Topic.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i18.VedaUserProfile?>()) {
-      return (data != null ? _i18.VedaUserProfile.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i18.SubscriptionStatus?>()) {
+      return (data != null ? _i18.SubscriptionStatus.fromJson(data) : null)
+          as T;
     }
-    if (t == _i1.getType<_i19.VedaUserProfileWithEmail?>()) {
+    if (t == _i1.getType<_i19.VedaUserProfile?>()) {
+      return (data != null ? _i19.VedaUserProfile.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i20.VedaUserProfileWithEmail?>()) {
       return (data != null
-              ? _i19.VedaUserProfileWithEmail.fromJson(data)
+              ? _i20.VedaUserProfileWithEmail.fromJson(data)
               : null)
           as T;
     }
-    if (t == _i1.getType<_i20.UserType?>()) {
-      return (data != null ? _i20.UserType.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i21.UserType?>()) {
+      return (data != null ? _i21.UserType.fromJson(data) : null) as T;
     }
     if (t == List<_i2.ChatMessage>) {
       return (data as List).map((e) => deserialize<_i2.ChatMessage>(e)).toList()
@@ -283,8 +292,8 @@ class Protocol extends _i1.SerializationManager {
               : null)
           as T;
     }
-    if (t == List<_i20.UserType>) {
-      return (data as List).map((e) => deserialize<_i20.UserType>(e)).toList()
+    if (t == List<_i21.UserType>) {
+      return (data as List).map((e) => deserialize<_i21.UserType>(e)).toList()
           as T;
     }
     if (t == List<Map<String, String>>) {
@@ -310,37 +319,37 @@ class Protocol extends _i1.SerializationManager {
     if (t == List<int>) {
       return (data as List).map((e) => deserialize<int>(e)).toList() as T;
     }
-    if (t == List<_i21.Course>) {
-      return (data as List).map((e) => deserialize<_i21.Course>(e)).toList()
+    if (t == List<_i22.Course>) {
+      return (data as List).map((e) => deserialize<_i22.Course>(e)).toList()
           as T;
     }
-    if (t == List<_i22.KnowledgeFile>) {
+    if (t == List<_i23.KnowledgeFile>) {
       return (data as List)
-              .map((e) => deserialize<_i22.KnowledgeFile>(e))
+              .map((e) => deserialize<_i23.KnowledgeFile>(e))
               .toList()
           as T;
     }
-    if (t == List<_i23.FileCreationDraft>) {
+    if (t == List<_i24.FileCreationDraft>) {
       return (data as List)
-              .map((e) => deserialize<_i23.FileCreationDraft>(e))
+              .map((e) => deserialize<_i24.FileCreationDraft>(e))
               .toList()
           as T;
     }
-    if (t == List<_i24.Module>) {
-      return (data as List).map((e) => deserialize<_i24.Module>(e)).toList()
+    if (t == List<_i25.Module>) {
+      return (data as List).map((e) => deserialize<_i25.Module>(e)).toList()
           as T;
     }
-    if (t == List<_i25.Topic>) {
-      return (data as List).map((e) => deserialize<_i25.Topic>(e)).toList()
+    if (t == List<_i26.Topic>) {
+      return (data as List).map((e) => deserialize<_i26.Topic>(e)).toList()
           as T;
     }
-    if (t == List<_i26.Enrollment>) {
-      return (data as List).map((e) => deserialize<_i26.Enrollment>(e)).toList()
+    if (t == List<_i27.Enrollment>) {
+      return (data as List).map((e) => deserialize<_i27.Enrollment>(e)).toList()
           as T;
     }
-    if (t == List<_i27.ModuleProgress>) {
+    if (t == List<_i28.ModuleProgress>) {
       return (data as List)
-              .map((e) => deserialize<_i27.ModuleProgress>(e))
+              .map((e) => deserialize<_i28.ModuleProgress>(e))
               .toList()
           as T;
     }
@@ -353,17 +362,17 @@ class Protocol extends _i1.SerializationManager {
               : null)
           as T;
     }
-    if (t == List<_i28.VedaUserProfile>) {
+    if (t == List<_i29.VedaUserProfile>) {
       return (data as List)
-              .map((e) => deserialize<_i28.VedaUserProfile>(e))
+              .map((e) => deserialize<_i29.VedaUserProfile>(e))
               .toList()
           as T;
     }
     try {
-      return _i29.Protocol().deserialize<T>(data, t);
+      return _i30.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     try {
-      return _i30.Protocol().deserialize<T>(data, t);
+      return _i31.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     return super.deserialize<T>(data, t);
   }
@@ -386,9 +395,10 @@ class Protocol extends _i1.SerializationManager {
       _i15.ModuleItem => 'ModuleItem',
       _i16.ModuleProgress => 'ModuleProgress',
       _i17.Topic => 'Topic',
-      _i18.VedaUserProfile => 'VedaUserProfile',
-      _i19.VedaUserProfileWithEmail => 'VedaUserProfileWithEmail',
-      _i20.UserType => 'UserType',
+      _i18.SubscriptionStatus => 'SubscriptionStatus',
+      _i19.VedaUserProfile => 'VedaUserProfile',
+      _i20.VedaUserProfileWithEmail => 'VedaUserProfileWithEmail',
+      _i21.UserType => 'UserType',
       _ => null,
     };
   }
@@ -435,18 +445,20 @@ class Protocol extends _i1.SerializationManager {
         return 'ModuleProgress';
       case _i17.Topic():
         return 'Topic';
-      case _i18.VedaUserProfile():
+      case _i18.SubscriptionStatus():
+        return 'SubscriptionStatus';
+      case _i19.VedaUserProfile():
         return 'VedaUserProfile';
-      case _i19.VedaUserProfileWithEmail():
+      case _i20.VedaUserProfileWithEmail():
         return 'VedaUserProfileWithEmail';
-      case _i20.UserType():
+      case _i21.UserType():
         return 'UserType';
     }
-    className = _i29.Protocol().getClassNameForObject(data);
+    className = _i30.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_idp.$className';
     }
-    className = _i30.Protocol().getClassNameForObject(data);
+    className = _i31.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_core.$className';
     }
@@ -507,22 +519,25 @@ class Protocol extends _i1.SerializationManager {
     if (dataClassName == 'Topic') {
       return deserialize<_i17.Topic>(data['data']);
     }
+    if (dataClassName == 'SubscriptionStatus') {
+      return deserialize<_i18.SubscriptionStatus>(data['data']);
+    }
     if (dataClassName == 'VedaUserProfile') {
-      return deserialize<_i18.VedaUserProfile>(data['data']);
+      return deserialize<_i19.VedaUserProfile>(data['data']);
     }
     if (dataClassName == 'VedaUserProfileWithEmail') {
-      return deserialize<_i19.VedaUserProfileWithEmail>(data['data']);
+      return deserialize<_i20.VedaUserProfileWithEmail>(data['data']);
     }
     if (dataClassName == 'UserType') {
-      return deserialize<_i20.UserType>(data['data']);
+      return deserialize<_i21.UserType>(data['data']);
     }
     if (dataClassName.startsWith('serverpod_auth_idp.')) {
       data['className'] = dataClassName.substring(19);
-      return _i29.Protocol().deserializeByClassName(data);
+      return _i30.Protocol().deserializeByClassName(data);
     }
     if (dataClassName.startsWith('serverpod_auth_core.')) {
       data['className'] = dataClassName.substring(20);
-      return _i30.Protocol().deserializeByClassName(data);
+      return _i31.Protocol().deserializeByClassName(data);
     }
     return super.deserializeByClassName(data);
   }
@@ -537,10 +552,10 @@ class Protocol extends _i1.SerializationManager {
       return null;
     }
     try {
-      return _i29.Protocol().mapRecordToJson(record);
+      return _i30.Protocol().mapRecordToJson(record);
     } catch (_) {}
     try {
-      return _i30.Protocol().mapRecordToJson(record);
+      return _i31.Protocol().mapRecordToJson(record);
     } catch (_) {}
     throw Exception('Unsupported record type ${record.runtimeType}');
   }

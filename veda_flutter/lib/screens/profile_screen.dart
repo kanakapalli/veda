@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:veda_client/veda_client.dart';
@@ -26,10 +28,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   int _enrolledCount = 0;
   bool _isLoading = true;
 
+  StreamSubscription<bool>? _subscriptionListener;
+
   @override
   void initState() {
     super.initState();
     _loadProfile();
+
+    // Refresh the profile when the subscription status changes so
+    // we pick up the latest server-synced data.
+    _subscriptionListener =
+        RevenueCatService.instance.onSubscriptionStatusChanged.listen((_) {
+      _loadProfile();
+    });
+  }
+
+  @override
+  void dispose() {
+    _subscriptionListener?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadProfile() async {
@@ -313,9 +330,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // ---------------------------------------------------------------------------
   Widget _buildSubscriptionSection() {
     final rc = RevenueCatService.instance;
-    final isPro = rc.isProUser;
-    final planName = rc.currentPlanName ?? 'FREE';
-    final expiry = rc.expirationDate;
+
+    // Use live RevenueCat data first, fall back to server-persisted data.
+    final isPro = rc.isProUser ||
+        _profile?.subscriptionStatus == SubscriptionStatus.active ||
+        _profile?.subscriptionStatus == SubscriptionStatus.cancelling;
+    final planName = rc.currentPlanName ??
+        _profile?.subscriptionPlan ??
+        'FREE';
+    final expiry = rc.expirationDate ?? _profile?.subscriptionExpiryDate;
+    final willRenew = rc.isInitialized
+        ? rc.willRenew
+        : _profile?.subscriptionStatus == SubscriptionStatus.active;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -388,32 +414,75 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ],
                 ),
-                if (isPro && expiry != null) ...[
+                if (isPro) ...[
                   const SizedBox(height: 20),
                   Container(height: 1, color: VedaColors.zinc800),
                   const SizedBox(height: 16),
+                  // Status row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'RENEWS ON',
+                        'STATUS',
                         style: GoogleFonts.jetBrainsMono(
                           fontSize: 10,
                           color: VedaColors.zinc500,
                           letterSpacing: 1.0,
                         ),
                       ),
-                      Text(
-                        _formatExpiryDate(expiry),
-                        style: GoogleFonts.jetBrainsMono(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: VedaColors.white,
-                          letterSpacing: 0.5,
-                        ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: willRenew
+                                  ? const Color(0xFF4ADE80)
+                                  : const Color(0xFFFBBF24),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            willRenew ? 'ACTIVE' : 'CANCELLING',
+                            style: GoogleFonts.jetBrainsMono(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: VedaColors.white,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
+                  if (expiry != null) ...[
+                    const SizedBox(height: 12),
+                    // Expiry / renewal row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          willRenew ? 'RENEWS ON' : 'EXPIRES ON',
+                          style: GoogleFonts.jetBrainsMono(
+                            fontSize: 10,
+                            color: VedaColors.zinc500,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                        Text(
+                          _formatExpiryDate(expiry),
+                          style: GoogleFonts.jetBrainsMono(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: VedaColors.white,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
                 if (!isPro) ...[
                   const SizedBox(height: 16),

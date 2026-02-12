@@ -4,6 +4,9 @@ import 'dart:developer';
 import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
+import 'package:veda_client/veda_client.dart' as veda;
+
+import '../main.dart' show client;
 
 /// Centralized service for managing RevenueCat subscriptions, entitlements,
 /// and customer info across the Veda app.
@@ -83,6 +86,13 @@ class RevenueCatService {
     if (entitlement == null || !entitlement.isActive) return null;
     final raw = entitlement.expirationDate;
     return raw != null ? DateTime.tryParse(raw) : null;
+  }
+
+  /// Whether the subscription will auto-renew at the end of the period.
+  bool get willRenew {
+    final entitlement = _customerInfo?.entitlements.all[entitlementId];
+    if (entitlement == null || !entitlement.isActive) return false;
+    return entitlement.willRenew;
   }
 
   // ---------------------------------------------------------------------------
@@ -253,10 +263,59 @@ class RevenueCatService {
     try {
       _customerInfo = await Purchases.getCustomerInfo();
       _statusController.add(isProUser);
+      // Sync the latest state to the Veda server.
+      syncSubscriptionToServer();
       return _customerInfo;
     } catch (e) {
       log('[RevenueCat] Error refreshing customer info: $e');
       return null;
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Server Sync
+  // ---------------------------------------------------------------------------
+
+  /// Pushes the current RevenueCat subscription state to the Veda server
+  /// so it is persisted on the user profile.
+  Future<void> syncSubscriptionToServer() async {
+    try {
+      final entitlement = _customerInfo?.entitlements.all[entitlementId];
+
+      veda.SubscriptionStatus status;
+      String? plan;
+      DateTime? expiryDate;
+      String? productId;
+
+      if (entitlement != null && entitlement.isActive) {
+        status = entitlement.willRenew
+            ? veda.SubscriptionStatus.active
+            : veda.SubscriptionStatus.cancelling;
+        plan = currentPlanName;
+        productId = entitlement.productIdentifier;
+        final raw = entitlement.expirationDate;
+        expiryDate = raw != null ? DateTime.tryParse(raw) : null;
+      } else {
+        // Check if there was a subscription that expired.
+        final latestExpiry = entitlement?.expirationDate;
+        if (latestExpiry != null) {
+          status = veda.SubscriptionStatus.expired;
+          expiryDate = DateTime.tryParse(latestExpiry);
+        } else {
+          status = veda.SubscriptionStatus.none;
+        }
+      }
+
+      await client.vedaUserProfile.updateSubscriptionStatus(
+        status: status,
+        plan: plan,
+        expiryDate: expiryDate,
+        productId: productId,
+      );
+
+      log('[RevenueCat] Subscription synced to server — status: $status');
+    } catch (e) {
+      log('[RevenueCat] Failed to sync subscription to server: $e');
     }
   }
 
@@ -268,6 +327,8 @@ class RevenueCatService {
     _customerInfo = info;
     _statusController.add(isProUser);
     log('[RevenueCat] Customer info updated — Pro: $isProUser');
+    // Sync to server in the background.
+    syncSubscriptionToServer();
   }
 
   /// Clean up (usually not needed, but here for completeness).

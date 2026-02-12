@@ -54,6 +54,15 @@ void main() async {
   // Initialize RevenueCat subscription management.
   await RevenueCatService.instance.initialize();
 
+  // If a user is already signed in (session restored), identify them
+  // with RevenueCat so entitlements are tied to the correct account.
+  if (client.auth.isAuthenticated) {
+    final authInfo = client.auth.authInfo;
+    if (authInfo != null) {
+      await RevenueCatService.instance.logIn(authInfo.authUserId.toString());
+    }
+  }
+
   runApp(const MyApp());
 }
 
@@ -381,6 +390,7 @@ class MyHomePage extends StatelessWidget {
     return SignInScreen(
       child: MainShell(
         onSignOut: () async {
+          await RevenueCatService.instance.logOut();
           await client.auth.signOutDevice();
         },
       ),

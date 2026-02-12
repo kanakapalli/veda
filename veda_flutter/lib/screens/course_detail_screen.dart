@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:veda_client/veda_client.dart';
 
 import '../design_system/veda_colors.dart';
 import '../main.dart';
+import '../services/revenue_cat_service.dart';
 import 'coach_screen.dart';
 import 'enrolled_course_screen.dart';
 
@@ -31,6 +34,10 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
   bool _isEnrolling = false;
   int _enrollmentCount = 0;
 
+  // Subscription state — combines RevenueCat + server data
+  bool _isProUser = false;
+  StreamSubscription<bool>? _subscriptionListener;
+
   // Track expanded state for modules and topics
   final Set<int> _expandedModuleIds = {};
   final Set<int> _expandedTopicIds = {};
@@ -38,7 +45,21 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
   @override
   void initState() {
     super.initState();
+    _isProUser = RevenueCatService.instance.isProUser;
     _loadCourseData();
+
+    // Listen for live subscription changes so the enroll button
+    // updates immediately after a purchase / cancellation.
+    _subscriptionListener =
+        RevenueCatService.instance.onSubscriptionStatusChanged.listen((isPro) {
+      if (mounted) setState(() => _isProUser = isPro);
+    });
+  }
+
+  @override
+  void dispose() {
+    _subscriptionListener?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadCourseData() async {
@@ -48,24 +69,31 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         _error = null;
       });
 
-      // Fetch modules, creator info, and enrollment status in parallel
+      // Fetch modules, creator info, enrollment status, and subscription in parallel
       final results = await Future.wait([
         client.lms.getModules(widget.course.id!),
         client.vedaUserProfile.getUserProfileById(widget.course.creatorId),
         client.lms.isEnrolled(widget.course.id!),
         client.lms.getEnrollmentCount(widget.course.id!),
+        client.vedaUserProfile.getSubscriptionStatus(),
       ]);
 
       final modules = results[0] as List<Module>;
       final creatorProfile = results[1] as VedaUserProfileWithEmail?;
       final isEnrolled = results[2] as bool;
       final enrollmentCount = results[3] as int;
+      final serverSubStatus = results[4] as SubscriptionStatus;
+
+      // Pro if RevenueCat says so OR server says active/cancelling
+      final isProFromServer = serverSubStatus == SubscriptionStatus.active ||
+          serverSubStatus == SubscriptionStatus.cancelling;
 
       setState(() {
         _modules = modules;
         _creator = creatorProfile?.profile;
         _isEnrolled = isEnrolled;
         _enrollmentCount = enrollmentCount;
+        _isProUser = RevenueCatService.instance.isProUser || isProFromServer;
         _isLoading = false;
       });
     } catch (e) {
@@ -78,6 +106,33 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
 
   Future<void> _handleEnroll() async {
     if (_isEnrolling) return;
+
+    // --- Subscription gate (enroll only) ---
+    if (!_isEnrolled) {
+      final rc = RevenueCatService.instance;
+      if (!_isProUser) {
+        // Present the paywall and wait for the result.
+        await rc.presentPaywallIfNeeded();
+        // After the paywall closes, refresh and re-check.
+        await rc.refreshCustomerInfo();
+        // refreshCustomerInfo triggers syncSubscriptionToServer and the
+        // listener will update _isProUser, but check immediately too.
+        if (mounted) setState(() => _isProUser = rc.isProUser);
+        if (!_isProUser) {
+          // Still not subscribed — don't enroll.
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('A Veda Pro subscription is required to enroll.'),
+                backgroundColor: VedaColors.zinc900,
+                duration: Duration(seconds: 3),
+              ),
+            );
+          }
+          return;
+        }
+      }
+    }
 
     setState(() => _isEnrolling = true);
 
@@ -954,21 +1009,26 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
             ),
           ),
         ] else ...[
-          // Enroll button
+          // Enroll button — appearance changes based on subscription status
           SizedBox(
             width: double.infinity,
             height: 56,
             child: ElevatedButton(
               onPressed: _isEnrolling ? null : _handleEnroll,
               style: ElevatedButton.styleFrom(
-                backgroundColor: VedaColors.white,
-                foregroundColor: VedaColors.black,
+                backgroundColor:
+                    _isProUser ? VedaColors.white : VedaColors.zinc800,
+                foregroundColor:
+                    _isProUser ? VedaColors.black : VedaColors.white,
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.zero,
                 ),
                 elevation: 0,
                 padding: EdgeInsets.zero,
                 disabledBackgroundColor: VedaColors.zinc800,
+                side: _isProUser
+                    ? BorderSide.none
+                    : const BorderSide(color: VedaColors.zinc600, width: 1),
               ),
               child: _isEnrolling
                   ? const SizedBox(
@@ -979,13 +1039,24 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                         color: VedaColors.black,
                       ),
                     )
-                  : Text(
-                      'ENROLL_NOW',
-                      style: GoogleFonts.jetBrainsMono(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 2,
-                      ),
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (!_isProUser) ...[
+                          const Icon(Icons.lock_outline, size: 16),
+                          const SizedBox(width: 10),
+                        ],
+                        Text(
+                          _isProUser
+                              ? 'ENROLL_NOW'
+                              : 'SUBSCRIBE TO ENROLL',
+                          style: GoogleFonts.jetBrainsMono(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 2,
+                          ),
+                        ),
+                      ],
                     ),
             ),
           ),

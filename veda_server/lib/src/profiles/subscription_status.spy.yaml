@@ -1,0 +1,7 @@
+### Subscription status enum for tracking user's subscription state
+enum: SubscriptionStatus
+values:
+  - none       # No subscription
+  - active     # Active subscription that will renew
+  - cancelling # Active but will not renew (user cancelled)
+  - expired    # Subscription has expired

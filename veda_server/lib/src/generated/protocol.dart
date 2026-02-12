@@ -32,17 +32,18 @@ import 'lms/module.dart' as _i17;
 import 'lms/module_item.dart' as _i18;
 import 'lms/module_progress.dart' as _i19;
 import 'lms/topic.dart' as _i20;
-import 'profiles/user_profile.dart' as _i21;
-import 'profiles/user_profile_with_email.dart' as _i22;
-import 'profiles/user_type.dart' as _i23;
-import 'package:veda_server/src/generated/lms/course.dart' as _i24;
-import 'package:veda_server/src/generated/lms/knowledge_file.dart' as _i25;
-import 'package:veda_server/src/generated/lms/file_creation_draft.dart' as _i26;
-import 'package:veda_server/src/generated/lms/module.dart' as _i27;
-import 'package:veda_server/src/generated/lms/topic.dart' as _i28;
-import 'package:veda_server/src/generated/lms/enrollment.dart' as _i29;
-import 'package:veda_server/src/generated/lms/module_progress.dart' as _i30;
-import 'package:veda_server/src/generated/profiles/user_profile.dart' as _i31;
+import 'profiles/subscription_status.dart' as _i21;
+import 'profiles/user_profile.dart' as _i22;
+import 'profiles/user_profile_with_email.dart' as _i23;
+import 'profiles/user_type.dart' as _i24;
+import 'package:veda_server/src/generated/lms/course.dart' as _i25;
+import 'package:veda_server/src/generated/lms/knowledge_file.dart' as _i26;
+import 'package:veda_server/src/generated/lms/file_creation_draft.dart' as _i27;
+import 'package:veda_server/src/generated/lms/module.dart' as _i28;
+import 'package:veda_server/src/generated/lms/topic.dart' as _i29;
+import 'package:veda_server/src/generated/lms/enrollment.dart' as _i30;
+import 'package:veda_server/src/generated/lms/module_progress.dart' as _i31;
+import 'package:veda_server/src/generated/profiles/user_profile.dart' as _i32;
 export 'gemini/chat_message.dart';
 export 'gemini/chat_request.dart';
 export 'gemini/chat_response.dart';
@@ -59,6 +60,7 @@ export 'lms/module.dart';
 export 'lms/module_item.dart';
 export 'lms/module_progress.dart';
 export 'lms/topic.dart';
+export 'profiles/subscription_status.dart';
 export 'profiles/user_profile.dart';
 export 'profiles/user_profile_with_email.dart';
 export 'profiles/user_type.dart';
@@ -1323,6 +1325,30 @@ class Protocol extends _i1.SerializationManagerServer {
           dartType: 'List<String>?',
         ),
         _i2.ColumnDefinition(
+          name: 'subscriptionStatus',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'protocol:SubscriptionStatus?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'subscriptionPlan',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'subscriptionExpiryDate',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'subscriptionProductId',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
           name: 'createdAt',
           columnType: _i2.ColumnType.timestampWithoutTimeZone,
           isNullable: false,
@@ -1457,14 +1483,17 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i20.Topic) {
       return _i20.Topic.fromJson(data) as T;
     }
-    if (t == _i21.VedaUserProfile) {
-      return _i21.VedaUserProfile.fromJson(data) as T;
+    if (t == _i21.SubscriptionStatus) {
+      return _i21.SubscriptionStatus.fromJson(data) as T;
     }
-    if (t == _i22.VedaUserProfileWithEmail) {
-      return _i22.VedaUserProfileWithEmail.fromJson(data) as T;
+    if (t == _i22.VedaUserProfile) {
+      return _i22.VedaUserProfile.fromJson(data) as T;
     }
-    if (t == _i23.UserType) {
-      return _i23.UserType.fromJson(data) as T;
+    if (t == _i23.VedaUserProfileWithEmail) {
+      return _i23.VedaUserProfileWithEmail.fromJson(data) as T;
+    }
+    if (t == _i24.UserType) {
+      return _i24.UserType.fromJson(data) as T;
     }
     if (t == _i1.getType<_i5.ChatMessage?>()) {
       return (data != null ? _i5.ChatMessage.fromJson(data) : null) as T;
@@ -1514,17 +1543,21 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i1.getType<_i20.Topic?>()) {
       return (data != null ? _i20.Topic.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i21.VedaUserProfile?>()) {
-      return (data != null ? _i21.VedaUserProfile.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i21.SubscriptionStatus?>()) {
+      return (data != null ? _i21.SubscriptionStatus.fromJson(data) : null)
+          as T;
     }
-    if (t == _i1.getType<_i22.VedaUserProfileWithEmail?>()) {
+    if (t == _i1.getType<_i22.VedaUserProfile?>()) {
+      return (data != null ? _i22.VedaUserProfile.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i23.VedaUserProfileWithEmail?>()) {
       return (data != null
-              ? _i22.VedaUserProfileWithEmail.fromJson(data)
+              ? _i23.VedaUserProfileWithEmail.fromJson(data)
               : null)
           as T;
     }
-    if (t == _i1.getType<_i23.UserType?>()) {
-      return (data != null ? _i23.UserType.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i24.UserType?>()) {
+      return (data != null ? _i24.UserType.fromJson(data) : null) as T;
     }
     if (t == List<_i5.ChatMessage>) {
       return (data as List).map((e) => deserialize<_i5.ChatMessage>(e)).toList()
@@ -1597,8 +1630,8 @@ class Protocol extends _i1.SerializationManagerServer {
               : null)
           as T;
     }
-    if (t == List<_i23.UserType>) {
-      return (data as List).map((e) => deserialize<_i23.UserType>(e)).toList()
+    if (t == List<_i24.UserType>) {
+      return (data as List).map((e) => deserialize<_i24.UserType>(e)).toList()
           as T;
     }
     if (t == List<Map<String, String>>) {
@@ -1624,37 +1657,37 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == List<int>) {
       return (data as List).map((e) => deserialize<int>(e)).toList() as T;
     }
-    if (t == List<_i24.Course>) {
-      return (data as List).map((e) => deserialize<_i24.Course>(e)).toList()
+    if (t == List<_i25.Course>) {
+      return (data as List).map((e) => deserialize<_i25.Course>(e)).toList()
           as T;
     }
-    if (t == List<_i25.KnowledgeFile>) {
+    if (t == List<_i26.KnowledgeFile>) {
       return (data as List)
-              .map((e) => deserialize<_i25.KnowledgeFile>(e))
+              .map((e) => deserialize<_i26.KnowledgeFile>(e))
               .toList()
           as T;
     }
-    if (t == List<_i26.FileCreationDraft>) {
+    if (t == List<_i27.FileCreationDraft>) {
       return (data as List)
-              .map((e) => deserialize<_i26.FileCreationDraft>(e))
+              .map((e) => deserialize<_i27.FileCreationDraft>(e))
               .toList()
           as T;
     }
-    if (t == List<_i27.Module>) {
-      return (data as List).map((e) => deserialize<_i27.Module>(e)).toList()
+    if (t == List<_i28.Module>) {
+      return (data as List).map((e) => deserialize<_i28.Module>(e)).toList()
           as T;
     }
-    if (t == List<_i28.Topic>) {
-      return (data as List).map((e) => deserialize<_i28.Topic>(e)).toList()
+    if (t == List<_i29.Topic>) {
+      return (data as List).map((e) => deserialize<_i29.Topic>(e)).toList()
           as T;
     }
-    if (t == List<_i29.Enrollment>) {
-      return (data as List).map((e) => deserialize<_i29.Enrollment>(e)).toList()
+    if (t == List<_i30.Enrollment>) {
+      return (data as List).map((e) => deserialize<_i30.Enrollment>(e)).toList()
           as T;
     }
-    if (t == List<_i30.ModuleProgress>) {
+    if (t == List<_i31.ModuleProgress>) {
       return (data as List)
-              .map((e) => deserialize<_i30.ModuleProgress>(e))
+              .map((e) => deserialize<_i31.ModuleProgress>(e))
               .toList()
           as T;
     }
@@ -1667,9 +1700,9 @@ class Protocol extends _i1.SerializationManagerServer {
               : null)
           as T;
     }
-    if (t == List<_i31.VedaUserProfile>) {
+    if (t == List<_i32.VedaUserProfile>) {
       return (data as List)
-              .map((e) => deserialize<_i31.VedaUserProfile>(e))
+              .map((e) => deserialize<_i32.VedaUserProfile>(e))
               .toList()
           as T;
     }
@@ -1703,9 +1736,10 @@ class Protocol extends _i1.SerializationManagerServer {
       _i18.ModuleItem => 'ModuleItem',
       _i19.ModuleProgress => 'ModuleProgress',
       _i20.Topic => 'Topic',
-      _i21.VedaUserProfile => 'VedaUserProfile',
-      _i22.VedaUserProfileWithEmail => 'VedaUserProfileWithEmail',
-      _i23.UserType => 'UserType',
+      _i21.SubscriptionStatus => 'SubscriptionStatus',
+      _i22.VedaUserProfile => 'VedaUserProfile',
+      _i23.VedaUserProfileWithEmail => 'VedaUserProfileWithEmail',
+      _i24.UserType => 'UserType',
       _ => null,
     };
   }
@@ -1752,11 +1786,13 @@ class Protocol extends _i1.SerializationManagerServer {
         return 'ModuleProgress';
       case _i20.Topic():
         return 'Topic';
-      case _i21.VedaUserProfile():
+      case _i21.SubscriptionStatus():
+        return 'SubscriptionStatus';
+      case _i22.VedaUserProfile():
         return 'VedaUserProfile';
-      case _i22.VedaUserProfileWithEmail():
+      case _i23.VedaUserProfileWithEmail():
         return 'VedaUserProfileWithEmail';
-      case _i23.UserType():
+      case _i24.UserType():
         return 'UserType';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -1828,14 +1864,17 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'Topic') {
       return deserialize<_i20.Topic>(data['data']);
     }
+    if (dataClassName == 'SubscriptionStatus') {
+      return deserialize<_i21.SubscriptionStatus>(data['data']);
+    }
     if (dataClassName == 'VedaUserProfile') {
-      return deserialize<_i21.VedaUserProfile>(data['data']);
+      return deserialize<_i22.VedaUserProfile>(data['data']);
     }
     if (dataClassName == 'VedaUserProfileWithEmail') {
-      return deserialize<_i22.VedaUserProfileWithEmail>(data['data']);
+      return deserialize<_i23.VedaUserProfileWithEmail>(data['data']);
     }
     if (dataClassName == 'UserType') {
-      return deserialize<_i23.UserType>(data['data']);
+      return deserialize<_i24.UserType>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -1891,8 +1930,8 @@ class Protocol extends _i1.SerializationManagerServer {
         return _i19.ModuleProgress.t;
       case _i20.Topic:
         return _i20.Topic.t;
-      case _i21.VedaUserProfile:
-        return _i21.VedaUserProfile.t;
+      case _i22.VedaUserProfile:
+        return _i22.VedaUserProfile.t;
     }
     return null;
   }

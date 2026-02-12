@@ -36,7 +36,9 @@ import 'package:veda_client/src/protocol/profiles/user_profile.dart' as _i19;
 import 'package:veda_client/src/protocol/profiles/user_type.dart' as _i20;
 import 'package:veda_client/src/protocol/profiles/user_profile_with_email.dart'
     as _i21;
-import 'protocol.dart' as _i22;
+import 'package:veda_client/src/protocol/profiles/subscription_status.dart'
+    as _i22;
+import 'protocol.dart' as _i23;
 
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
 /// are made available on the server and enable the corresponding sign-in widget
@@ -810,6 +812,32 @@ class EndpointVedaUserProfile extends _i2.EndpointRef {
       'topic': topic,
     },
   );
+
+  /// Updates the subscription fields on the authenticated user's profile.
+  /// Called from the Flutter client after a RevenueCat subscription change.
+  _i3.Future<_i19.VedaUserProfile?> updateSubscriptionStatus({
+    required _i22.SubscriptionStatus status,
+    String? plan,
+    DateTime? expiryDate,
+    String? productId,
+  }) => caller.callServerEndpoint<_i19.VedaUserProfile?>(
+    'vedaUserProfile',
+    'updateSubscriptionStatus',
+    {
+      'status': status,
+      'plan': plan,
+      'expiryDate': expiryDate,
+      'productId': productId,
+    },
+  );
+
+  /// Returns the subscription status for the authenticated user.
+  _i3.Future<_i22.SubscriptionStatus> getSubscriptionStatus() =>
+      caller.callServerEndpoint<_i22.SubscriptionStatus>(
+        'vedaUserProfile',
+        'getSubscriptionStatus',
+        {},
+      );
 }
 
 class Modules {
@@ -843,7 +871,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i22.Protocol(),
+         _i23.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,

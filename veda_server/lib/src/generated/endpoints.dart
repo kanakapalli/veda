@@ -28,10 +28,12 @@ import 'package:veda_server/src/generated/lms/module.dart' as _i14;
 import 'package:veda_server/src/generated/lms/topic.dart' as _i15;
 import 'package:veda_server/src/generated/lms/module_item.dart' as _i16;
 import 'package:veda_server/src/generated/profiles/user_type.dart' as _i17;
-import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
+import 'package:veda_server/src/generated/profiles/subscription_status.dart'
     as _i18;
-import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
+import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _i19;
+import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
+    as _i20;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -1384,11 +1386,60 @@ class Endpoints extends _i1.EndpointDispatch {
                         topic: params['topic'],
                       ),
         ),
+        'updateSubscriptionStatus': _i1.MethodConnector(
+          name: 'updateSubscriptionStatus',
+          params: {
+            'status': _i1.ParameterDescription(
+              name: 'status',
+              type: _i1.getType<_i18.SubscriptionStatus>(),
+              nullable: false,
+            ),
+            'plan': _i1.ParameterDescription(
+              name: 'plan',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'expiryDate': _i1.ParameterDescription(
+              name: 'expiryDate',
+              type: _i1.getType<DateTime?>(),
+              nullable: true,
+            ),
+            'productId': _i1.ParameterDescription(
+              name: 'productId',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['vedaUserProfile'] as _i7.VedaUserProfileEndpoint)
+                      .updateSubscriptionStatus(
+                        session,
+                        status: params['status'],
+                        plan: params['plan'],
+                        expiryDate: params['expiryDate'],
+                        productId: params['productId'],
+                      ),
+        ),
+        'getSubscriptionStatus': _i1.MethodConnector(
+          name: 'getSubscriptionStatus',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['vedaUserProfile'] as _i7.VedaUserProfileEndpoint)
+                      .getSubscriptionStatus(session),
+        ),
       },
     );
-    modules['serverpod_auth_idp'] = _i18.Endpoints()
+    modules['serverpod_auth_idp'] = _i19.Endpoints()
       ..initializeEndpoints(server);
-    modules['serverpod_auth_core'] = _i19.Endpoints()
+    modules['serverpod_auth_core'] = _i20.Endpoints()
       ..initializeEndpoints(server);
   }
 }

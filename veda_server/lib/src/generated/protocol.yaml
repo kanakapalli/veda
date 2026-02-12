@@ -67,3 +67,5 @@ vedaUserProfile:
   - getMyProfileWithEmail:
   - getUserProfileById:
   - listCreators:
+  - updateSubscriptionStatus:
+  - getSubscriptionStatus:
