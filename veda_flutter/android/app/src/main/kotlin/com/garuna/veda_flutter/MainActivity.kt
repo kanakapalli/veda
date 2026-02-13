@@ -1,4 +1,4 @@
-package com.example.veda_flutter
+package com.garuna.veda_flutter
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 
